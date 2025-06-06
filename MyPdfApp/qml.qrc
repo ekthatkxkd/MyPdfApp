@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/templateForm">
+        <file>MaterialForm.qml</file>
+    </qresource>
+</RCC>
