@@ -19,7 +19,27 @@ Window {
     function loadTemplateForm(templateIndex) {
         if (templateList[templateIndex] === templateList[0]) {
             templateFormLoader.sourceComponent = materialComp
+        } else if (templateList[templateIndex] === templateList[1]) {
+
+        } else if (templateList[templateIndex] === templateList[2]) {
+
+        } else if (templateList[templateIndex] === templateList[3]) {
+
         }
+    }
+
+    function bottomTapClicked(clickedIndex) {
+        if (pdfFuncText[clickedIndex] === pdfFuncText[0]) {
+            if (templateFormLoader.status === Loader.Ready) {
+                callExportToPdf(templateFormLoader.item.templateItemArea)
+            }
+        } else if (pdfFuncText[clickedIndex] === pdfFuncText[1]) {
+        }
+    }
+
+    function callExportToPdf(templateItemArea) {
+        console.log("[LLDDSS] callExportToPdf")
+        // pdfExporter.exportToPdf(templateItemArea, "D:/realTest.pdf")
     }
 
     Component {
@@ -82,7 +102,7 @@ Window {
 
         Item {
             id : bottomTapArea
-            property int bottomTabAreaHeight : 0
+
             anchors.bottom : parent.bottom
 
             height : parent.width * pdfFuncText.length
@@ -111,22 +131,27 @@ Window {
                                 font.pixelSize: 15
                                 text : modelData
                             }
+
+                            MouseArea {
+                                anchors.fill : parent
+                                onClicked : {
+                                    bottomTapClicked(index)
+                                }
+                            }
                         }
                     }
                 }
-
             }
         }
     }
 
     Item {
         id : mainArea
+
         anchors.top : parent.top
         anchors.bottom : parent.bottom
         anchors.right : parent.right
         anchors.left : tapArea.right
-
-        anchors.margins : 5
 
         Loader {
             id : templateFormLoader

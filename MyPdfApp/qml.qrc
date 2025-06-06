@@ -2,4 +2,7 @@
     <qresource prefix="/templateForm">
         <file>MaterialForm.qml</file>
     </qresource>
+    <qresource prefix="/templateItems">
+        <file>TemplateTable.qml</file>
+    </qresource>
 </RCC>
