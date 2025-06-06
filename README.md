@@ -1,2 +1,3 @@
 # MyPdfApp
-Implementing an app to save PDF files and read them.
+1. 정의된 문서 양식을 PDF 파일로 저장하는 기능 구현.
+2. 저장 혹은 인쇄 전 PDF 문서 양식을 미리 볼 수 있는 뷰어 기능 구현.
