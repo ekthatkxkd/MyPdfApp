@@ -15,6 +15,39 @@ Item {
         width : 80
 
         color : "#696969"
+
+        Repeater {
+            model : 1
+            Item {
+                width : formTapArea.width
+                height : formTapArea.width
+
+                Rectangle {
+                    anchors.fill : parent
+                    anchors.margins : 5
+                    color : "white"
+                    border.color : "black"
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width : parent.width
+
+                        horizontalAlignment : Text.AlignHCenter
+                        wrapMode : Text.WrapAnywhere
+
+                        font.pixelSize: 15
+                        text : "품목명 추가"
+                    }
+
+                    MouseArea {
+                        anchors.fill : parent
+                        onClicked : {
+                            // loadTemplateForm(index)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Item {
@@ -71,18 +104,44 @@ Item {
                     return Math.max(sumHeight, formArea.height)
                 }
 
-                width : scrollView.width/2
+                width : scrollView.width
 
-                Rectangle {
-                    width : scrollView.width / 2
-                    height : 1000
-                    color : "skyblue"
-                    border.color : "red"
+                Text {
+                    id : templateTitle
+                    objectName : "templateTitle"
 
-                    Text {
-                        anchors.centerIn: parent
-                        text : "TEST rectangle.."
-                        font.pixelSize: 20
+                    anchors.horizontalCenter : parent.horizontalCenter
+
+                    font.pixelSize : 30
+                    font.bold : true
+
+                    text : "자재 구매 확인서"
+                }
+
+                TemplateTable {
+                    id : informTable
+                    objectName : "informTable"
+
+                    anchors.top : templateTitle.bottom
+                    anchors.topMargin : 5
+                    anchors.left : parent.left
+                    anchors.right : parent.right
+
+                    // width : templateItemArea.width
+
+                    dividedColCount : 3
+                    dividedRowCount : 5
+
+                    tableTextValue : "테스트 타이틀"
+
+                    Component.onCompleted: {
+                        initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
+
+                        initHeaderData([
+                                           initCell(0, 0, 1, 1, "테스트1", false, headerBgColor, true, 12, "center"),
+                                           initCell(1, 0, 2, 1, "테스트2", false, headerBgColor, true, 12, "center", false),
+                                           initCell(3, 0, 2, 1, "테스트3", false, headerBgColor, true, 12, "center", false)
+                                       ])
                     }
                 }
             }
