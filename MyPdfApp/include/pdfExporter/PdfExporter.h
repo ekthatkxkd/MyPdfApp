@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QPdfWriter>
 
 class PdfExporter : public QObject {
     Q_OBJECT
