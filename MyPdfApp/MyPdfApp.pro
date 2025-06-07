@@ -1,7 +1,8 @@
-QT += quick
+QT += quick widgets printsupport
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        src/pdfExporter/PdfExporter.cpp
 
 resources.files = main.qml 
 resources.prefix = /$${TARGET}
@@ -20,3 +21,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES +=
+
+HEADERS += \
+    include/pdfExporter/PdfExporter.h

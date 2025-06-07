@@ -1,11 +1,18 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include "include/pdfExporter/PdfExporter.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
+
+    //////// PdfExporter 객체 생성.
+    PdfExporter pdfExporter;
+    engine.rootContext()->setContextProperty("pdfExporter", &pdfExporter);
+
     const QUrl url(QStringLiteral("qrc:/MyPdfApp/main.qml"));
     QObject::connect(
         &engine,

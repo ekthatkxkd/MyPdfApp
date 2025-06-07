@@ -39,7 +39,7 @@ Window {
 
     function callExportToPdf(templateItemArea) {
         console.log("[LLDDSS] callExportToPdf")
-        // pdfExporter.exportToPdf(templateItemArea, "D:/realTest.pdf")
+        pdfExporter.exportToPdf(templateItemArea, "D:/realTest.pdf")
     }
 
     Component {
