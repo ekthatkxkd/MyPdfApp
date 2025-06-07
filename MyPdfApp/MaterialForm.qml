@@ -43,6 +43,14 @@ Item {
                         anchors.fill : parent
                         onClicked : {
                             // loadTemplateForm(index)
+
+                            informTable.addInnerRowData([
+                                                informTable.initCell(0, 3, 1, 1, "구매담당자", false, informTable.headerBgColor, true, 12, "center"),
+                                                informTable.initCell(1, 3, 1, 1, "", true, "white", false, 12, "left"),
+                                                informTable.initCell(2, 3, 1, 1, "TEL", false, informTable.headerBgColor, true, 12, "center"),
+                                                informTable.initCell(3, 3, 1, 1, "TEL", false, informTable.headerBgColor, true, 12, "center"),
+                                                informTable.initCell(4, 3, 1, 1, "", true, "white", false, 12, "left")
+                                            ])
                         }
                     }
                 }
@@ -127,9 +135,7 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    // width : templateItemArea.width
-
-                    dividedColCount : 3
+                    // dividedInnerColCount : 3
                     dividedRowCount : 5
 
                     tableTextValue : "테스트 타이틀"
@@ -142,6 +148,29 @@ Item {
                                            initCell(1, 0, 2, 1, "테스트2", false, headerBgColor, true, 12, "center", false),
                                            initCell(3, 0, 2, 1, "테스트3", false, headerBgColor, true, 12, "center", false)
                                        ])
+
+                        addInnerRowData([
+                                            initCell(0, 0, 1, 1, "구매번호", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(2, 0, 1, 3, "구매처", false, headerBgColor, true, 12, "center", true),
+                                            initCell(3, 0, 1, 1, "상호", false, headerBgColor, true, 12, "center"),
+                                            initCell(4, 0, 1, 1, "", true, "white", false, 12, "left")
+                                        ])
+
+
+                        addInnerRowData([
+                                            initCell(0, 1, 1, 1, "구매창고", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 1, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(3, 1, 1, 1, "주소", false, headerBgColor, true, 12, "center"),
+                                            initCell(4, 1, 1, 1, "", true, "white", false, 12, "left")
+                                        ])
+
+                        addInnerRowData([
+                                            initCell(0, 2, 1, 1, "구매담당자", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 2, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
+                                            initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
+                                        ])
                     }
                 }
             }
