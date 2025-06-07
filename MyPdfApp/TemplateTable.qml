@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 Item {
     id : root
@@ -19,6 +20,10 @@ Item {
     property int headerHeight : minCellHeight
     property var dividedInnerHeights : []
     property int footerHeight : minCellHeight
+
+    property var innerDefaultData : []
+
+    height : column.implicitHeight
 
     function initDividedWidths(widthRatios) {
         let remainWidth = root.width
@@ -70,6 +75,10 @@ Item {
     }
 
     function addInnerRowData(datas) {
+        if (datas.length <= 0) {
+            return
+        }
+
         addDividedInnerHeights()
 
         let rowDatas = []
@@ -84,16 +93,83 @@ Item {
         innerDatasChanged()
     }
 
+    function addInnerDefaultRowData() {
+        let defaultRowData = innerDefaultData
+
+        for (let i = 0; i < innerDefaultData.length; i++) {
+            defaultRowData[i].startCol = (dividedInnerHeights.length)
+        }
+
+        addInnerRowData(defaultRowData)
+    }
+
+    function initFooterData(datas) {
+        for (let index = 0; index < datas.length; index++) {
+            footerData.push(datas[index])
+        }
+
+        footerDataChanged()
+    }
+
     Component {
         id : textEditComp
         TextEdit {
+            objectName : "cellText"
 
+            anchors.fill : parent
+
+            horizontalAlignment : {
+                if (currentModelData.alignPosition === "center") {
+                    Text.AlignHCenter
+                } else if (currentModelData.alignPosition === "left") {
+                    Text.AlignLeft
+                } else {
+                    Text.AlignRight
+                }
+            }
+            verticalAlignment : Text.AlignVCenter
+
+            wrapMode : TextEdit.Wrap
+
+            font.pixelSize : currentModelData.fontSize
+            font.bold : currentModelData.isBold
+
+            text : currentModelData.cellText
         }
     }
+
     Component {
         id : textComp
-        Text {
 
+        Text {
+            objectName : "cellText"
+
+            anchors.fill : parent
+
+            horizontalAlignment : {
+                if (currentModelData.alignPosition === "center") {
+                    Text.AlignHCenter
+                } else if (currentModelData.alignPosition === "left") {
+                    Text.AlignLeft
+                } else {
+                    Text.AlignRight
+                }
+            }
+
+            verticalAlignment : Text.AlignVCenter
+
+            wrapMode : TextEdit.Wrap
+
+            font.pixelSize : currentModelData.fontSize
+            font.bold : currentModelData.isBold
+
+            text : {
+                if (currentModelData.isVerticalDir) {
+                    currentModelData.cellText.split("").join("\n")
+                } else {
+                    currentModelData.cellText
+                }
+            }
         }
     }
 
@@ -138,7 +214,7 @@ Item {
                 id : headerRow
                 objectName : "headerRow"
 
-                width : root.width
+                width : parent.width
 
                 Repeater {
                     model : headerData
@@ -146,6 +222,8 @@ Item {
                     Rectangle {
                         id : headerCell
                         objectName : "cell"
+
+                        readonly property int headerTextMargin : 5
 
                         width : {
                             let getRowSpan = modelData.rowSpan
@@ -168,7 +246,8 @@ Item {
 
                         Text {
                             anchors.fill : parent
-                            anchors.margins : 5
+                            anchors.margins : headerTextMargin
+
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
 
@@ -181,8 +260,6 @@ Item {
                 }
             }
         }
-
-
 
         Item {
             id : innerTableArea
@@ -200,25 +277,28 @@ Item {
             }
 
             Repeater {
+                id : innerColRep
                 model : innerDatas.length
 
+
                 Repeater {
+                    id : innerRowRep
                     readonly property int innerColIndex : index
 
                     model : innerDatas[innerColIndex]
 
                     Rectangle {
+                        id : cellArea
                         readonly property int innerRowIndex : index
+                        readonly property int innerTextMargin : 5
+
+                        readonly property int textContentHeight : (innerTextTypeLoader.status === Loader.Ready &&
+                                                                   innerTextTypeLoader.item !== null &&
+                                                                   innerTextTypeLoader.item.contentHeight !== undefined
+                                                                   ) ? innerTextTypeLoader.item.contentHeight
+                                                                    : 0
+
                         x : {
-                            let testinnerdata = innerDatas
-                            let testInnerDataslength = innerDatas.length
-                            let testInnerDatasindexdata = innerDatas[innerColIndex]
-                            let testInnerDatasindexdatalength = innerDatas[innerColIndex].length
-                            let testInnerDatasindexdatalengthdata = innerDatas[innerColIndex][innerRowIndex]
-
-                            let testModelData = modelData
-                            let testStartRow = modelData.startRow
-
                             let basicXpos = 0  // dividedWidths[modelData.startRow]
 
                             for (let index = 0; index < (modelData.startRow); index++) {
@@ -227,17 +307,8 @@ Item {
 
                             return basicXpos
                         }
+
                         y : {
-                            let testinnerdata = innerDatas
-                            let testInnerDataslength = innerDatas.length
-                            let testInnerDatasindexdata = innerDatas[innerColIndex]
-                            let testInnerDatasindexdatalength = innerDatas[innerColIndex].length
-                            let testInnerDatasindexdatalengthdata = innerDatas[innerColIndex][innerRowIndex]
-
-                            let testModelData = modelData
-                            let testStartRow = modelData.startRow
-
-
                             let basicYpos = 0  // dividedInnerHeights[modelData.startCol]
 
                             for (let index = 0; index < (modelData.startCol); index++) {
@@ -248,16 +319,6 @@ Item {
                         }
 
                         width : {
-                            let testinnerdata = innerDatas
-                            let testInnerDataslength = innerDatas.length
-                            let testInnerDatasindexdata = innerDatas[innerColIndex]
-                            let testInnerDatasindexdatalength = innerDatas[innerColIndex].length
-                            let testInnerDatasindexdatalengthdata = innerDatas[innerColIndex][innerRowIndex]
-
-                            let testModelData = modelData
-                            let testStartRow = modelData.startRow
-
-
                             let sumWidth = 0
 
                             for (let index = modelData.startRow; index < (modelData.startRow + modelData.rowSpan); index++) {
@@ -268,40 +329,129 @@ Item {
                         }
 
                         height : {
-                            let testinnerdata = innerDatas
-                            let testInnerDataslength = innerDatas.length
-                            let testInnerDatasindexdata = innerDatas[innerColIndex]
-                            let testInnerDatasindexdatalength = innerDatas[innerColIndex].length
-                            let testInnerDatasindexdatalengthdata = innerDatas[innerColIndex][innerRowIndex]
-
-                            let testModelData = modelData
-                            let testStartRow = modelData.startRow
-
-
                             let sumHeight = 0
 
                             for (let index = modelData.startCol; index < (modelData.startCol + modelData.colSpan); index++) {
                                 sumHeight += dividedInnerHeights[index]
                             }
-
                             return sumHeight
                         }
 
                         color : modelData.bgColor
-                        border.color : "blue"
+                        border.color : "black"
+
+                        Loader {
+                            id : innerTextTypeLoader
+
+                            property var currentModelData : modelData
+
+                            anchors.fill : parent
+
+                            anchors.margins: innerTextMargin
+
+                            sourceComponent: {
+                                if (modelData.isTextEdit) {
+                                    textEditComp
+                                } else {
+                                    textComp
+                                }
+                            }
+                        }
+
+                        Connections {
+                            target: innerTextTypeLoader.item
+
+                            enabled: ((innerTextTypeLoader.status === Loader.Ready) &&
+                                      (innerTextTypeLoader.item !== null))
+
+                            function onContentHeightChanged() {
+                                let colHeight = dividedInnerHeights[innerRowRep.innerColIndex]
+
+                                let contentTextHeight = 0
+
+                                if (innerTextTypeLoader.item) {
+                                    contentTextHeight = innerTextTypeLoader.item.contentHeight
+                                }
+
+                                if (contentTextHeight > colHeight) {
+                                    dividedInnerHeights[innerRowRep.innerColIndex] = contentTextHeight + (2*innerTextMargin)
+
+                                    dividedInnerHeights = dividedInnerHeights
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
+
+        Item {
+            id : footerTableArea
+
+            width : root.width
+            height : footerHeight
+
+            visible : (footerData.length > 0) ? true : false
+
+            Row {
+                id : footerRow
+                objectName : "footerRow"
+
+                width : parent.width
+
+                Repeater {
+                    model : footerData
+
+                    Rectangle {
+                        id : footerCell
+                        objectName : "cell"
+
+                        readonly property int footerTextMargin : 5
+
+                        width : {
+                            let getStartRow = modelData.startRow
+                            let getRowSpan = modelData.rowSpan
+
+                            let actualWidth = 0
+
+                            for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
+                                actualWidth += dividedWidths[i]
+                            }
+
+                            return actualWidth
+
+                        }
+
+                        height : footerHeight
+
+                        color : modelData.bgColor
+                        border.color : "black"
+
+                        Text {
+                            anchors.fill : parent
+                            anchors.margins : footerTextMargin
 
 
-    Rectangle {
-        width : column.width
-        height : column.height
-        color : "transparent"
-        border.color : "red"
-        border.width : 2
+                            verticalAlignment : Text.AlignVCenter
+                            horizontalAlignment : {
+                                if (modelData.alignPosition === "center") {
+                                    Text.AlignHCenter
+                                } else if (modelData.alignPosition === "left") {
+                                    Text.AlignLeft
+                                } else {
+                                    Text.AlignRight
+                                }
+                            }
+
+                            font.pixelSize : modelData.fontSize
+                            font.bold : modelData.isBold
+
+                            text : modelData.cellText
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Component.onCompleted: {

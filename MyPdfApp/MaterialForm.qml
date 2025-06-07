@@ -36,7 +36,7 @@ Item {
                         wrapMode : Text.WrapAnywhere
 
                         font.pixelSize: 15
-                        text : "품목명 추가"
+                        text : "구매내역 추가"
                     }
 
                     MouseArea {
@@ -44,13 +44,7 @@ Item {
                         onClicked : {
                             // loadTemplateForm(index)
 
-                            informTable.addInnerRowData([
-                                                informTable.initCell(0, 3, 1, 1, "구매담당자", false, informTable.headerBgColor, true, 12, "center"),
-                                                informTable.initCell(1, 3, 1, 1, "", true, "white", false, 12, "left"),
-                                                informTable.initCell(2, 3, 1, 1, "TEL", false, informTable.headerBgColor, true, 12, "center"),
-                                                informTable.initCell(3, 3, 1, 1, "TEL", false, informTable.headerBgColor, true, 12, "center"),
-                                                informTable.initCell(4, 3, 1, 1, "", true, "white", false, 12, "left")
-                                            ])
+                            purchaseHistory.addInnerDefaultRowData()
                         }
                     }
                 }
@@ -143,12 +137,21 @@ Item {
                     Component.onCompleted: {
                         initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
 
+                        //////// header data
+                        ///
+                        ///
                         initHeaderData([
                                            initCell(0, 0, 1, 1, "테스트1", false, headerBgColor, true, 12, "center"),
                                            initCell(1, 0, 2, 1, "테스트2", false, headerBgColor, true, 12, "center", false),
                                            initCell(3, 0, 2, 1, "테스트3", false, headerBgColor, true, 12, "center", false)
                                        ])
+                        ///
+                        ///
+                        ////////
 
+                        //////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "구매번호", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
@@ -171,6 +174,90 @@ Item {
                                             initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
                                             initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
                                         ])
+                        ///
+                        ///
+                        ////////
+
+                        //////// footer data
+                        ///
+                        ///
+                        initFooterData([
+                                           initCell(0, 0, 2, 1, "footer테스트", false, headerBgColor, true, 12, "center"),
+                                           initCell(2, 0, 3, 1, "", false, headerBgColor, false, 12)
+                                       ])
+                        ///
+                        ///
+                        ////////
+                    }
+
+                }
+
+                TemplateTable {
+                    id : purchaseHistory
+                    objectName : "purchaseHistory"
+
+                    anchors.top : informTable.bottom
+                    anchors.topMargin : 5
+                    anchors.left : parent.left
+                    anchors.right : parent.right
+
+                    dividedRowCount : 4
+
+                    tableTextValue : "▶ 자재구매 내역"
+
+                    innerDefaultData : [
+                        initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(2, 0, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
+                    ]
+
+                    Component.onCompleted: {
+                        initDividedWidths([0.1, 0.6, 0.1, 0.2])
+
+                        //////// header data
+                        ///
+                        ///
+                        initHeaderData([
+                                           initCell(0, 0, 1, 1, "일자", false, headerBgColor, true, 12, "center"),
+                                           initCell(1, 0, 1, 1, "품목명[규격명]", false, headerBgColor, true, 12, "center"),
+                                           initCell(2, 0, 1, 1, "수랑", false, headerBgColor, true, 12, "center"),
+                                           initCell(3, 0, 1, 1, "적요", false, headerBgColor, true, 12, "center"),
+                                       ])
+                        ///
+                        ///
+                        ////////
+
+                        //////// inner data
+                        ///
+                        ///
+                        addInnerRowData([
+                                            initCell(0, 0, 1, 1, "03/13", true, "white", false, 12, "center"),
+                                            initCell(1, 0, 1, 1, "[EFFECT_V2_SKY] FRONT BUTTON DECO", true, "white", false, 12, "left"),
+                                            initCell(2, 0, 1, 1, "1,232.00", true, "white", false, 12, "right"),
+                                            initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
+                                        ])
+
+                        addInnerDefaultRowData()
+                        addInnerDefaultRowData()
+                        addInnerDefaultRowData()
+                        addInnerDefaultRowData()
+                        ///
+                        ///
+                        ////////
+
+                        //////// footer data
+                        ///
+                        ///
+                        initFooterData([
+                                           initCell(0, 0, 2, 1, "총합계", false, headerBgColor, true, 12, "center"),
+                                           initCell(2, 0, 1, 1, "1,232.00", false, headerBgColor, true, 12, "right"),
+                                           initCell(3, 0, 1, 1, "", false, headerBgColor, true, 12, "center")
+                                       ])
+                        ///
+                        ///
+                        ////////
+
                     }
                 }
             }
