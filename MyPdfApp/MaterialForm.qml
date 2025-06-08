@@ -94,6 +94,7 @@ Item {
 
             Item {
                 id : templateItemArea
+                objectName : "materialItemArea"
 
                 height : {
                     let sumHeight = 0;

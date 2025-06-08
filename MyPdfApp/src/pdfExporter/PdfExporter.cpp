@@ -14,7 +14,7 @@ PdfExporter::~PdfExporter() {
 }
 
 void PdfExporter::initPxContentsFullSize() {
-    pxContentsFullSize = QPoint(convertMMtoPixel((mmA4Width - (2 * mmPdfDefaultMargin))),
+    pxContentsFullSize = QSizeF(convertMMtoPixel((mmA4Width - (2 * mmPdfDefaultMargin))),
                                 convertMMtoPixel(mmA4Height - (2 * mmPdfDefaultMargin)));
 }
 
@@ -28,14 +28,114 @@ void PdfExporter::setDefaultPdfEnvironment(QPdfWriter &pdfWriter) {
     pdfWriter.setResolution(pdfDefaultDPI);
 }
 
-void PdfExporter::setDefaultFont(QPainter &painter) {
+void PdfExporter::setFont(QPainter &painter, int fontSize, bool isBold) {
     QFont font = painter.font();
 
-    font.setPointSize(9);
-    font.setBold(false);
+    font.setPointSize(fontSize);
+    font.setBold(isBold);
 
     painter.setFont(font);
     painter.setPen(QPen(Qt::black, 2));
+}
+
+QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames) {
+    QHash<QString, QQuickItem*> childItems;
+
+    if (rootItem != nullptr) {
+        for (QString childObjName : childObjNames) {
+            childItems[childObjName] = getChildItem(rootItem, childObjName);
+        }
+    }
+
+    return childItems;
+}
+
+QQuickItem* PdfExporter::getChildItem(QQuickItem *rootItem, const QString &childObjName) {
+    // Searches only up to 1 depth.
+
+    QQuickItem *retChildItem = nullptr;
+
+    if (rootItem != nullptr) {
+        const QList<QQuickItem*> childItems = rootItem->childItems();
+
+        for (QQuickItem *childItem : childItems) {
+            const QString objectName = childItem->objectName();
+
+            if (objectName == childObjName) {
+                retChildItem = childItem;
+                break;
+            }
+        }
+    }
+
+    return retChildItem;
+}
+
+QQuickItem* PdfExporter::getInnerItem(QQuickItem *rootItem, const QString &objNameToFound) {
+    // Search all depths within root.
+    QQuickItem *retInnerItem = nullptr;
+
+    if (rootItem != nullptr) {
+        const QList<QQuickItem*> childItems = rootItem->childItems();
+
+        for (QQuickItem *childItem : childItems) {
+            const QString childObjName = childItem->objectName();
+
+            if (childObjName == objNameToFound) {
+                retInnerItem = childItem;
+                break;
+            } else {
+                retInnerItem = getInnerItem(childItem, objNameToFound);
+
+                if (retInnerItem != nullptr) {
+                    break;
+                }
+            }
+        }
+    }
+
+    return retInnerItem;
+}
+
+QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
+    QRectF titleArea(QPointF(0, 0), QSizeF(0, 0));
+    QString titleText = textItem->property("text").toString();
+
+    setFont(painter, 20, true);
+
+    QFontMetrics metrics(painter.font());
+    QRectF boundingBox(QPointF(0, 0), QSizeF(pxContentsFullSize.width(), metrics.height()));
+
+    Qt::AlignmentFlag align = Qt::AlignHCenter;
+
+    painter.drawRect(boundingBox);  // [LLDDSS] FOR TEST DELETE
+    painter.drawText(boundingBox, align, titleText);
+
+    return titleArea;
+}
+
+void PdfExporter::drawMaterialTemplate(QPainter &painter, QQuickItem *rootItem) {
+    QPointF cursorPoint(0, 0);
+
+    QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, materialObjNames);
+
+    if (templateQuickItems.size() == 0) {
+        qDebug() << "[LLDDSS] drawing failed...";
+        return;
+    }
+
+    //////// template title 그리기
+    ///
+    ///
+    if (templateQuickItems[materialObjNames[0]] != nullptr) {
+        setFont(painter, 20, true);
+        drawTemplateTitle(painter, templateQuickItems[materialObjNames[0]]);
+    }
+    ///
+    ///
+    ////////
+
+    setFont(painter);
 }
 
 bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
@@ -52,7 +152,13 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
         return false;
     }
 
-    setDefaultFont(painter);
+    setFont(painter);
+
+    if (rootItem->objectName() == templateObjNames[0]) {
+        drawMaterialTemplate(painter, rootItem);
+    } else {
+
+    }
 
     painter.end();
 
@@ -61,8 +167,8 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 
 void PdfExporter::testDrawFullRectWithRect(QPainter &painter) {
     QRectF calculatedRect(QPointF(0, 0),
-                          QSizeF(pxContentsFullSize.x(),
-                                 pxContentsFullSize.y()));
+                          QSizeF(pxContentsFullSize.width(),
+                                 pxContentsFullSize.height()));
 
     painter.drawRect(calculatedRect);
 
