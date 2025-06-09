@@ -158,7 +158,7 @@ Item {
 
             verticalAlignment : Text.AlignVCenter
 
-            wrapMode : TextEdit.Wrap
+            wrapMode : Text.Wrap
 
             font.pixelSize : currentModelData.fontSize
             font.bold : currentModelData.isBold

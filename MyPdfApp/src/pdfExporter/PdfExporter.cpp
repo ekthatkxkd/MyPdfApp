@@ -163,8 +163,119 @@ QQuickItem* PdfExporter::getInnerItem(QQuickItem *rootItem, const QString &objNa
     return retInnerItem;
 }
 
+void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QList<QList<TableCellData>> &cellDatas,
+                                     const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio) {
+    //////// cell widths init
+    ///
+    ///
+    qreal remainingWidthValue = pxTableFullWidthSize;
+    int maxWidth = 0;
+    int maxWidthIndex = 0;
+    for (int index = 0; index < pxCellWidths.size(); index++) {
+        qreal calculatedWidth = tableWidthRatio[index] * pxTableFullWidthSize;
+        pxCellWidths[index] = calculatedWidth;
+        remainingWidthValue -= calculatedWidth;
+
+        if (calculatedWidth > maxWidth) {
+            maxWidth = calculatedWidth;
+            maxWidthIndex = index;
+        }
+    }
+
+    if (remainingWidthValue > 0) {
+        pxCellWidths[maxWidthIndex] += remainingWidthValue;
+    }
+    ///
+    ///
+    ////////
+
+    //////// inner cell height init
+    ///
+    ///
+
+    for (int colIndex = 0; colIndex < cellDatas.size(); colIndex++) {
+        std::vector<std::pair<int, qreal>> verticalCell;
+
+        for (int rowIndex = 0; rowIndex < cellDatas[colIndex].size(); rowIndex++) {
+            QSizeF textAreaSize;
+            const auto &cellData = cellDatas[colIndex][rowIndex];
+
+            QString cellText = cellData.cellText;
+
+            if (cellData.isVerticalDir) {
+                if (!cellText.contains("\n")) {
+                    cellText = cellText.split("").join("\n");  // qml 내에서 개행문자 추가 안되어 있을 경우 대비.
+                }
+                textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir);
+
+                verticalCell.push_back(std::make_pair(rowIndex, textAreaSize.height()));
+            } else {
+                textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir, QTextOption::WordWrap, (pxCellWidths[colIndex] - (2 * cellTextMargins)));
+                if ((textAreaSize.height() + (2 * cellTextMargins)) > pxCellHeights[colIndex]) {
+                    pxCellHeights[colIndex] = textAreaSize.height() + (2 * cellTextMargins);
+                }
+            }
+        }
+
+        for (int verticalCellIndex = 0; verticalCellIndex < verticalCell.size(); verticalCellIndex++) {
+            const auto &cellData = cellDatas[colIndex][verticalCell[verticalCellIndex].first];
+
+            qreal cellHeight = verticalCell[verticalCellIndex].second + (2 * cellTextMargins);
+
+            int cellColSpan = cellData.colSpan;
+
+
+            qreal remainingCellHeight = cellHeight - pxCellHeights[colIndex];
+
+            for (int cellStartCol = (cellData.startCol+1); cellStartCol < (cellData.startCol + cellColSpan); cellStartCol++) {
+                qreal dividedHeight = remainingCellHeight / ((cellData.startCol + cellColSpan) - cellStartCol);
+
+                if (dividedHeight > pxCellHeights[cellStartCol]) {
+                    pxCellHeights[cellStartCol] = dividedHeight;
+                    remainingCellHeight = dividedHeight;
+                } else {
+                    remainingCellHeight -= pxCellHeights[cellStartCol];
+                }
+            }
+        }
+    }
+
+    ///
+    ///
+    ////////
+}
+
+QSizeF PdfExporter::getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical, const QTextOption::WrapMode &wrapMode, qreal fixedWidth) {
+    QTextLayout textLayout(text, font);
+    QTextOption option;
+    option.setWrapMode(wrapMode);
+    textLayout.setTextOption(option);
+
+    textLayout.beginLayout();
+    qreal totalHeight = 0;
+    QList<QTextLine> lines;
+
+    while(true) {
+        QTextLine line = textLayout.createLine();
+        if (!line.isValid()) break;
+
+        line.setLineWidth(fixedWidth);
+        // line.setPosition(QPointF(0, totalHeight));
+        // lines.append(line);
+        totalHeight += line.height();
+    }
+
+    textLayout.endLayout();
+
+    if (isVertical) {
+        QFontMetrics metrics(font);
+        fixedWidth = metrics.horizontalAdvance("가");
+    }
+
+    return QSizeF(fixedWidth, totalHeight);
+}
+
 QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
-    QRectF titleArea(QPointF(0, 0), QSizeF(0, 0));
     QString titleText = textItem->property("text").toString();
 
     setFont(painter, 20, true);
@@ -174,13 +285,12 @@ QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
 
     Qt::AlignmentFlag align = Qt::AlignHCenter;
 
-    painter.drawRect(boundingBox);  // [LLDDSS] FOR TEST DELETE
     painter.drawText(boundingBox, align, titleText);
 
-    return titleArea;
+    return boundingBox;
 }
 
-QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint) {
+QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio) {
     QRectF tableArea(QPointF(0, 0), QSizeF(0, 0));
 
     int tableRowCount = tableItem->property("dividedRowCount").toInt();
@@ -196,7 +306,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     std::vector<double> pxCellWidths(tableRowCount, 0);
     std::vector<double> pxCellHeights(innerTableColCount, 0);
 
-
+    initTableCellSizes(painter, pxCellWidths, pxCellHeights, innerData, pxTableFullWidthSize, tableWidthRatio);
 
     //////// innerTable 그리기
     ///
@@ -208,14 +318,14 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
 
     // * newPage 고려하기
 
+
+    // QTextOption textOption;
+    // textOption.setAlignment(alignment);
+    // textOption.setWrapMode(QTextOption::WrapAnywhere);
+
     ///
     ///
     ////////
-
-
-
-
-
 
     return tableArea;
 }
@@ -238,6 +348,9 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     if (templateQuickItems[materialObjNames[0]] != nullptr) {
         childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[materialObjNames[0]]);
     }
+
+    painter.drawRect(childItemRect[0]);  // [LLDDSS] FOR TEST DELETE
+
     setFont(painter);
     ///
     ///
@@ -246,8 +359,13 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     //////// informTable 그리기
     ///
     ///
+    cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
+
     if (templateQuickItems[materialObjNames[1]] != nullptr) {
-        childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[1]], cursorPoint);
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.15, 0.3, 0.05, 0.1, 0.4};
+
+        childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
     }
     ///
     ///
@@ -319,3 +437,21 @@ void PdfExporter::testOutputCellDatas(const TableCellData &cellData) {
     qDebug() << "[LLDDSS] isVerticalDir : " << cellData.isVerticalDir;
     qDebug() << "[LLDDSS] ---------------------------";
 }
+
+void PdfExporter::testDrawTable(QPainter &painter, QPointF &cursorPoint,
+                                std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights) {
+    QPointF innerTableStartPoint = cursorPoint;
+    for (const auto &cellHeight : pxCellHeights) {
+        for (const auto &cellWidth : pxCellWidths) {
+            painter.drawRect(QRectF(innerTableStartPoint,
+                                    QSize(cellWidth, cellHeight)));
+
+            innerTableStartPoint = QPointF((innerTableStartPoint.x() + cellWidth),
+                                           innerTableStartPoint.y());
+        }
+
+        innerTableStartPoint = QPointF(cursorPoint.x(),
+                                       innerTableStartPoint.y() + cellHeight);
+    }
+}
+

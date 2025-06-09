@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QTextLayout>
+#include <QTextOption>
 #include <QPdfWriter>
 
 struct TableCellData {
@@ -39,6 +41,9 @@ public :
     const int mmPdfDefaultMargin = 15;
 
 private :
+    const int templateItemSpacing = 5;
+    const int cellTextMargins = 5;
+
     TableCellData convertToTableCellData(const QVariantMap &map);
     QList<TableCellData> convertToRowData(const QVariantList &rowList);
     QList<QList<TableCellData>> getCellDatas(QQuickItem *tableItem, const QString &propertyName);
@@ -50,14 +55,19 @@ private :
     void setDefaultPdfEnvironment(QPdfWriter &pdfWriter);
     void setFont(QPainter &painter, int fontSize = 12, bool isBold = false);
 
+    void initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QList<QList<TableCellData>> &cellDatas,
+                            const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);
+    QSizeF getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical = false, const QTextOption::WrapMode &wrapMode = QTextOption::NoWrap, qreal fixedWidth = 0);
+
     QRectF drawTemplateTitle(QPainter &painter, QQuickItem *textItem);
-    QRectF drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint);
+    QRectF drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);
 
     void drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
 
     void testDrawFullRectWithRect(QPainter &painter);
     void testDrawFullRectWithWindow(QPainter &painter);
     void testOutputCellDatas(const TableCellData &cellData);
+    void testDrawTable(QPainter &painter, QPointF &cursorPoint, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights);
 
     QSizeF pxContentsFullSize{0, 0};  // A4 전체 pixel size 가 아닌 margin 이 반영된 pixel size.
 };
