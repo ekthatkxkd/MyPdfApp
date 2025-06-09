@@ -53,7 +53,7 @@ private :
     QQuickItem* getInnerItem(QQuickItem *rootItem, const QString &objNameToFound);
 
     void setDefaultPdfEnvironment(QPdfWriter &pdfWriter);
-    void setFont(QPainter &painter, int fontSize = 12, bool isBold = false);
+    void setFont(QPainter &painter, int fontSize = 10, bool isBold = false);
 
     void initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QList<QList<TableCellData>> &cellDatas,
                             const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);

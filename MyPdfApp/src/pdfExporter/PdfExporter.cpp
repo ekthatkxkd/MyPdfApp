@@ -65,6 +65,18 @@ QList<TableCellData> PdfExporter::convertToRowData(const QVariantList &rowList) 
 
             TableCellData cellData = convertToTableCellData(cellMap);
 
+            if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
+                cellData.cellText = cellData.cellText.split("").join("\n");
+
+                // 앞뒤 개행문자 제거
+                if (cellData.cellText.startsWith('\n')) {
+                    cellData.cellText = cellData.cellText.mid(1);
+                }
+                if (cellData.cellText.endsWith('\n')) {
+                    cellData.cellText.chop(1); // 마지막 문자 제거
+                }
+            }
+
             cellDatas.append(cellData);
         }
     }
@@ -206,11 +218,17 @@ void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxC
                 if (!cellText.contains("\n")) {
                     cellText = cellText.split("").join("\n");  // qml 내에서 개행문자 추가 안되어 있을 경우 대비.
                 }
+
                 textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir);
 
                 verticalCell.push_back(std::make_pair(rowIndex, textAreaSize.height()));
             } else {
-                textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir, QTextOption::WordWrap, (pxCellWidths[colIndex] - (2 * cellTextMargins)));
+                qreal actualCellWidth = 0;
+                for (int widthIndex = cellData.startRow; widthIndex < (cellData.startRow + cellData.rowSpan); widthIndex++) {
+                    actualCellWidth += pxCellWidths[widthIndex];
+                }
+
+                textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir, QTextOption::WrapAnywhere, (actualCellWidth - (2 * cellTextMargins)));
                 if ((textAreaSize.height() + (2 * cellTextMargins)) > pxCellHeights[colIndex]) {
                     pxCellHeights[colIndex] = textAreaSize.height() + (2 * cellTextMargins);
                 }
@@ -232,7 +250,7 @@ void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxC
 
                 if (dividedHeight > pxCellHeights[cellStartCol]) {
                     pxCellHeights[cellStartCol] = dividedHeight;
-                    remainingCellHeight = dividedHeight;
+                    remainingCellHeight -= dividedHeight;
                 } else {
                     remainingCellHeight -= pxCellHeights[cellStartCol];
                 }
@@ -246,30 +264,33 @@ void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxC
 }
 
 QSizeF PdfExporter::getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical, const QTextOption::WrapMode &wrapMode, qreal fixedWidth) {
-    QTextLayout textLayout(text, font);
-    QTextOption option;
-    option.setWrapMode(wrapMode);
-    textLayout.setTextOption(option);
-
-    textLayout.beginLayout();
     qreal totalHeight = 0;
-    QList<QTextLine> lines;
-
-    while(true) {
-        QTextLine line = textLayout.createLine();
-        if (!line.isValid()) break;
-
-        line.setLineWidth(fixedWidth);
-        // line.setPosition(QPointF(0, totalHeight));
-        // lines.append(line);
-        totalHeight += line.height();
-    }
-
-    textLayout.endLayout();
 
     if (isVertical) {
-        QFontMetrics metrics(font);
-        fixedWidth = metrics.horizontalAdvance("가");
+        int explicitLineCount = text.count('\n') + 1;
+        QFontMetrics fm(font);
+        totalHeight = explicitLineCount * fm.height();
+        fixedWidth = fm.horizontalAdvance("가");
+    } else {
+        QTextLayout textLayout(text, font);
+        QTextOption option;
+        option.setWrapMode(wrapMode);
+        textLayout.setTextOption(option);
+
+        textLayout.beginLayout();
+        QList<QTextLine> lines;
+
+        while(true) {
+            QTextLine line = textLayout.createLine();
+            if (!line.isValid()) break;
+
+            line.setLineWidth(fixedWidth);
+            // line.setPosition(QPointF(0, totalHeight));
+            // lines.append(line);
+            totalHeight += line.height();
+        }
+
+        textLayout.endLayout();
     }
 
     return QSizeF(fixedWidth, totalHeight);
@@ -283,7 +304,7 @@ QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
     QFontMetrics metrics(painter.font());
     QRectF boundingBox(QPointF(0, 0), QSizeF(pxContentsFullSize.width(), metrics.height()));
 
-    Qt::AlignmentFlag align = Qt::AlignHCenter;
+    Qt::Alignment align = Qt::AlignHCenter;
 
     painter.drawText(boundingBox, align, titleText);
 
@@ -293,35 +314,210 @@ QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
 QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio) {
     QRectF tableArea(QPointF(0, 0), QSizeF(0, 0));
 
+    const int titleTableMargin = 5;
+    const qreal basicCellHeight = 50;
+
+    QPointF tableCursorPoint = cursorPoint;
+
     int tableRowCount = tableItem->property("dividedRowCount").toInt();
     int innerTableColCount = tableItem->property("dividedInnerColCount").toInt();
 
 
     QString tableTitle = tableItem->property("tableTextValue").toString();
 
-    QList<QList<TableCellData>> headerData = getCellDatas(tableItem, "headerData");
-    QList<QList<TableCellData>> innerData = getCellDatas(tableItem, "innerDatas");
-    QList<QList<TableCellData>> footerData = getCellDatas(tableItem, "footerData");
+    QList<QList<TableCellData>> headerDatas = getCellDatas(tableItem, "headerData");
+    QList<QList<TableCellData>> innerDatas = getCellDatas(tableItem, "innerDatas");
+    QList<QList<TableCellData>> footerDatas = getCellDatas(tableItem, "footerData");
 
     std::vector<double> pxCellWidths(tableRowCount, 0);
     std::vector<double> pxCellHeights(innerTableColCount, 0);
 
-    initTableCellSizes(painter, pxCellWidths, pxCellHeights, innerData, pxTableFullWidthSize, tableWidthRatio);
+    //////// innerTableCell height 값 초기화
+    ///
+    ///
+    initTableCellSizes(painter, pxCellWidths, pxCellHeights, innerDatas, pxTableFullWidthSize, tableWidthRatio);
+    ///
+    ///
+    ////////
+
+    //////// table title 그리기
+    ///
+    ///
+    if (tableTitle != "") {
+        setFont(painter, 10, true);
+
+        QFontMetrics metrics(painter.font());
+        QRectF boundingBox(tableCursorPoint, QSizeF(pxTableFullWidthSize, metrics.height()));
+
+        Qt::AlignmentFlag align = Qt::AlignLeft;
+
+        painter.drawText(boundingBox, align, tableTitle);
+
+        tableCursorPoint = QPointF(cursorPoint.x(), tableCursorPoint.y() + boundingBox.height() + titleTableMargin);
+    }
+    ///
+    ///
+    ////////
+
+    //////// header list 그리기
+    ///
+    ///
+
+    // header list 는 오직 하나의 열만 가지고 있고 text 는 오직 한 줄인 것으로 가정.
+    if (headerDatas.size() != 0) {
+        setFont(painter, 10, true);
+
+        QPointF headerCursorPoint = tableCursorPoint;
+
+        std::vector<double> pxHeaderCellWidths(tableRowCount, 0);
+        std::vector<double> pxHeaderCellHeights(1, 0);
+
+        initTableCellSizes(painter, pxHeaderCellWidths, pxHeaderCellHeights, headerDatas,
+                           pxTableFullWidthSize, tableWidthRatio);
+
+        for (const auto &headerData : headerDatas) {
+            for (int rowIndex = 0; rowIndex < headerData.size(); rowIndex++) {
+                QString cellText = headerData[rowIndex].cellText;
+                int cellStartRow = headerData[rowIndex].startRow;
+                int cellRowSpan = headerData[rowIndex].rowSpan;
+                QColor cellBgColor = headerData[rowIndex].bgColor;
+                QString cellAlign = headerData[rowIndex].alignPosition;
+
+                qreal actualWidth = 0;
+
+                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                    actualWidth += pxCellWidths[widthIndex];
+                }
+
+                QRectF boundingBox(headerCursorPoint, QSizeF(actualWidth, pxHeaderCellHeights[0]));
+
+                painter.setPen(QPen(Qt::black, 1.0));
+                painter.fillRect(boundingBox,
+                                 QColor(cellBgColor));
+                painter.drawRect(boundingBox);
+
+                QTextOption textOption;
+                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+                if (cellAlign == "center") {
+                    align |= Qt::AlignmentFlag::AlignHCenter;
+                } else if (cellAlign == "right") {
+                    align |= Qt::AlignmentFlag::AlignRight;
+                } else {
+                    align |= Qt::AlignmentFlag::AlignLeft;
+                }
+
+                textOption.setAlignment(align);
+                textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+                painter.drawText(adjustedTextRect, cellText, textOption);
+
+                headerCursorPoint = QPointF(headerCursorPoint.x() + actualWidth,
+                                            headerCursorPoint.y());
+            }
+        }
+
+        tableCursorPoint = QPointF(tableCursorPoint.x(),
+                                   tableCursorPoint.y() + pxHeaderCellHeights[0]);
+    }
+
+    ///
+    ///
+    ////////
 
     //////// innerTable 그리기
     ///
     ///
 
-    // 1. pxCellWidths, pxCellHeights 객체에 값을 initializing 하기
-    // 2. n 번째 col 에 위치한 cell data 들을 QRectF boundingBox 계산해서
-    //    가장 큰 height 값을 구하고 이 값을 pxCellHeights 객체의 n 번째 col 에 해당하는 index 에 값 변경하기.
-
     // * newPage 고려하기
 
+    if (innerDatas.size() != 0) {
+        QPointF innerCursorPoint = tableCursorPoint;
 
-    // QTextOption textOption;
-    // textOption.setAlignment(alignment);
-    // textOption.setWrapMode(QTextOption::WrapAnywhere);
+        for (int colIndex = 0; colIndex < innerDatas.size(); colIndex++) {
+
+            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.width()) {
+                pdfWriter.newPage();
+
+                cursorPoint = QPointF(0, 0);
+                tableCursorPoint = cursorPoint;
+                innerCursorPoint = tableCursorPoint;
+            }
+
+            for (int rowIndex = 0; rowIndex < innerDatas[colIndex].size(); rowIndex++) {
+                QString cellText = innerDatas[colIndex][rowIndex].cellText;
+
+                int cellStartRow = innerDatas[colIndex][rowIndex].startRow;
+                int cellRowSpan = innerDatas[colIndex][rowIndex].rowSpan;
+                int cellStartCol = innerDatas[colIndex][rowIndex].startCol;
+                int cellColSpan = innerDatas[colIndex][rowIndex].colSpan;
+
+                qreal cellRectXPos = tableCursorPoint.x();
+                qreal cellRectYPos = tableCursorPoint.y();
+
+                for (int widthIndex = 0; widthIndex < cellStartRow; widthIndex++) {
+                    cellRectXPos += pxCellWidths[widthIndex];
+                }
+
+                for (int heightIndex = 0; heightIndex < cellStartCol; heightIndex++) {
+                    cellRectYPos += pxCellHeights[heightIndex];
+                }
+
+                qreal cellRectWidth = 0;
+                qreal cellRectHeight = 0;
+
+                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                    cellRectWidth += pxCellWidths[widthIndex];
+                }
+
+                for (int heightIndex = cellStartCol; heightIndex < (cellStartCol + cellColSpan); heightIndex++) {
+                    cellRectHeight += pxCellHeights[heightIndex];
+                }
+
+                QColor cellRectBgColor = innerDatas[colIndex][rowIndex].bgColor;
+
+                QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
+                                   QSizeF(cellRectWidth, cellRectHeight));
+
+                painter.setPen(QPen(Qt::black, 1.0));
+                painter.fillRect(boundingBox,
+                                 QColor(cellRectBgColor));
+                painter.drawRect(boundingBox);
+
+                QString cellTextAlign = innerDatas[colIndex][rowIndex].alignPosition;
+                bool cellTextBold = innerDatas[colIndex][rowIndex].isBold;
+
+                setFont(painter, 10, cellTextBold);
+
+                QTextOption textOption;
+                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+                if (cellTextAlign == "center") {
+                    align |= Qt::AlignmentFlag::AlignHCenter;
+                } else if (cellTextAlign == "right") {
+                    align |= Qt::AlignmentFlag::AlignRight;
+                } else {
+                    align |= Qt::AlignmentFlag::AlignLeft;
+                }
+
+                textOption.setAlignment(align);
+                textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+                painter.drawText(adjustedTextRect, cellText, textOption);
+            }
+
+            innerCursorPoint = QPointF(innerCursorPoint.x(),
+                                       innerCursorPoint.y() + pxCellHeights[colIndex]);
+        }
+
+        tableCursorPoint = QPointF(tableCursorPoint.x(),
+                                   innerCursorPoint.y());
+    }
+
 
     ///
     ///
@@ -350,8 +546,6 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     }
 
     painter.drawRect(childItemRect[0]);  // [LLDDSS] FOR TEST DELETE
-
-    setFont(painter);
     ///
     ///
     ////////
@@ -359,6 +553,8 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     //////// informTable 그리기
     ///
     ///
+    setFont(painter);
+
     cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
 
     if (templateQuickItems[materialObjNames[1]] != nullptr) {

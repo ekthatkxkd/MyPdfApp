@@ -114,7 +114,10 @@ Item {
     Component {
         id : textEditComp
         TextEdit {
+            id : cellTextEdit
             objectName : "cellText"
+
+            signal textModified(string newText)
 
             anchors.fill : parent
 
@@ -135,6 +138,10 @@ Item {
             font.bold : currentModelData.isBold
 
             text : currentModelData.cellText
+
+            onTextChanged: {
+                textModified(cellTextEdit.text)
+            }
         }
     }
 
@@ -378,6 +385,73 @@ Item {
 
                                     dividedInnerHeights = dividedInnerHeights
                                 }
+                            }
+
+                            function onTextModified(newText) {
+                                let colIndex = innerRowRep.innerColIndex   // outer index
+                                let rowIndex = cellArea.innerRowIndex   // inner index
+
+                                // 방어 코드 및 디버그 로그
+                                if (!root.innerDatas || root.innerDatas.length <= colIndex) {
+                                    console.warn("[ERROR] Invalid column index:", colIndex)
+                                    return
+                                }
+
+                                let column = root.innerDatas[colIndex]
+                                if (!column || column.length <= rowIndex) {
+                                    console.warn("[ERROR] Invalid row index:", rowIndex)
+                                    return
+                                }
+
+                                // 안전하게 셀 복사 및 수정
+                                let cell = Object.assign({}, column[rowIndex])
+                                cell.cellText = newText
+
+                                // 내부 배열도 복사 후 수정 → QML이 감지 가능하게
+                                let newColumn = column.slice(0)
+                                newColumn[rowIndex] = cell
+                                root.innerDatas[colIndex] = newColumn
+
+                                console.log("[UPDATED] cellText:", root.innerDatas[colIndex][rowIndex].cellText)
+
+                                /*
+                                let rowIndex = cellArea.innerRowIndex  // root.selectedRow
+                                let colIndex = innerRowRep.innerColIndex // root.selectedCol
+                                console.log("[LLDDSS] rowIndex : ", rowIndex)
+                                console.log("[LLDDSS] colIndex : ", colIndex)
+
+                                // 방어 코드 및 디버깅 로그
+                                if (!root.innerDatas || root.innerDatas.length <= colIndex) {
+                                    console.warn("[ERROR] Invalid row index:", colIndex)
+                                    return
+                                }
+
+                                let row = root.innerDatas[colIndex]
+                                if (!row || row.length <= colIndex) {
+                                    console.warn("[ERROR] Invalid column index:", colIndex)
+                                    return
+                                }
+
+                                // 안전하게 복사하고 값 수정
+                                let cell = Object.assign({}, row[rowIndex])
+                                cell.cellText = newText
+
+                                // 배열을 복사해서 다시 대입 (QML이 감지할 수 있도록)
+                                let newRow = row.slice(0) // row 자체도 복사
+                                newRow[rowIndex] = cell
+                                root.innerDatas[colIndex] = newRow
+
+                                console.log("[UPDATED] cellText:", root.innerDatas[colIndex][rowIndex].cellText)
+                                */
+                            }
+
+                            function onTextChanged() {
+                                // console.log("[LLDDSS] onTextChanged")
+                                // console.log("[LLDDSS] onTextChanged index : ", innerDatas[innerRowRep.innerColIndex][index])
+                                // console.log("[LLDDSS] onTextChanged startRow : ", innerDatas[innerRowRep.innerColIndex][index].startRow)
+                                // console.log("[LLDDSS] onTextChanged startCol : ", innerDatas[innerRowRep.innerColIndex][index].startCol)
+                                // innerDatas[innerRowRep.innerColIndex][index].cellText = innerTextTypeLoader.item.text;
+                                // console.log("[LLDDSS] onTextChanged text : ", innerDatas[innerRowRep.innerColIndex][index].cellText)
                             }
                         }
                     }
