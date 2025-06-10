@@ -1,4 +1,5 @@
 #include "include/pdfExporter/PdfExporter.h"
+#include "include/model/listmodel/TableModel.h"
 #include <QPainter>
 #include <QFont>
 #include <QVariant>
@@ -320,6 +321,40 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     QPointF tableCursorPoint = cursorPoint;
 
     int tableRowCount = tableItem->property("dividedRowCount").toInt();
+
+
+
+    QVector<QVector<CellData>> innerDatas = newGetCellDatas(tableItem, "innerColRep");
+
+
+
+
+    //////// [LLDDSS]
+
+    // 해당 부분부터 구현.
+
+    ////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
     int innerTableColCount = tableItem->property("dividedInnerColCount").toInt();
 
 
@@ -523,6 +558,8 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     ///
     ////////
 
+    */
+
     return tableArea;
 }
 
@@ -651,3 +688,43 @@ void PdfExporter::testDrawTable(QPainter &painter, QPointF &cursorPoint,
     }
 }
 
+QVector<QVector<CellData>> PdfExporter::newGetCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
+    QVector<QVector<CellData>> m_processedTableData;
+
+    QQuickItem * innerRepQuickItem = getInnerItem(tableItem, repeaterObjName);
+
+    if (innerRepQuickItem) {
+        QVariant modelProperty = innerRepQuickItem->property("model");
+        QObject* modelObject = modelProperty.value<QObject*>();
+
+        if (modelObject) {
+            TableModel* tableModel = qobject_cast<TableModel*>(modelObject);
+
+            if (tableModel) {
+                QVariantList allData = tableModel->getAllTableData();
+
+                for (int i = 0; i < allData.size(); ++i) {
+                    QVariantList rowData = allData[i].toList();
+                    QVector<CellData> processedRow;
+
+                    for (int j = 0; j < rowData.size(); ++j) {
+                        QVariantMap cellMap = rowData[j].toMap();
+                        CellData cellData = CellData::fromVariantMap(cellMap);
+                        processedRow.append(cellData);
+                    }
+
+                    m_processedTableData.append(processedRow);
+                }
+
+            } else {
+                qDebug()<< "faild....";
+            }
+        } else {
+            qDebug()<< "faild....";
+        }
+    } else {
+        qDebug()<< "faild....";
+    }
+
+    return m_processedTableData;
+}

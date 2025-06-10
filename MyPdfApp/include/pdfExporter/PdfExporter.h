@@ -7,6 +7,8 @@
 #include <QTextOption>
 #include <QPdfWriter>
 
+#include "include/model/listmodel/CellData.h"
+
 struct TableCellData {
     int startRow, startCol;
     int rowSpan, colSpan;
@@ -43,6 +45,8 @@ public :
 private :
     const int templateItemSpacing = 5;
     const int cellTextMargins = 5;
+
+    QVector<QVector<CellData>> newGetCellDatas(QQuickItem *tableItem, const QString &repeaterObjName);
 
     TableCellData convertToTableCellData(const QVariantMap &map);
     QList<TableCellData> convertToRowData(const QVariantList &rowList);

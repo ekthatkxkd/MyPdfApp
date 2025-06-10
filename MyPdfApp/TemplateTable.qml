@@ -286,6 +286,7 @@ Item {
                 width : parent.width
 
                 Repeater {
+                    objectName : "headerColRep"
                     model : headerTableModel  // headerData
 
                     Repeater {
@@ -344,6 +345,8 @@ Item {
 
             Repeater {
                 id : innerColRep
+                objectName : "innerColRep"
+
                 model : tableModel // innerDatas.length
 
                 Repeater {
@@ -477,6 +480,7 @@ Item {
                 width : parent.width
 
                 Repeater {
+                    objectName : "footerColRep"
                     model : footerTableModel  // footerData
 
                     Repeater {

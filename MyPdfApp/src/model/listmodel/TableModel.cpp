@@ -412,3 +412,21 @@ CellData TableModel::createCellData(int row, int col, int rowSpan, int colSpan,
     return CellData(row, col, rowSpan, colSpan, cellText, isTextEdit,
                     bgColor, isBold, fontSize, alignPosition, isVerticalDir);
 }
+
+QVariantList TableModel::getAllTableData() const {
+    QVariantList allData;
+
+    for (int i = 0; i < m_tableData.size(); ++i) {
+        QVariantList rowData;
+        const QVector<CellData>& row = m_tableData[i];
+
+        for (int j = 0; j < row.size(); ++j) {
+            rowData.append(row[j].toVariantMap());
+        }
+
+        // allData.append(rowData);
+        allData.push_back(rowData);
+    }
+
+    return allData;
+}

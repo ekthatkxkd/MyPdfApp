@@ -58,6 +58,8 @@ public slots:
     // TextEdit 전용 최적화된 메서드
     Q_INVOKABLE bool updateCellText(int row, int col, const QString &newText);
 
+    Q_INVOKABLE QVariantList getAllTableData() const;
+
 signals:
     void rowCountChanged();
     void columnCountChanged();
