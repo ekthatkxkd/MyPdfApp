@@ -44,7 +44,8 @@ public slots:
     Q_INVOKABLE bool updateCellProperty(int row, int col, const QString &property, const QVariant &value);
 
     // 행/열 조작
-    Q_INVOKABLE void insertRow(int row);
+    // Q_INVOKABLE void insertRow(int row);
+    Q_INVOKABLE void insertRow(const QVariantList &rowData);
     Q_INVOKABLE void removeRow(int row);
     Q_INVOKABLE void insertColumn(int col);
     Q_INVOKABLE void removeColumn(int col);
@@ -70,7 +71,11 @@ private slots:
 private:
     enum TableRoles {
         RowDataRole = Qt::UserRole + 1,
-        RowIndexRole
+        RowIndexRole,
+        StartRowRole,
+        StartColRole,
+        RowSpanRole,
+        ColSpanRole
     };
 
     // 이중 배열 데이터 저장

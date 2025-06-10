@@ -42,9 +42,9 @@ Item {
                     MouseArea {
                         anchors.fill : parent
                         onClicked : {
-                            // loadTemplateForm(index)
+                            // purchaseHistory.addInnerDefaultRowData()
 
-                            purchaseHistory.addInnerDefaultRowData()
+                            informTable.testAddRow()
                         }
                     }
                 }
@@ -130,13 +130,26 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    // dividedInnerColCount : 3
+                    // dividedWidths : [0.15, 0.3, 0.1, 0.15, 0.3]
+                    dividedColCount : 3
                     dividedRowCount : 5
 
                     tableTextValue : "테스트 타이틀"
 
+                    //////// [LLDDSS] FOR TEST DELETE
+                    innerDefaultData : [
+                        initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(2, 0, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(4, 0, 1, 1, "", true, "white", false, 12, "center")
+                    ]
+                    ////////
+
                     Component.onCompleted: {
                         initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
+
+                        tableModel.setTableSize(dividedColCount, dividedRowCount);
 
                         //////// header data
                         ///
@@ -193,6 +206,7 @@ Item {
 
                 }
 
+                /*
                 TemplateTable {
                     id : purchaseHistory
                     objectName : "purchaseHistory"
@@ -258,9 +272,9 @@ Item {
                         ///
                         ///
                         ////////
-
                     }
                 }
+                */
             }
         }
     }

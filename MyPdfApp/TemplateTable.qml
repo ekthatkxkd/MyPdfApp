@@ -4,6 +4,9 @@ import TableModel 1.0
 
 Item {
     id : root
+
+    property alias tableModel : tableModel
+
     readonly property int minCellHeight : 30
     readonly property string headerBgColor : "#f0f0f0"
 
@@ -14,6 +17,7 @@ Item {
     property var footerData : []
 
     property int dividedInnerColCount : 0
+    property int dividedColCount : 0
     property int dividedRowCount : 0
 
     property var dividedWidths : []
@@ -92,6 +96,8 @@ Item {
 
         // innerDatas = innerDatas
         innerDatasChanged()
+
+        tableModel.insertRow(datas);
     }
 
     function addInnerDefaultRowData() {
@@ -112,6 +118,10 @@ Item {
         footerDataChanged()
     }
 
+    function testAddRow() {
+        addInnerDefaultRowData()
+    }
+
     Component {
         id : textEditComp
         TextEdit {
@@ -119,6 +129,8 @@ Item {
             objectName : "cellText"
 
             signal textModified(string newText)
+
+            property var tableModelRef: null
 
             anchors.fill : parent
 
@@ -141,7 +153,8 @@ Item {
             text : currentModelData.cellText
 
             onTextChanged: {
-                textModified(cellTextEdit.text)
+                console.log("[LLDDSS] cellTextEdit TEXTCHANGED : " + text)
+                textModified(text)
             }
         }
     }
@@ -151,6 +164,8 @@ Item {
 
         Text {
             objectName : "cellText"
+
+            property var tableModelRef: null
 
             anchors.fill : parent
 
@@ -184,13 +199,26 @@ Item {
     TableModel {
         id: tableModel
 
-        // 모델 변경 시그널 처리
+        function setTableSize(row, col) {
+            tableModel.initializeTable(row, col);
+        }
+
+        Component.onCompleted: {
+            console.log("TableModel 인스턴스 생성 완료");
+            // initializeTable(0, 0);
+        }
+
+        // C++ 시그널 처리
         onCellDataChanged: function(row, col) {
             console.log(`셀 데이터 변경: (${row}, ${col})`);
         }
 
         onTableStructureChanged: {
             console.log("테이블 구조 변경됨");
+        }
+
+        onCellTextChanged: function(row, col, newText) {
+            console.log(`셀 텍스트 변경: (${row}, ${col}) -> "${newText}"`);
         }
     }
 
@@ -299,17 +327,27 @@ Item {
 
             Repeater {
                 id : innerColRep
-                model : innerDatas.length
+                model : tableModel // innerDatas.length
 
 
                 Repeater {
                     id : innerRowRep
                     readonly property int innerColIndex : index
 
-                    model : innerDatas[innerColIndex]
+                    model : rowData  // innerDatas[innerColIndex]
 
                     Rectangle {
+                        MouseArea{
+                            anchors.fill : parent
+                            onClicked : {
+                                console.log("[LLDDSS] x : " + cellArea.x + ", y : " + cellArea.y)
+                            }
+                        }
+
                         id : cellArea
+
+                        property var cellData : modelData
+
                         readonly property int innerRowIndex : index
                         readonly property int innerTextMargin : 5
 
@@ -317,9 +355,15 @@ Item {
                                                                    innerTextTypeLoader.item !== null &&
                                                                    innerTextTypeLoader.item.contentHeight !== undefined
                                                                    ) ? innerTextTypeLoader.item.contentHeight
-                                                                    : 0
+                                                                     : 0
 
                         x : {
+                            if (modelData.cellText === "주소") {
+                                let testbreak;
+                            }
+
+                            var test = modelData
+
                             let basicXpos = 0  // dividedWidths[modelData.startRow]
 
                             for (let index = 0; index < (modelData.startRow); index++) {
@@ -330,6 +374,12 @@ Item {
                         }
 
                         y : {
+                            if (modelData.cellText === "주소") {
+                                let testbreak;
+                            }
+
+                            var test = modelData
+
                             let basicYpos = 0  // dividedInnerHeights[modelData.startCol]
 
                             for (let index = 0; index < (modelData.startCol); index++) {
@@ -377,6 +427,12 @@ Item {
                                     textComp
                                 }
                             }
+
+                            onStatusChanged : {
+                                if (status === Loader.Ready) {
+                                    item.tableModelRef = tableModel
+                                }
+                            }
                         }
 
                         Connections {
@@ -402,70 +458,9 @@ Item {
                             }
 
                             function onTextModified(newText) {
-                                let colIndex = innerRowRep.innerColIndex   // outer index
-                                let rowIndex = cellArea.innerRowIndex   // inner index
+                                console.log("[LLDDSS] cellText : " + newText)
 
-                                // 방어 코드 및 디버그 로그
-                                if (!root.innerDatas || root.innerDatas.length <= colIndex) {
-                                    console.warn("[ERROR] Invalid column index:", colIndex)
-                                    return
-                                }
-
-                                let column = root.innerDatas[colIndex]
-                                if (!column || column.length <= rowIndex) {
-                                    console.warn("[ERROR] Invalid row index:", rowIndex)
-                                    return
-                                }
-
-                                // 안전하게 셀 복사 및 수정
-                                let cell = Object.assign({}, column[rowIndex])
-                                cell.cellText = newText
-
-                                // 내부 배열도 복사 후 수정 → QML이 감지 가능하게
-                                let newColumn = column.slice(0)
-                                newColumn[rowIndex] = cell
-                                root.innerDatas[colIndex] = newColumn
-
-                                console.log("[UPDATED] cellText:", root.innerDatas[colIndex][rowIndex].cellText)
-
-                                /*
-                                let rowIndex = cellArea.innerRowIndex  // root.selectedRow
-                                let colIndex = innerRowRep.innerColIndex // root.selectedCol
-                                console.log("[LLDDSS] rowIndex : ", rowIndex)
-                                console.log("[LLDDSS] colIndex : ", colIndex)
-
-                                // 방어 코드 및 디버깅 로그
-                                if (!root.innerDatas || root.innerDatas.length <= colIndex) {
-                                    console.warn("[ERROR] Invalid row index:", colIndex)
-                                    return
-                                }
-
-                                let row = root.innerDatas[colIndex]
-                                if (!row || row.length <= colIndex) {
-                                    console.warn("[ERROR] Invalid column index:", colIndex)
-                                    return
-                                }
-
-                                // 안전하게 복사하고 값 수정
-                                let cell = Object.assign({}, row[rowIndex])
-                                cell.cellText = newText
-
-                                // 배열을 복사해서 다시 대입 (QML이 감지할 수 있도록)
-                                let newRow = row.slice(0) // row 자체도 복사
-                                newRow[rowIndex] = cell
-                                root.innerDatas[colIndex] = newRow
-
-                                console.log("[UPDATED] cellText:", root.innerDatas[colIndex][rowIndex].cellText)
-                                */
-                            }
-
-                            function onTextChanged() {
-                                // console.log("[LLDDSS] onTextChanged")
-                                // console.log("[LLDDSS] onTextChanged index : ", innerDatas[innerRowRep.innerColIndex][index])
-                                // console.log("[LLDDSS] onTextChanged startRow : ", innerDatas[innerRowRep.innerColIndex][index].startRow)
-                                // console.log("[LLDDSS] onTextChanged startCol : ", innerDatas[innerRowRep.innerColIndex][index].startCol)
-                                // innerDatas[innerRowRep.innerColIndex][index].cellText = innerTextTypeLoader.item.text;
-                                // console.log("[LLDDSS] onTextChanged text : ", innerDatas[innerRowRep.innerColIndex][index].cellText)
+                                tableModel.updateCellText(cellData.startCol, cellData.startRow, newText);
                             }
                         }
                     }

@@ -15,7 +15,7 @@ TableModel::TableModel(QObject *parent)
 
     // 기본 테이블 초기화
     // initializeTable(5, 5);
-    initializeTable(0, 0);
+    // initializeTable(0, 0);
 }
 
 TableModel::~TableModel() {
@@ -34,6 +34,12 @@ QHash<int, QByteArray> TableModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[RowDataRole] = "rowData";
     roles[RowIndexRole] = "rowIndex";
+
+    // roles[StartRowRole] = "startRow";
+    // roles[StartColRole] = "startCol";
+    // roles[RowSpanRole] = "rowSpan";
+    // roles[ColSpanRole] = "colSpan";
+
     return roles;
 }
 
@@ -54,6 +60,16 @@ QVariant TableModel::data(const QModelIndex &index, int role) const {
     }
     case RowIndexRole:
         return index.row();
+
+    // case StartRowRole :
+    //     return;
+    // case StartColRole :
+    //     return;
+    // case RowSpanRole :
+    //     return;
+    // case ColSpanRole :
+    //     return;
+
     case Qt::DisplayRole:
         return QString("Row %1").arg(index.row());
     default:
@@ -75,39 +91,45 @@ Qt::ItemFlags TableModel::flags(const QModelIndex &index) const {
 }
 
 void TableModel::initializeTable(int rows, int cols) {
-    if (rows <= 0 || cols <= 0) return;
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    // if (rows <= 0 || cols <= 0) return;
 
-    beginResetModel();
+    // beginResetModel();
 
-    m_tableData.clear();
+    // m_tableData.clear();
+    // m_columnCount = cols;
+
+    // // 헤더 행 생성
+    // QVector<CellData> headerRow;
+    // headerRow.append(createCellData(0, 0, 1, 1, "상품명", false, Qt::lightGray, true, 14, "center"));
+    // headerRow.append(createCellData(0, 1, 1, 2, "가격 정보", false, Qt::lightGray, true, 14, "center"));
+    // headerRow.append(createCellData(0, 3, 1, 1, "재고", false, Qt::lightGray, true, 14, "center"));
+    // headerRow.append(createCellData(0, 4, 1, 1, "비고", false, Qt::lightGray, true, 14, "center"));
+    // m_tableData.append(headerRow);
+
+    // // 데이터 행들 생성
+    // for (int i = 0; i < rows; ++i) {
+    //     QVector<CellData> dataRow;
+    //     dataRow.append(createCellData(i, 0, 1, 1, QString("상품 %1").arg(i), false, Qt::white, false, 12, "left"));
+    //     dataRow.append(createCellData(i, 1, 1, 1, QString("%1").arg(1000000 + i * 100000), false, Qt::white, false, 12, "right"));
+    //     dataRow.append(createCellData(i, 2, 1, 1, "KRW", false, Qt::white, false, 12, "center"));
+    //     dataRow.append(createCellData(i, 3, 1, 1, QString("%1").arg(100 + i * 50), false, Qt::white, false, 12, "right"));
+    //     dataRow.append(createCellData(i, 4, 1, 1, "정상", false, Qt::white, false, 12, "center"));
+    //     m_tableData.append(dataRow);
+    // }
+
+    // endResetModel();
+
+    // emit rowCountChanged();
+    // emit columnCountChanged();
+    // emit tableStructureChanged();
+
+    // qDebug() << "테이블 초기화 완료. 행:" << m_tableData.size() << "열:" << m_columnCount;
+    ////////
+
+    //////// [LLDDSS] MY MODIFIED
     m_columnCount = cols;
-
-    // 헤더 행 생성
-    QVector<CellData> headerRow;
-    headerRow.append(createCellData(0, 0, 1, 1, "상품명", false, Qt::lightGray, true, 14, "center"));
-    headerRow.append(createCellData(0, 1, 1, 2, "가격 정보", false, Qt::lightGray, true, 14, "center"));
-    headerRow.append(createCellData(0, 3, 1, 1, "재고", false, Qt::lightGray, true, 14, "center"));
-    headerRow.append(createCellData(0, 4, 1, 1, "비고", false, Qt::lightGray, true, 14, "center"));
-    m_tableData.append(headerRow);
-
-    // 데이터 행들 생성
-    for (int i = 1; i < rows; ++i) {
-        QVector<CellData> dataRow;
-        dataRow.append(createCellData(i, 0, 1, 1, QString("상품 %1").arg(i), false, Qt::white, false, 12, "left"));
-        dataRow.append(createCellData(i, 1, 1, 1, QString("%1").arg(1000000 + i * 100000), false, Qt::white, false, 12, "right"));
-        dataRow.append(createCellData(i, 2, 1, 1, "KRW", false, Qt::white, false, 12, "center"));
-        dataRow.append(createCellData(i, 3, 1, 1, QString("%1").arg(100 + i * 50), false, Qt::white, false, 12, "right"));
-        dataRow.append(createCellData(i, 4, 1, 1, "정상", false, Qt::white, false, 12, "center"));
-        m_tableData.append(dataRow);
-    }
-
-    endResetModel();
-
-    emit rowCountChanged();
-    emit columnCountChanged();
-    emit tableStructureChanged();
-
-    qDebug() << "테이블 초기화 완료. 행:" << m_tableData.size() << "열:" << m_columnCount;
+    ////////
 }
 
 QVariantMap TableModel::getCellData(int row, int col) const {
@@ -235,23 +257,37 @@ void TableModel::processPendingTextUpdates() {
 }
 
 // qml 에서 새로운 행 추가 요청을 할 때
-void TableModel::insertRow(int row) {
-    if (row < 0 || row > m_tableData.size()) return;
+void TableModel::insertRow(const QVariantList &rowData) {
+    // if (row < 0 || row > m_tableData.size()) return;
+
+    int row = m_tableData.size();
+    int rowSize = rowData.size();
 
     beginInsertRows(QModelIndex(), row, row);
 
     QVector<CellData> newRow;
-    for (int j = 0; j < m_columnCount; ++j) {
-        newRow.append(createCellData(row, j, 1, 1, QString("새 셀 (%1,%2)").arg(row).arg(j), false));
-    }
 
+
+
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    // for (int j = 0; j < m_columnCount; ++j) {
+    //     newRow.append(createCellData(row, j, 1, 1, QString("새 셀 (%1,%2)").arg(row).arg(j), false));
+    // }
+    // m_tableData.insert(row, newRow);
+
+    // for (int i = row + 1; i < m_tableData.size(); ++i) {
+    //     for (int j = 0; j < m_columnCount; ++j) {
+    //         m_tableData[i][j].startRow = i;
+    //     }
+    // }
+    ////////
+
+    //////// [LLDDSS] MY MODIFIED
+    for (int j = 0; j < rowSize; j++) {
+        newRow.append(CellData::fromVariantMap(rowData[j].toMap()));
+    }
     m_tableData.insert(row, newRow);
-
-    for (int i = row + 1; i < m_tableData.size(); ++i) {
-        for (int j = 0; j < m_columnCount; ++j) {
-            m_tableData[i][j].startRow = i;
-        }
-    }
+    ////////
 
     endInsertRows();
     emit rowCountChanged();
