@@ -201,16 +201,6 @@ bool TableModel::updateCellProperty(int row, int col, const QString &property, c
 }
 
 bool TableModel::updateCellText(int row, int col, const QString &newText) {
-
-    //////// [LLDDSS] FOR TEST
-    auto test = m_tableData;
-    m_tableData.size();
-    m_tableData[0].size();
-
-    ////////
-
-
-
     if (!isValidPosition(row, col)) {
         qWarning() << "잘못된 셀 위치:" << row << col;
         return false;
@@ -409,12 +399,6 @@ void TableModel::clearTable() {
 }
 
 bool TableModel::isValidPosition(int row, int col) const {
-
-    //////// [LLDDSS] FOR TEST
-    auto mcolumnCount = m_columnCount;
-    auto m_tableDatasize = m_tableData.size();
-    ////////
-
     return row >= 0 && row < m_tableData.size() &&
            col >= 0 && col < m_columnCount &&
            col < m_tableData[row].size();

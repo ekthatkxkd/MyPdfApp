@@ -14,7 +14,6 @@ Item {
 
     property string tableTextValue : ""
 
-    // property int dividedInnerColCount : 0
     property int dividedColCount : 0
     property int dividedRowCount : 0
 
@@ -45,7 +44,7 @@ Item {
 
     function addDividedInnerHeights() {
         dividedInnerHeights.push(minCellHeight)
-        // dividedInnerColCount = dividedInnerHeights.length
+
         dividedInnerHeights = dividedInnerHeights
     }
 
@@ -79,16 +78,6 @@ Item {
 
         addDividedInnerHeights()
 
-        // let rowDatas = []
-
-        // for (let index = 0; index < datas.length; index++) {
-        //     rowDatas.push(datas[index])
-        // }
-
-        // innerDatas.push(rowDatas)
-
-        // innerDatasChanged()
-
         tableModel.insertRow(datas);
     }
 
@@ -106,14 +95,9 @@ Item {
         footerTableModel.insertRow(datas);
     }
 
-    function testAddRow() {
-        addInnerDefaultRowData()
-    }
-
     Component {
         id : textEditComp
         TextEdit {
-            id : cellTextEdit
             objectName : "cellText"
 
             signal textModified(string newText)
@@ -141,7 +125,6 @@ Item {
             text : currentModelData.cellText
 
             onTextChanged: {
-                console.log("[LLDDSS] cellTextEdit TEXTCHANGED : " + text)
                 textModified(text)
             }
         }
@@ -149,7 +132,6 @@ Item {
 
     Component {
         id : textComp
-
         Text {
             objectName : "cellText"
 
