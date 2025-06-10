@@ -149,15 +149,22 @@ Item {
                     Component.onCompleted: {
                         initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
 
+                        headerTableModel.setTableSize(1, dividedRowCount);
                         tableModel.setTableSize(dividedColCount, dividedRowCount);
+                        footerTableModel.setTableSize(1, dividedRowCount);
+
+
+
+
+
 
                         //////// header data
                         ///
                         ///
                         initHeaderData([
-                                           initCell(0, 0, 1, 1, "테스트1", false, headerBgColor, true, 12, "center"),
-                                           initCell(1, 0, 2, 1, "테스트2", false, headerBgColor, true, 12, "center", false),
-                                           initCell(3, 0, 2, 1, "테스트3", false, headerBgColor, true, 12, "center", false)
+                                           initCell(0, 0, 1, 1, "테스트1", true, headerBgColor, true, 12, "center"),
+                                           initCell(1, 0, 2, 1, "테스트2", true, headerBgColor, true, 12, "center", false),
+                                           initCell(3, 0, 2, 1, "테스트3", true, headerBgColor, true, 12, "center", false)
                                        ])
                         ///
                         ///
@@ -167,25 +174,25 @@ Item {
                         ///
                         ///
                         addInnerRowData([
-                                            initCell(0, 0, 1, 1, "구매번호", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 0, 1, 1, "구매번호", true, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(2, 0, 1, 3, "구매처", false, headerBgColor, true, 12, "center", true),
-                                            initCell(3, 0, 1, 1, "상호", false, headerBgColor, true, 12, "center"),
+                                            initCell(2, 0, 1, 3, "구매처", true, headerBgColor, true, 12, "center", true),
+                                            initCell(3, 0, 1, 1, "상호", true, headerBgColor, true, 12, "center"),
                                             initCell(4, 0, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "구매창고", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 1, 1, 1, "구매창고", true, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(3, 1, 1, 1, "주소", false, headerBgColor, true, 12, "center"),
+                                            initCell(3, 1, 1, 1, "주소", true, headerBgColor, true, 12, "center"),
                                             initCell(4, 1, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 2, 1, 1, "구매담당자", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 2, 1, 1, "구매담당자", true, headerBgColor, true, 12, "center"),
                                             initCell(1, 2, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
+                                            initCell(3, 2, 1, 1, "TEL", true, headerBgColor, true, 12, "center"),
                                             initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
                                         ])
                         ///
@@ -196,8 +203,8 @@ Item {
                         ///
                         ///
                         initFooterData([
-                                           initCell(0, 0, 2, 1, "footer테스트", false, headerBgColor, true, 12, "center"),
-                                           initCell(2, 0, 3, 1, "", false, headerBgColor, false, 12)
+                                           initCell(0, 0, 2, 1, "footer테스트", true, headerBgColor, true, 12, "center"),
+                                           initCell(2, 0, 3, 1, "", true, headerBgColor, false, 12)
                                        ])
                         ///
                         ///

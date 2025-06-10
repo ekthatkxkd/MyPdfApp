@@ -5,18 +5,16 @@ import TableModel 1.0
 Item {
     id : root
 
+    property alias headerTableModel : headerTableModel
     property alias tableModel : tableModel
+    property alias footerTableModel : footerTableModel
 
     readonly property int minCellHeight : 30
     readonly property string headerBgColor : "#f0f0f0"
 
     property string tableTextValue : ""
 
-    property var headerData : []
-    property list<var> innerDatas : []
-    property var footerData : []
-
-    property int dividedInnerColCount : 0
+    // property int dividedInnerColCount : 0
     property int dividedColCount : 0
     property int dividedRowCount : 0
 
@@ -47,7 +45,7 @@ Item {
 
     function addDividedInnerHeights() {
         dividedInnerHeights.push(minCellHeight)
-        dividedInnerColCount = dividedInnerHeights.length
+        // dividedInnerColCount = dividedInnerHeights.length
         dividedInnerHeights = dividedInnerHeights
     }
 
@@ -71,12 +69,7 @@ Item {
     }
 
     function initHeaderData(datas) {
-        for (let index = 0; index < datas.length; index++) {
-            headerData.push(datas[index])
-        }
-
-        // headerData = headerData
-        headerDataChanged()
+        headerTableModel.insertRow(datas);
     }
 
     function addInnerRowData(datas) {
@@ -86,16 +79,15 @@ Item {
 
         addDividedInnerHeights()
 
-        let rowDatas = []
+        // let rowDatas = []
 
-        for (let index = 0; index < datas.length; index++) {
-            rowDatas.push(datas[index])
-        }
+        // for (let index = 0; index < datas.length; index++) {
+        //     rowDatas.push(datas[index])
+        // }
 
-        innerDatas.push(rowDatas)
+        // innerDatas.push(rowDatas)
 
-        // innerDatas = innerDatas
-        innerDatasChanged()
+        // innerDatasChanged()
 
         tableModel.insertRow(datas);
     }
@@ -111,11 +103,7 @@ Item {
     }
 
     function initFooterData(datas) {
-        for (let index = 0; index < datas.length; index++) {
-            footerData.push(datas[index])
-        }
-
-        footerDataChanged()
+        footerTableModel.insertRow(datas);
     }
 
     function testAddRow() {
@@ -197,6 +185,31 @@ Item {
     }
 
     TableModel {
+        id: headerTableModel
+
+        function setTableSize(row, col) {
+            headerTableModel.initializeTable(row, col);
+        }
+
+        Component.onCompleted: {
+            console.log("TableModel 인스턴스 생성 완료");
+        }
+
+        // C++ 시그널 처리
+        onCellDataChanged: function(row, col) {
+            console.log(`셀 데이터 변경: (${row}, ${col})`);
+        }
+
+        onTableStructureChanged: {
+            console.log("테이블 구조 변경됨");
+        }
+
+        onCellTextChanged: function(row, col, newText) {
+            console.log(`셀 텍스트 변경: (${row}, ${col}) -> "${newText}"`);
+        }
+    }
+
+    TableModel {
         id: tableModel
 
         function setTableSize(row, col) {
@@ -206,6 +219,31 @@ Item {
         Component.onCompleted: {
             console.log("TableModel 인스턴스 생성 완료");
             // initializeTable(0, 0);
+        }
+
+        // C++ 시그널 처리
+        onCellDataChanged: function(row, col) {
+            console.log(`셀 데이터 변경: (${row}, ${col})`);
+        }
+
+        onTableStructureChanged: {
+            console.log("테이블 구조 변경됨");
+        }
+
+        onCellTextChanged: function(row, col, newText) {
+            console.log(`셀 텍스트 변경: (${row}, ${col}) -> "${newText}"`);
+        }
+    }
+
+    TableModel {
+        id: footerTableModel
+
+        function setTableSize(row, col) {
+            footerTableModel.initializeTable(row, col);
+        }
+
+        Component.onCompleted: {
+            console.log("TableModel 인스턴스 생성 완료");
         }
 
         // C++ 시그널 처리
@@ -257,7 +295,7 @@ Item {
             width : root.width
             height : headerHeight  // dividedHeights[0]
 
-            visible : (headerData.length > 0) ? true : false
+            visible : headerTableModel.rowCount > 0 ? true : false // (headerData.length > 0) ? true : false
 
             Row {
                 id : headerRow
@@ -266,44 +304,50 @@ Item {
                 width : parent.width
 
                 Repeater {
-                    model : headerData
+                    model : headerTableModel  // headerData
 
-                    Rectangle {
-                        id : headerCell
-                        objectName : "cell"
+                    Repeater {
+                        id : headerRowRep
 
-                        readonly property int headerTextMargin : 5
+                        model : rowData
 
-                        width : {
-                            let getRowSpan = modelData.rowSpan
-                            let actualWidth = 0
+                        Rectangle {
+                            id : headerCell
+                            objectName : "cell"
 
-                            let getStartRow = modelData.startRow
-                            // let getIndex = index
+                            readonly property int headerTextMargin : 5
 
-                            for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
-                                actualWidth += dividedWidths[i]
+                            width : {
+                                let getRowSpan = modelData.rowSpan
+                                let actualWidth = 0
+
+                                let getStartRow = modelData.startRow
+
+                                for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
+                                    actualWidth += dividedWidths[i]
+                                }
+
+                                return actualWidth
                             }
 
-                            return actualWidth
-                        }
+                            height : headerHeight  // dividedHeights[0]
 
-                        height : headerHeight  // dividedHeights[0]
+                            color : modelData.bgColor
+                            border.color : "black"
 
-                        color : modelData.bgColor
-                        border.color : "black"
+                            Text {
+                                id : headerText
+                                anchors.fill : parent
+                                anchors.margins : headerCell.headerTextMargin
 
-                        Text {
-                            anchors.fill : parent
-                            anchors.margins : headerTextMargin
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
 
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                                font.pixelSize : modelData.fontSize
+                                font.bold : modelData.isBold
 
-                            font.pixelSize : modelData.fontSize
-                            font.bold : modelData.isBold
-
-                            text : modelData.cellText
+                                text : modelData.cellText
+                            }
                         }
                     }
                 }
@@ -314,21 +358,11 @@ Item {
             id : innerTableArea
 
             width : root.width
-
-            height : {
-                let sumHeight = 0;
-
-                for (let index = 0; index < dividedInnerHeights.length; index++) {
-                    sumHeight += dividedInnerHeights[index]
-                }
-
-                return sumHeight
-            }
+            height : childrenRect.height
 
             Repeater {
                 id : innerColRep
                 model : tableModel // innerDatas.length
-
 
                 Repeater {
                     id : innerRowRep
@@ -337,13 +371,6 @@ Item {
                     model : rowData  // innerDatas[innerColIndex]
 
                     Rectangle {
-                        MouseArea{
-                            anchors.fill : parent
-                            onClicked : {
-                                console.log("[LLDDSS] x : " + cellArea.x + ", y : " + cellArea.y)
-                            }
-                        }
-
                         id : cellArea
 
                         property var cellData : modelData
@@ -351,19 +378,7 @@ Item {
                         readonly property int innerRowIndex : index
                         readonly property int innerTextMargin : 5
 
-                        readonly property int textContentHeight : (innerTextTypeLoader.status === Loader.Ready &&
-                                                                   innerTextTypeLoader.item !== null &&
-                                                                   innerTextTypeLoader.item.contentHeight !== undefined
-                                                                   ) ? innerTextTypeLoader.item.contentHeight
-                                                                     : 0
-
                         x : {
-                            if (modelData.cellText === "주소") {
-                                let testbreak;
-                            }
-
-                            var test = modelData
-
                             let basicXpos = 0  // dividedWidths[modelData.startRow]
 
                             for (let index = 0; index < (modelData.startRow); index++) {
@@ -374,12 +389,6 @@ Item {
                         }
 
                         y : {
-                            if (modelData.cellText === "주소") {
-                                let testbreak;
-                            }
-
-                            var test = modelData
-
                             let basicYpos = 0  // dividedInnerHeights[modelData.startCol]
 
                             for (let index = 0; index < (modelData.startCol); index++) {
@@ -418,7 +427,7 @@ Item {
 
                             anchors.fill : parent
 
-                            anchors.margins: innerTextMargin
+                            anchors.margins: cellArea.innerTextMargin
 
                             sourceComponent: {
                                 if (modelData.isTextEdit) {
@@ -457,10 +466,13 @@ Item {
                                 }
                             }
 
-                            function onTextModified(newText) {
-                                console.log("[LLDDSS] cellText : " + newText)
 
-                                tableModel.updateCellText(cellData.startCol, cellData.startRow, newText);
+                            Component.onCompleted: {
+                                if (innerTextTypeLoader.item && innerTextTypeLoader.item.textModified) {
+                                    innerTextTypeLoader.item.textModified.connect(function(newText) {
+                                        tableModel.updateCellText(innerRowRep.innerColIndex, cellArea.innerRowIndex, newText);
+                                    })
+                                }
                             }
                         }
                     }
@@ -474,7 +486,7 @@ Item {
             width : root.width
             height : footerHeight
 
-            visible : (footerData.length > 0) ? true : false
+            visible : footerTableModel.rowCount > 0 ? true : false   // (footerData.length > 0) ? true : false
 
             Row {
                 id : footerRow
@@ -483,60 +495,99 @@ Item {
                 width : parent.width
 
                 Repeater {
-                    model : footerData
+                    model : footerTableModel  // footerData
 
-                    Rectangle {
-                        id : footerCell
-                        objectName : "cell"
+                    Repeater {
+                        id : footerRowRep
+                        readonly property int footerColIndex : index
 
-                        readonly property int footerTextMargin : 5
+                        model : rowData
 
-                        width : {
-                            let getStartRow = modelData.startRow
-                            let getRowSpan = modelData.rowSpan
+                        Rectangle {
+                            id : footerCell
+                            objectName : "cell"
 
-                            let actualWidth = 0
+                            property var cellData : modelData
 
-                            for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
-                                actualWidth += dividedWidths[i]
+                            readonly property int footerRowIndex : index
+                            readonly property int footerTextMargin : 5
+
+                            width : {
+                                let getStartRow = modelData.startRow
+                                let getRowSpan = modelData.rowSpan
+
+                                let actualWidth = 0
+
+                                for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
+                                    actualWidth += dividedWidths[i]
+                                }
+
+                                return actualWidth
+
                             }
 
-                            return actualWidth
+                            height : footerHeight
 
-                        }
+                            color : modelData.bgColor
+                            border.color : "black"
 
-                        height : footerHeight
+                            Loader {
+                                id : footerTextTypeLoader
 
-                        color : modelData.bgColor
-                        border.color : "black"
+                                property var currentModelData : modelData
 
-                        Text {
-                            anchors.fill : parent
-                            anchors.margins : footerTextMargin
+                                anchors.fill : parent
+                                anchors.margins : footerCell.footerTextMargin
 
+                                sourceComponent: {
+                                    if (modelData.isTextEdit) {
+                                        textEditComp
+                                    } else {
+                                        textComp
+                                    }
+                                }
 
-                            verticalAlignment : Text.AlignVCenter
-                            horizontalAlignment : {
-                                if (modelData.alignPosition === "center") {
-                                    Text.AlignHCenter
-                                } else if (modelData.alignPosition === "left") {
-                                    Text.AlignLeft
-                                } else {
-                                    Text.AlignRight
+                                onStatusChanged : {
+                                    if (status === Loader.Ready) {
+                                        item.tableModelRef = footerTableModel
+                                    }
                                 }
                             }
 
-                            font.pixelSize : modelData.fontSize
-                            font.bold : modelData.isBold
+                            Connections {
+                                target: footerTextTypeLoader.item
 
-                            text : modelData.cellText
+                                enabled: ((footerTextTypeLoader.status === Loader.Ready) &&
+                                          (footerTextTypeLoader.item !== null))
+
+                                function onContentHeightChanged() {
+                                    let colHeight = footerHeight
+
+                                    let contentTextHeight = 0
+
+                                    if (footerTextTypeLoader.item) {
+                                        contentTextHeight = footerTextTypeLoader.item.contentHeight
+                                    }
+
+                                    if (contentTextHeight > colHeight) {
+                                        footerHeight = contentTextHeight + (2*footerCell.footerTextMargin)
+
+                                        footerHeight = footerHeight
+                                    }
+                                }
+
+                                Component.onCompleted: {
+                                    if (footerTextTypeLoader.item && footerTextTypeLoader.item.textModified) {
+                                        footerTextTypeLoader.item.textModified.connect(function(newText) {
+                                            footerTableModel.updateCellText(footerRowRep.footerColIndex, footerCell.footerRowIndex, newText);
+                                        })
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
-
-    Component.onCompleted: {
     }
 }
