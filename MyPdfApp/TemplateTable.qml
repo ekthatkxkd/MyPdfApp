@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import TableModel 1.0
 
 Item {
     id : root
@@ -177,6 +178,19 @@ Item {
                     currentModelData.cellText
                 }
             }
+        }
+    }
+
+    TableModel {
+        id: tableModel
+
+        // 모델 변경 시그널 처리
+        onCellDataChanged: function(row, col) {
+            console.log(`셀 데이터 변경: (${row}, ${col})`);
+        }
+
+        onTableStructureChanged: {
+            console.log("테이블 구조 변경됨");
         }
     }
 

@@ -1,7 +1,8 @@
-QT += quick widgets printsupport
+QT += quick widgets printsupport core qml
 
 SOURCES += \
         main.cpp \
+        src/model/listmodel/TableModel.cpp \
         src/pdfExporter/PdfExporter.cpp
 
 resources.files = main.qml 
@@ -23,4 +24,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES +=
 
 HEADERS += \
+    include/model/listmodel/CellData.h \
+    include/model/listmodel/TableModel.h \
     include/pdfExporter/PdfExporter.h

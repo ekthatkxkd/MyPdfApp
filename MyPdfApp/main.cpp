@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "include/pdfExporter/PdfExporter.h"
+#include "include/model/listmodel/TableModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,9 @@ int main(int argc, char *argv[])
     //////// PdfExporter 객체 생성.
     PdfExporter pdfExporter;
     engine.rootContext()->setContextProperty("pdfExporter", &pdfExporter);
+
+    // 명시적 QML 타입 등록
+    qmlRegisterType<TableModel>("TableModel", 1, 0, "TableModel");
 
     const QUrl url(QStringLiteral("qrc:/MyPdfApp/main.qml"));
     QObject::connect(
