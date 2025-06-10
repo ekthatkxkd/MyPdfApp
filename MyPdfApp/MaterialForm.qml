@@ -131,6 +131,8 @@ Item {
                     dividedColCount : 3
                     dividedRowCount : 5
 
+                    tableTextValue : "테스트 테이블 타이틀"
+
                     Component.onCompleted: {
                         initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
 
@@ -139,11 +141,11 @@ Item {
                         //////// header data
                         ///
                         ///
-                        // initHeaderData([
-                        //                    initCell(0, 0, 1, 1, "테스트1", true, headerBgColor, true, 12, "center"),
-                        //                    initCell(1, 0, 2, 1, "테스트2", true, headerBgColor, true, 12, "center", false),
-                        //                    initCell(3, 0, 2, 1, "테스트3", true, headerBgColor, true, 12, "center", false)
-                        //                ])
+                        initHeaderData([
+                                           initCell(0, 0, 1, 1, "테스트1", true, headerBgColor, true, 12, "center"),
+                                           initCell(1, 0, 2, 1, "테스트2", true, headerBgColor, true, 12, "center", false),
+                                           initCell(3, 0, 2, 1, "테스트3", true, headerBgColor, true, 12, "center", false)
+                                       ])
                         ///
                         ///
                         ////////
@@ -172,6 +174,11 @@ Item {
                                             initCell(1, 2, 1, 1, "", true, "white", false, 12, "left"),
                                             initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
                                             initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
+                                        ])
+
+                        addInnerRowData([
+                                            initCell(0, 3, 2, 1, "footer테스트", true, headerBgColor, true, 12, "center"),
+                                            initCell(2, 3, 3, 1, "", true, headerBgColor, false, 12)
                                         ])
                         ///
                         ///

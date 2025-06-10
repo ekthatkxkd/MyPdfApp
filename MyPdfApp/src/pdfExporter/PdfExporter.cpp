@@ -39,83 +39,83 @@ void PdfExporter::setFont(QPainter &painter, int fontSize, bool isBold) {
     painter.setPen(QPen(Qt::black, 2));
 }
 
-TableCellData PdfExporter::convertToTableCellData(const QVariantMap &map) {
-    TableCellData data;
+// TableCellData PdfExporter::convertToTableCellData(const QVariantMap &map) {
+//     TableCellData data;
 
-    data.startRow = map.value("startRow", 0).toInt();
-    data.startCol = map.value("startCol", 0).toInt();
-    data.rowSpan = map.value("rowSpan", 1).toInt();
-    data.colSpan = map.value("colSpan", 1).toInt();
-    data.cellText = map.value("cellText", "").toString();
-    data.isTextEdit = map.value("isTextEdit", false).toBool();
-    data.bgColor = QColor(map.value("bgColor", "white").toString());
-    data.isBold = map.value("isBold", false).toBool();
-    data.fontSize = map.value("fontSize", 12).toInt();
-    data.alignPosition = map.value("alignPosition", "right").toString();
-    data.isVerticalDir = map.value("isVerticalDir", false).toBool();
+//     data.startRow = map.value("startRow", 0).toInt();
+//     data.startCol = map.value("startCol", 0).toInt();
+//     data.rowSpan = map.value("rowSpan", 1).toInt();
+//     data.colSpan = map.value("colSpan", 1).toInt();
+//     data.cellText = map.value("cellText", "").toString();
+//     data.isTextEdit = map.value("isTextEdit", false).toBool();
+//     data.bgColor = QColor(map.value("bgColor", "white").toString());
+//     data.isBold = map.value("isBold", false).toBool();
+//     data.fontSize = map.value("fontSize", 12).toInt();
+//     data.alignPosition = map.value("alignPosition", "right").toString();
+//     data.isVerticalDir = map.value("isVerticalDir", false).toBool();
 
-    return data;
-}
+//     return data;
+// }
 
-QList<TableCellData> PdfExporter::convertToRowData(const QVariantList &rowList) {
-    QList<TableCellData> cellDatas;
+// QList<TableCellData> PdfExporter::convertToRowData(const QVariantList &rowList) {
+//     QList<TableCellData> cellDatas;
 
-    for (const QVariant &cellVariant : rowList) {
-        if (cellVariant.canConvert<QVariantMap>()) {
-            QVariantMap cellMap = cellVariant.toMap();
+//     for (const QVariant &cellVariant : rowList) {
+//         if (cellVariant.canConvert<QVariantMap>()) {
+//             QVariantMap cellMap = cellVariant.toMap();
 
-            TableCellData cellData = convertToTableCellData(cellMap);
+//             TableCellData cellData = convertToTableCellData(cellMap);
 
-            if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
-                cellData.cellText = cellData.cellText.split("").join("\n");
+//             if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
+//                 cellData.cellText = cellData.cellText.split("").join("\n");
 
-                // 앞뒤 개행문자 제거
-                if (cellData.cellText.startsWith('\n')) {
-                    cellData.cellText = cellData.cellText.mid(1);
-                }
-                if (cellData.cellText.endsWith('\n')) {
-                    cellData.cellText.chop(1); // 마지막 문자 제거
-                }
-            }
+//                 // 앞뒤 개행문자 제거
+//                 if (cellData.cellText.startsWith('\n')) {
+//                     cellData.cellText = cellData.cellText.mid(1);
+//                 }
+//                 if (cellData.cellText.endsWith('\n')) {
+//                     cellData.cellText.chop(1); // 마지막 문자 제거
+//                 }
+//             }
 
-            cellDatas.append(cellData);
-        }
-    }
+//             cellDatas.append(cellData);
+//         }
+//     }
 
-    return cellDatas;
-}
+//     return cellDatas;
+// }
 
-QList<QList<TableCellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &propertyName) {
-    QList<QList<TableCellData>> cellDatas;
+// QList<QList<TableCellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &propertyName) {
+//     QList<QList<TableCellData>> cellDatas;
 
-    QVariantList varCellDatas = tableItem->property(propertyName.toLocal8Bit().data()).toList();
+//     QVariantList varCellDatas = tableItem->property(propertyName.toLocal8Bit().data()).toList();
 
-    if (!varCellDatas.isEmpty()) {
-        const QVariant &firstElement = varCellDatas.first();
+//     if (!varCellDatas.isEmpty()) {
+//         const QVariant &firstElement = varCellDatas.first();
 
-        bool isDoubleArray = firstElement.canConvert<QVariantList>();
+//         bool isDoubleArray = firstElement.canConvert<QVariantList>();
 
-        if (isDoubleArray) {
-            // innerData 와 같이 이차 배열의 cellData 를 읽어오기
-            for (int i = 0; i < varCellDatas.size(); i++) {
-                const QVariant &rowVariant = varCellDatas[i];
+//         if (isDoubleArray) {
+//             // innerData 와 같이 이차 배열의 cellData 를 읽어오기
+//             for (int i = 0; i < varCellDatas.size(); i++) {
+//                 const QVariant &rowVariant = varCellDatas[i];
 
-                QVariantList rowList = rowVariant.toList();
-                QList<TableCellData> rowData = convertToRowData(rowList);
+//                 QVariantList rowList = rowVariant.toList();
+//                 QList<TableCellData> rowData = convertToRowData(rowList);
 
-                cellDatas.append(rowData);
-            }
+//                 cellDatas.append(rowData);
+//             }
 
-        } else {
-            // headerData 와 같이 일차 배열의 cellData 를 읽어오기
-            QList<TableCellData> rowData = convertToRowData(varCellDatas);
+//         } else {
+//             // headerData 와 같이 일차 배열의 cellData 를 읽어오기
+//             QList<TableCellData> rowData = convertToRowData(varCellDatas);
 
-            cellDatas.append(rowData);
-        }
-    }
+//             cellDatas.append(rowData);
+//         }
+//     }
 
-    return cellDatas;
-}
+//     return cellDatas;
+// }
 
 QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames) {
     QHash<QString, QQuickItem*> childItems;
@@ -176,7 +176,7 @@ QQuickItem* PdfExporter::getInnerItem(QQuickItem *rootItem, const QString &objNa
     return retInnerItem;
 }
 
-void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QList<QList<TableCellData>> &cellDatas,
+void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QVector<QVector<CellData>> &cellDatas,
                                      const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio) {
     //////// cell widths init
     ///
@@ -320,52 +320,18 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
 
     QPointF tableCursorPoint = cursorPoint;
 
-    int tableRowCount = tableItem->property("dividedRowCount").toInt();
-
-
-
-    QVector<QVector<CellData>> innerDatas = newGetCellDatas(tableItem, "innerColRep");
-
-
-
-
-    //////// [LLDDSS]
-
-    // 해당 부분부터 구현.
-
-    ////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-    int innerTableColCount = tableItem->property("dividedInnerColCount").toInt();
-
-
     QString tableTitle = tableItem->property("tableTextValue").toString();
 
-    QList<QList<TableCellData>> headerDatas = getCellDatas(tableItem, "headerData");
-    QList<QList<TableCellData>> innerDatas = getCellDatas(tableItem, "innerDatas");
-    QList<QList<TableCellData>> footerDatas = getCellDatas(tableItem, "footerData");
+    QVector<QVector<CellData>> headerDatas = getCellDatas(tableItem, "headerColRep");
+    QVector<QVector<CellData>> innerDatas = getCellDatas(tableItem, "innerColRep");
+    QVector<QVector<CellData>> footerDatas = getCellDatas(tableItem, "footerColRep");
+
+    int tableRowCount = tableItem->property("dividedRowCount").toInt();
+    int innerTableColCount = innerDatas.size();
 
     std::vector<double> pxCellWidths(tableRowCount, 0);
     std::vector<double> pxCellHeights(innerTableColCount, 0);
+
 
     //////// innerTableCell height 값 초기화
     ///
@@ -374,6 +340,11 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     ///
     ///
     ////////
+
+    double pxSumTableWidths = 0;
+    for (const auto &pxCellWidth : pxCellWidths) {
+        pxSumTableWidths += pxCellWidth;
+    }
 
     //////// table title 그리기
     ///
@@ -390,9 +361,12 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
 
         tableCursorPoint = QPointF(cursorPoint.x(), tableCursorPoint.y() + boundingBox.height() + titleTableMargin);
     }
+
+
     ///
     ///
     ////////
+
 
     //////// header list 그리기
     ///
@@ -462,6 +436,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     ///
     ////////
 
+
     //////// innerTable 그리기
     ///
     ///
@@ -471,14 +446,17 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     if (innerDatas.size() != 0) {
         QPointF innerCursorPoint = tableCursorPoint;
 
+        qreal cellRectYPos = innerCursorPoint.y();
+
         for (int colIndex = 0; colIndex < innerDatas.size(); colIndex++) {
 
-            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.width()) {
+            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.height()) {
                 pdfWriter.newPage();
 
                 cursorPoint = QPointF(0, 0);
                 tableCursorPoint = cursorPoint;
                 innerCursorPoint = tableCursorPoint;
+                cellRectYPos = 0;
             }
 
             for (int rowIndex = 0; rowIndex < innerDatas[colIndex].size(); rowIndex++) {
@@ -490,14 +468,9 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
                 int cellColSpan = innerDatas[colIndex][rowIndex].colSpan;
 
                 qreal cellRectXPos = tableCursorPoint.x();
-                qreal cellRectYPos = tableCursorPoint.y();
 
                 for (int widthIndex = 0; widthIndex < cellStartRow; widthIndex++) {
                     cellRectXPos += pxCellWidths[widthIndex];
-                }
-
-                for (int heightIndex = 0; heightIndex < cellStartCol; heightIndex++) {
-                    cellRectYPos += pxCellHeights[heightIndex];
                 }
 
                 qreal cellRectWidth = 0;
@@ -547,18 +520,112 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
 
             innerCursorPoint = QPointF(innerCursorPoint.x(),
                                        innerCursorPoint.y() + pxCellHeights[colIndex]);
+
+            cellRectYPos += pxCellHeights[colIndex];
         }
 
         tableCursorPoint = QPointF(tableCursorPoint.x(),
                                    innerCursorPoint.y());
     }
 
+    ///
+    ///
+    ////////
+
+    //////// footer 그리기
+    ///
+    ///
+
+    if (footerDatas.size() != 0) {
+        QPointF innerCursorPoint = tableCursorPoint;
+
+        qreal cellRectYPos = innerCursorPoint.y();
+
+        for (int colIndex = 0; colIndex < footerDatas.size(); colIndex++) {
+
+            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.height()) {
+                pdfWriter.newPage();
+
+                cursorPoint = QPointF(0, 0);
+                tableCursorPoint = cursorPoint;
+                innerCursorPoint = tableCursorPoint;
+                cellRectYPos = 0;
+            }
+
+            for (int rowIndex = 0; rowIndex < footerDatas[colIndex].size(); rowIndex++) {
+                QString cellText = footerDatas[colIndex][rowIndex].cellText;
+
+                int cellStartRow = footerDatas[colIndex][rowIndex].startRow;
+                int cellRowSpan = footerDatas[colIndex][rowIndex].rowSpan;
+                int cellStartCol = footerDatas[colIndex][rowIndex].startCol;
+                int cellColSpan = footerDatas[colIndex][rowIndex].colSpan;
+
+                qreal cellRectXPos = tableCursorPoint.x();
+
+                for (int widthIndex = 0; widthIndex < cellStartRow; widthIndex++) {
+                    cellRectXPos += pxCellWidths[widthIndex];
+                }
+
+                qreal cellRectWidth = 0;
+                qreal cellRectHeight = 0;
+
+                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                    cellRectWidth += pxCellWidths[widthIndex];
+                }
+
+                for (int heightIndex = cellStartCol; heightIndex < (cellStartCol + cellColSpan); heightIndex++) {
+                    cellRectHeight += pxCellHeights[heightIndex];
+                }
+
+                QColor cellRectBgColor = footerDatas[colIndex][rowIndex].bgColor;
+
+                QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
+                                   QSizeF(cellRectWidth, cellRectHeight));
+
+                painter.setPen(QPen(Qt::black, 1.0));
+                painter.fillRect(boundingBox,
+                                 QColor(cellRectBgColor));
+                painter.drawRect(boundingBox);
+
+                QString cellTextAlign = footerDatas[colIndex][rowIndex].alignPosition;
+                bool cellTextBold = footerDatas[colIndex][rowIndex].isBold;
+
+                setFont(painter, 10, cellTextBold);
+
+                QTextOption textOption;
+                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+                if (cellTextAlign == "center") {
+                    align |= Qt::AlignmentFlag::AlignHCenter;
+                } else if (cellTextAlign == "right") {
+                    align |= Qt::AlignmentFlag::AlignRight;
+                } else {
+                    align |= Qt::AlignmentFlag::AlignLeft;
+                }
+
+                textOption.setAlignment(align);
+                textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+                painter.drawText(adjustedTextRect, cellText, textOption);
+            }
+
+            innerCursorPoint = QPointF(innerCursorPoint.x(),
+                                       innerCursorPoint.y() + pxCellHeights[colIndex]);
+
+            cellRectYPos += pxCellHeights[colIndex];
+        }
+
+        tableCursorPoint = QPointF(tableCursorPoint.x(),
+                                   innerCursorPoint.y());
+    }
 
     ///
     ///
     ////////
 
-    */
+    tableArea = QRectF(cursorPoint, QSizeF(pxSumTableWidths, tableCursorPoint.y() - cursorPoint.y()));
 
     return tableArea;
 }
@@ -600,6 +667,28 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
 
         childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
     }
+
+    painter.setPen(QPen(Qt::red, 1.5));
+    painter.drawRect(childItemRect[1]);  // [LLDDSS] FOR TEST DELETE
+    ///
+    ///
+    ////////
+
+    //////// 자재구매 내역 리스트 그리기
+    ///
+    ///
+    setFont(painter);
+    cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[1].height() + templateItemSpacing);
+
+    if (templateQuickItems[materialObjNames[2]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.1, 0.6, 0.1, 0.2};
+
+        childItemRect[2] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+
+    painter.setPen(QPen(Qt::red, 1.5));
+    painter.drawRect(childItemRect[2]);  // [LLDDSS] FOR TEST DELETE
     ///
     ///
     ////////
@@ -657,7 +746,7 @@ void PdfExporter::testDrawFullRectWithWindow(QPainter &painter) {
     qDebug() << "[LLDDSS] fullArea height : " << fullArea.height();
 }
 
-void PdfExporter::testOutputCellDatas(const TableCellData &cellData) {
+void PdfExporter::testOutputCellDatas(const CellData &cellData) {
     qDebug() << "[LLDDSS] --------[CellDatas]--------";
     qDebug() << "[LLDDSS] startRow : " << cellData.startRow << ", startCol : " << cellData.startCol;
     qDebug() << "[LLDDSS] rowSpan : " << cellData.rowSpan << ", colSpan : " << cellData.colSpan;
@@ -688,7 +777,7 @@ void PdfExporter::testDrawTable(QPainter &painter, QPointF &cursorPoint,
     }
 }
 
-QVector<QVector<CellData>> PdfExporter::newGetCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
+QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
     QVector<QVector<CellData>> m_processedTableData;
 
     QQuickItem * innerRepQuickItem = getInnerItem(tableItem, repeaterObjName);
@@ -710,6 +799,23 @@ QVector<QVector<CellData>> PdfExporter::newGetCellDatas(QQuickItem *tableItem, c
                     for (int j = 0; j < rowData.size(); ++j) {
                         QVariantMap cellMap = rowData[j].toMap();
                         CellData cellData = CellData::fromVariantMap(cellMap);
+
+                        // vertical text 일 경우 개행문자 추가.
+                        if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
+                            cellData.cellText = cellData.cellText.split("").join("\n");
+
+                            // 앞뒤 개행문자 제거
+                            if (cellData.cellText.startsWith("\n")) {
+                                cellData.cellText = cellData.cellText.mid(1);
+                            }
+
+                            if (cellData.cellText.endsWith("\n")) {
+                                cellData.cellText.chop(1);
+                            }
+                            //
+                        }
+                        //
+
                         processedRow.append(cellData);
                     }
 

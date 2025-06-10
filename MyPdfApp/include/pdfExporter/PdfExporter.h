@@ -34,7 +34,7 @@ public :
     Q_INVOKABLE bool exportToPdf(QQuickItem *rootItem, const QString &filePath);
 
     const QList<QString> templateObjNames = {"materialItemArea"};
-    const QList<QString> materialObjNames = {"templateTitle", "informTable"};
+    const QList<QString> materialObjNames = {"templateTitle", "informTable", "purchaseHistory"};
 
     const double mmA4Width = 210.0;  // a4 full size
     const double mmA4Height = 297.0;  // a4 full size
@@ -46,11 +46,11 @@ private :
     const int templateItemSpacing = 5;
     const int cellTextMargins = 5;
 
-    QVector<QVector<CellData>> newGetCellDatas(QQuickItem *tableItem, const QString &repeaterObjName);
+    QVector<QVector<CellData>> getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName);
 
-    TableCellData convertToTableCellData(const QVariantMap &map);
-    QList<TableCellData> convertToRowData(const QVariantList &rowList);
-    QList<QList<TableCellData>> getCellDatas(QQuickItem *tableItem, const QString &propertyName);
+    // TableCellData convertToTableCellData(const QVariantMap &map);
+    // QList<TableCellData> convertToRowData(const QVariantList &rowList);
+    // QList<QList<TableCellData>> getCellDatas(QQuickItem *tableItem, const QString &propertyName);
 
     QHash<QString, QQuickItem*> getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames);
     QQuickItem* getChildItem(QQuickItem *rootItem, const QString &childObjName);
@@ -59,7 +59,7 @@ private :
     void setDefaultPdfEnvironment(QPdfWriter &pdfWriter);
     void setFont(QPainter &painter, int fontSize = 10, bool isBold = false);
 
-    void initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QList<QList<TableCellData>> &cellDatas,
+    void initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QVector<QVector<CellData>> &cellDatas,
                             const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);
     QSizeF getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical = false, const QTextOption::WrapMode &wrapMode = QTextOption::NoWrap, qreal fixedWidth = 0);
 
@@ -70,7 +70,7 @@ private :
 
     void testDrawFullRectWithRect(QPainter &painter);
     void testDrawFullRectWithWindow(QPainter &painter);
-    void testOutputCellDatas(const TableCellData &cellData);
+    void testOutputCellDatas(const CellData &cellData);
     void testDrawTable(QPainter &painter, QPointF &cursorPoint, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights);
 
     QSizeF pxContentsFullSize{0, 0};  // A4 전체 pixel size 가 아닌 margin 이 반영된 pixel size.
