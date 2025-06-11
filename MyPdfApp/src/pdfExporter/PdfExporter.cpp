@@ -711,7 +711,7 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, materialObjNames);
 
     if (templateQuickItems.size() == 0) {
-        qDebug() << "[LLDDSS] drawing failed...";
+        qDebug() << "drawMaterialTemplate, could not fount childitems...";
         return;
     }
 
@@ -721,8 +721,6 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     if (templateQuickItems[materialObjNames[0]] != nullptr) {
         childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[materialObjNames[0]]);
     }
-
-    painter.drawRect(childItemRect[0]);  // [LLDDSS] FOR TEST DELETE
     ///
     ///
     ////////
@@ -740,9 +738,6 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
 
         childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
     }
-
-    painter.setPen(QPen(Qt::red, 1.5));
-    painter.drawRect(childItemRect[1]);  // [LLDDSS] FOR TEST DELETE
     ///
     ///
     ////////
@@ -759,9 +754,102 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
 
         childItemRect[2] = drawTemplateTable(painter, pdfWriter, templateQuickItems[materialObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
     }
+    ///
+    ///
+    ////////
+}
 
-    painter.setPen(QPen(Qt::red, 1.5));
-    painter.drawRect(childItemRect[2]);  // [LLDDSS] FOR TEST DELETE
+void PdfExporter::defectReportTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem) {
+    QPointF cursorPoint(0, 0);
+
+    std::vector<QRectF> childItemRect(defectReportObjNames.length());
+
+    QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, defectReportObjNames);
+
+    if (templateQuickItems.size() == 0) {
+        qDebug() << "drawMaterialTemplate, could not fount childitems...";
+        return;
+    }
+
+    //////// template title 그리기
+    ///
+    ///
+    if (templateQuickItems[defectReportObjNames[0]] != nullptr) {
+        childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[defectReportObjNames[0]]);
+    }
+    ///
+    ///
+    ////////
+
+    int gapMarginTwoUpperTable = 20;  // 문서 테이블, 장소 테이블 사이의 margin
+
+    //////// 상단의 문서 번호 테이블 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
+    if (templateQuickItems[defectReportObjNames[1]] != nullptr) {
+        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - gapMarginTwoUpperTable) / 2;
+
+        std::vector<qreal> tableWidthRatio{0.2, 0.8};
+
+        childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[defectReportObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 상단의 장소 테이블 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(childItemRect[1].x() + childItemRect[1].width() + gapMarginTwoUpperTable, childItemRect[1].y());
+    if (templateQuickItems[defectReportObjNames[2]] != nullptr) {
+        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - gapMarginTwoUpperTable) / 2;
+
+        std::vector<qreal> tableWidthRatio{0.2, 0.8};
+
+        childItemRect[2] = drawTemplateTable(painter, pdfWriter, templateQuickItems[defectReportObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 품목 리스트 그리기
+    ///
+    ///
+    setFont(painter);
+
+    if (templateQuickItems[defectReportObjNames[3]] != nullptr) {
+        int maxUpperTableHeight = (childItemRect[1].height() > childItemRect[2].height()) ? childItemRect[1].height() : childItemRect[2].height();
+
+        cursorPoint = QPointF(0, childItemRect[1].y() + maxUpperTableHeight + templateItemSpacing);
+
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+
+        std::vector<qreal> tableWidthRatio{0.05, 0.25 ,0.36, 0.12, 0.12, 0.1};
+
+        childItemRect[3] = drawTemplateTable(painter, pdfWriter, templateQuickItems[defectReportObjNames[3]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 총 수량 테이블
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[3].y() + childItemRect[3].height() + templateItemSpacing);
+    if (templateQuickItems[defectReportObjNames[4]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.1, 0.25, 0.1, 0.25, 0.1, 0.2};
+
+        childItemRect[4] = drawTemplateTable(painter, pdfWriter, templateQuickItems[defectReportObjNames[4]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+
     ///
     ///
     ////////
@@ -831,12 +919,14 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QPdfWriter &pdfW
     ///
     {
         setFont(painter);
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
-        std::vector<qreal> tableWidthRatio{0.05, 0.15, 0.5, 0.1, 0.2};
 
         int maxUpperTableHeight = (childItemRect[1].height() > childItemRect[2].height()) ? childItemRect[1].height() : childItemRect[2].height();
-
         cursorPoint = QPointF(0, childItemRect[1].y() + maxUpperTableHeight + templateItemSpacing);
+
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+
+        std::vector<qreal> tableWidthRatio{0.05, 0.15, 0.5, 0.1, 0.2};
+
         // 생산 테이블
         if (templateQuickItems[receiptVouchrObjNames[3]] != nullptr) {
             childItemRect[3] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[3]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
@@ -904,6 +994,8 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 
     if (rootItem->objectName() == templateObjNames[0]) {
         drawMaterialTemplate(painter, pdfWriter, rootItem);
+    } else if (rootItem->objectName() == templateObjNames[1]) {
+        defectReportTemplate(painter, pdfWriter, rootItem);
     } else if (rootItem->objectName() == templateObjNames[3]) {
         drawReceiptVoucherTemplate(painter, pdfWriter, rootItem);
     }
@@ -1013,15 +1105,8 @@ QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, cons
 
                     m_processedTableData.append(processedRow);
                 }
-
-            } else {
-                qDebug()<< "faild....";
             }
-        } else {
-            qDebug()<< "faild....";
         }
-    } else {
-        qDebug()<< "faild....";
     }
 
     return m_processedTableData;

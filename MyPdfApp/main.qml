@@ -20,11 +20,11 @@ Window {
         if (templateList[templateIndex] === templateList[0]) {
             templateFormLoader.sourceComponent = materialComp
         } else if (templateList[templateIndex] === templateList[1]) {
-
+            templateFormLoader.sourceComponent = defectReportComp
         } else if (templateList[templateIndex] === templateList[2]) {
 
         } else if (templateList[templateIndex] === templateList[3]) {
-            templateFormLoader.sourceComponent = receiptVoucher
+            templateFormLoader.sourceComponent = receiptVoucherComp
         }
     }
 
@@ -36,6 +36,7 @@ Window {
         if (pdfFuncText[clickedIndex] === pdfFuncText[0]) {
             callExportToPdf(templateFormLoader.item.templateItemArea)
         } else if (pdfFuncText[clickedIndex] === pdfFuncText[1]) {
+            callExportToPdf(templateFormLoader.item.templateItemArea)
         } else if (pdfFuncText[clickedIndex] === pdfFuncText[2]) {
         } else if (pdfFuncText[clickedIndex] === pdfFuncText[3]) {
             callExportToPdf(templateFormLoader.item.templateItemArea)
@@ -54,9 +55,16 @@ Window {
         }
     }
 
+    // 불량 발견 보고서
+    Component {
+        id : defectReportComp
+        DefectReportForm {
+        }
+    }
+
     // 생산입고전표
     Component {
-        id : receiptVoucher
+        id : receiptVoucherComp
         ReceiptVoucherForm {
         }
     }

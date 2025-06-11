@@ -250,9 +250,9 @@ Item {
                         Component.onCompleted: {
                             initDividedWidths(listArea.dividedWidths)  // initDividedWidths([0.05, 0.15, 0.5, 0.1, 0.2])
 
-                            headerTableModel.setTableSize(1, dividedRowCount);
+                            headerTableModel.setTableSize(1, dividedRowCount)
                             tableModel.setTableSize(dividedColCount, dividedRowCount)
-                            footerTableModel.setTableSize(1, dividedRowCount);
+                            footerTableModel.setTableSize(1, dividedRowCount)
 
                             initHeaderData([
                                                initCell(0, 0, 1, 1, "구분", false, headerBgColor, true, 12, "center"),

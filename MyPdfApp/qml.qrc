@@ -2,6 +2,7 @@
     <qresource prefix="/templateForm">
         <file>MaterialForm.qml</file>
         <file>ReceiptVoucherForm.qml</file>
+        <file>DefectReportForm.qml</file>
     </qresource>
     <qresource prefix="/templateItems">
         <file>TemplateTable.qml</file>
