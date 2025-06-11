@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Dialogs
 import "qrc:/templateForm/"
 
 Window {
@@ -28,17 +29,18 @@ Window {
         }
     }
 
-    function bottomTapClicked(clickedIndex) {
-        if (templateFormLoader.status !== Loader.Ready) {
-            return
-        }
+    // function bottomTapClicked(clickedIndex) {
+    //     if (templateFormLoader.status !== Loader.Ready) {
+    //         return
+    //     }
 
-        callExportToPdf(templateFormLoader.item.templateItemArea)
-    }
+    //     callExportToPdf(templateFormLoader.item.templateItemArea)
+    // }
 
-    function callExportToPdf(templateItemArea) {
+    function callExportToPdf(templateItemArea, path) {
         console.log("[LLDDSS] callExportToPdf")
-        pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
+        // pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
+        pdfExporter.exportToPdf(templateItemArea, path)
     }
 
     // 자재구매확인서
@@ -66,6 +68,18 @@ Window {
     Component {
         id : receiptVoucherComp
         ReceiptVoucherForm {
+        }
+    }
+
+    FileDialog {
+        id: saveDialog
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["PDF files (*.pdf)"]
+        onAccepted: {
+            var test = selectedFile.toString()
+            var path = selectedFile.toString().replace("file:///", "")
+            // exportToPdfWithPath(path)
+            callExportToPdf(templateFormLoader.item.templateItemArea, path)
         }
     }
 
@@ -156,7 +170,11 @@ Window {
                             MouseArea {
                                 anchors.fill : parent
                                 onClicked : {
-                                    bottomTapClicked(index)
+                                    // bottomTapClicked(index)
+                                    if (templateFormLoader.status !== Loader.Ready) {
+                                        return
+                                    }
+                                    saveDialog.open()
                                 }
                             }
                         }
