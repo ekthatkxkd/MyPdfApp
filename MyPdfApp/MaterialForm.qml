@@ -16,8 +16,7 @@ Item {
 
         color : "#696969"
 
-        Repeater {
-            model : 1
+        Column {
             Item {
                 width : formTapArea.width
                 height : formTapArea.width
@@ -217,7 +216,7 @@ Item {
                         initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
                         initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
                         initCell(2, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center")
                     ]
 
                     Component.onCompleted: {

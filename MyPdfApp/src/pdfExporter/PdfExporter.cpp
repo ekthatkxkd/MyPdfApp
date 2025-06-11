@@ -3,6 +3,8 @@
 #include <QPainter>
 #include <QFont>
 #include <QVariant>
+#include <QResource>
+#include <QPixmap>
 
 #include <QDebug>
 
@@ -117,12 +119,16 @@ void PdfExporter::setFont(QPainter &painter, int fontSize, bool isBold) {
 //     return cellDatas;
 // }
 
-QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames) {
+QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames, const bool isInside) {
     QHash<QString, QQuickItem*> childItems;
 
     if (rootItem != nullptr) {
         for (QString childObjName : childObjNames) {
-            childItems[childObjName] = getChildItem(rootItem, childObjName);
+            if (isInside) {
+                childItems[childObjName] = getInnerItem(rootItem, childObjName);
+            } else {
+                childItems[childObjName] = getChildItem(rootItem, childObjName);
+            }
         }
     }
 
@@ -374,7 +380,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
 
     // header list 는 오직 하나의 열만 가지고 있고 text 는 오직 한 줄인 것으로 가정.
     if (headerDatas.size() != 0) {
-        setFont(painter, 10, true);
+        setFont(painter, 8, true);
 
         QPointF headerCursorPoint = tableCursorPoint;
 
@@ -497,7 +503,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
                 QString cellTextAlign = innerDatas[colIndex][rowIndex].alignPosition;
                 bool cellTextBold = innerDatas[colIndex][rowIndex].isBold;
 
-                setFont(painter, 10, cellTextBold);
+                setFont(painter, 8, cellTextBold);
 
                 QTextOption textOption;
                 Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
@@ -590,7 +596,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
                 QString cellTextAlign = footerDatas[colIndex][rowIndex].alignPosition;
                 bool cellTextBold = footerDatas[colIndex][rowIndex].isBold;
 
-                setFont(painter, 10, cellTextBold);
+                setFont(painter, 8, cellTextBold);
 
                 QTextOption textOption;
                 Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
@@ -628,6 +634,73 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, 
     tableArea = QRectF(cursorPoint, QSizeF(pxSumTableWidths, tableCursorPoint.y() - cursorPoint.y()));
 
     return tableArea;
+}
+
+QRectF PdfExporter::drawTemplateImage(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *imageItem, QPointF &cursorPoint, const int settingPxImageWidth, const bool isHCenter) {
+    QPointF imgCursorPoint = cursorPoint;
+
+    QPixmap scaledPixmap(0, 0);
+
+    QString qrcPath = imageItem->property("source").toString();
+
+     // "qrc:" 제거.
+    if (qrcPath.startsWith("qrc:")) {
+        qrcPath = qrcPath.mid(3);
+    }
+
+    QResource resource(qrcPath);
+
+    if (!resource.isValid() || resource.size() == 0) {
+        qDebug() << "drawTemplateImage, could not found qrc resource...";
+
+        return QRectF(QPointF(0, 0), QSizeF(0, 0));
+    }
+
+    QPixmap originPixmap(qrcPath);
+    if (!originPixmap.loadFromData(reinterpret_cast<const uchar*>(resource.data()), resource.size())) {
+        qDebug() << "drawTemplateImage, could not load image data to QPixmap...";
+        return QRectF(QPointF(0, 0), QSizeF(0, 0));
+    }
+
+    if (!originPixmap.isNull()) {
+        // QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());  // pdf 페이지의 실제 그리기 영역.
+
+
+        if (settingPxImageWidth > 0) {
+            int targetImgWidth = settingPxImageWidth;
+
+            double aspectRatio = static_cast<double>(originPixmap.height()) / originPixmap.width();
+            int targetImgHeight = static_cast<int>(targetImgWidth * aspectRatio);
+
+            if (targetImgWidth > pxContentsFullSize.width() || targetImgHeight > pxContentsFullSize.height()) {
+                scaledPixmap = originPixmap.scaled(pxContentsFullSize.width(), pxContentsFullSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            } else {
+                scaledPixmap = originPixmap.scaled(targetImgWidth, targetImgHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+        } else {
+            scaledPixmap = originPixmap.scaled(pxContentsFullSize.width(), pxContentsFullSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        // newPage
+        if ((imgCursorPoint.y() + scaledPixmap.height()) > pxContentsFullSize.height()) {
+            pdfWriter.newPage();
+
+            cursorPoint = QPointF(0, 0);
+            imgCursorPoint = cursorPoint;
+        }
+
+        if (isHCenter) {
+            imgCursorPoint = QPointF((pxContentsFullSize.width() - scaledPixmap.width()) / 2,
+                                     imgCursorPoint.y());
+        }
+
+        painter.drawPixmap(imgCursorPoint, scaledPixmap);
+    } else {
+        qDebug() << "drawTemplateImage, loaded QPixmap is null...";
+        return QRectF(QPointF(0, 0), QSizeF(0, 0));
+    }
+
+    return QRectF(imgCursorPoint, QSizeF(scaledPixmap.width(), scaledPixmap.height()));
 }
 
 void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem) {
@@ -694,6 +767,125 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     ////////
 }
 
+void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem) {
+    QPointF cursorPoint(0, 0);
+
+    std::vector<QRectF> childItemRect(receiptVouchrObjNames.length());
+
+    QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, receiptVouchrObjNames, true);
+
+    if (templateQuickItems.size() == 0) {
+        qDebug() << "drawReceiptVoucherTemplate, could not fount childitems...";
+        return;
+    }
+
+    //////// template title 그리기
+    ///
+    ///
+    if (templateQuickItems[receiptVouchrObjNames[0]] != nullptr) {
+        childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[receiptVouchrObjNames[0]]);
+    }
+    ///
+    ///
+    ////////
+
+    int gapMarginTwoUpperTable = 20;  // 전표 번호, 출입고처 테이블 사이의 margin
+
+    //////// 전표 번호 table 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
+
+    if (templateQuickItems[receiptVouchrObjNames[1]] != nullptr) {
+        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - gapMarginTwoUpperTable) / 2;
+
+        std::vector<qreal> tableWidthRatio{0.2, 0.8};
+
+        childItemRect[1] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 출입고처 table 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(childItemRect[1].x() + childItemRect[1].width() + gapMarginTwoUpperTable, childItemRect[1].y());
+
+    if (templateQuickItems[receiptVouchrObjNames[2]] != nullptr) {
+        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - gapMarginTwoUpperTable) / 2;
+        std::vector<qreal> tableWidthRatio{0.2, 0.8};
+
+        childItemRect[2] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 제품 리스트 테이블 그리기
+    ///
+    ///
+    {
+        setFont(painter);
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.05, 0.15, 0.5, 0.1, 0.2};
+
+        int maxUpperTableHeight = (childItemRect[1].height() > childItemRect[2].height()) ? childItemRect[1].height() : childItemRect[2].height();
+
+        cursorPoint = QPointF(0, childItemRect[1].y() + maxUpperTableHeight + templateItemSpacing);
+        // 생산 테이블
+        if (templateQuickItems[receiptVouchrObjNames[3]] != nullptr) {
+            childItemRect[3] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[3]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+        }
+
+
+        cursorPoint = QPointF(0, childItemRect[3].y() + childItemRect[3].height());
+        // 소모 테이블
+        if (templateQuickItems[receiptVouchrObjNames[4]] != nullptr) {
+            childItemRect[4] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[4]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+        }
+    }
+    ///
+    ///
+    ////////
+
+    //////// 총 수량 테이블
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[4].y() + childItemRect[4].height() + templateItemSpacing);
+
+    if (templateQuickItems[receiptVouchrObjNames[5]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.1, 0.25, 0.1, 0.25, 0.1, 0.2};
+
+        childItemRect[5] = drawTemplateTable(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[5]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+
+    ///
+    ///
+    ////////
+
+    //////// 하단 이미지
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[5].y() + childItemRect[5].height() + templateItemSpacing);
+
+    if (templateQuickItems[receiptVouchrObjNames[6]] != nullptr) {
+        childItemRect[6] = drawTemplateImage(painter, pdfWriter, templateQuickItems[receiptVouchrObjNames[6]], cursorPoint, pxContentsFullSize.width(), true);
+    }
+    ///
+    ///
+    ////////
+}
+
 bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     qDebug() << "[LLDDSS] exportToPdf";
 
@@ -712,8 +904,8 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 
     if (rootItem->objectName() == templateObjNames[0]) {
         drawMaterialTemplate(painter, pdfWriter, rootItem);
-    } else {
-
+    } else if (rootItem->objectName() == templateObjNames[3]) {
+        drawReceiptVoucherTemplate(painter, pdfWriter, rootItem);
     }
 
     painter.end();

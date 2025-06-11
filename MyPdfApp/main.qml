@@ -24,16 +24,21 @@ Window {
         } else if (templateList[templateIndex] === templateList[2]) {
 
         } else if (templateList[templateIndex] === templateList[3]) {
-
+            templateFormLoader.sourceComponent = receiptVoucher
         }
     }
 
     function bottomTapClicked(clickedIndex) {
+        if (templateFormLoader.status !== Loader.Ready) {
+            return
+        }
+
         if (pdfFuncText[clickedIndex] === pdfFuncText[0]) {
-            if (templateFormLoader.status === Loader.Ready) {
-                callExportToPdf(templateFormLoader.item.templateItemArea)
-            }
+            callExportToPdf(templateFormLoader.item.templateItemArea)
         } else if (pdfFuncText[clickedIndex] === pdfFuncText[1]) {
+        } else if (pdfFuncText[clickedIndex] === pdfFuncText[2]) {
+        } else if (pdfFuncText[clickedIndex] === pdfFuncText[3]) {
+            callExportToPdf(templateFormLoader.item.templateItemArea)
         }
     }
 
@@ -42,9 +47,17 @@ Window {
         pdfExporter.exportToPdf(templateItemArea, "D:/realTest.pdf")
     }
 
+    // 자재구매확인서
     Component {
         id : materialComp
         MaterialForm {
+        }
+    }
+
+    // 생산입고전표
+    Component {
+        id : receiptVoucher
+        ReceiptVoucherForm {
         }
     }
 

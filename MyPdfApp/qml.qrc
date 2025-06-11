@@ -1,8 +1,12 @@
 <RCC>
     <qresource prefix="/templateForm">
         <file>MaterialForm.qml</file>
+        <file>ReceiptVoucherForm.qml</file>
     </qresource>
     <qresource prefix="/templateItems">
         <file>TemplateTable.qml</file>
+    </qresource>
+    <qresource prefix="/imageFiles">
+        <file>cfimages.jpg</file>
     </qresource>
 </RCC>

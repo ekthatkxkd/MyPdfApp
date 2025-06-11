@@ -1,4 +1,4 @@
-QT += quick widgets printsupport core qml
+QT += quick widgets printsupport core qml gui
 
 SOURCES += \
         main.cpp \

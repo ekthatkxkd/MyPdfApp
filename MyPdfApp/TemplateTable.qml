@@ -399,6 +399,7 @@ Item {
                             for (let index = modelData.startCol; index < (modelData.startCol + modelData.colSpan); index++) {
                                 sumHeight += dividedInnerHeights[index]
                             }
+
                             return sumHeight
                         }
 
@@ -425,6 +426,20 @@ Item {
                             onStatusChanged : {
                                 if (status === Loader.Ready) {
                                     item.tableModelRef = tableModel
+
+                                    let colHeight = dividedInnerHeights[innerRowRep.innerColIndex]
+
+                                    let contentTextHeight = 0
+
+                                    if (innerTextTypeLoader.item) {
+                                        contentTextHeight = innerTextTypeLoader.item.contentHeight
+                                    }
+
+                                    if (contentTextHeight > colHeight) {
+                                        dividedInnerHeights[innerRowRep.innerColIndex] = contentTextHeight + (2*innerTextMargin)
+
+                                        dividedInnerHeights = dividedInnerHeights
+                                    }
                                 }
                             }
                         }
