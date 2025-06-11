@@ -33,10 +33,11 @@ public :
 
     Q_INVOKABLE bool exportToPdf(QQuickItem *rootItem, const QString &filePath);
 
-    const QList<QString> templateObjNames = {"materialItemArea", "defectReportItemArea", "", "receiptVoucherItemArea"};
+    const QList<QString> templateObjNames = {"materialItemArea", "defectReportItemArea", "orderFormItemArea", "receiptVoucherItemArea"};
 
     const QList<QString> materialObjNames = {"templateTitle", "informTable", "purchaseHistory"};
     const QList<QString> defectReportObjNames = {"templateTitle", "defectReportNumTable", "placeInformTable", "productionTable", "quantityTotalTable"};
+    const QList<QString> orderFromObjNames = {"templateTitle", "orderDataItem", "recipientInformTable", "senderInformTable", "orderDetailsTable"};
     const QList<QString> receiptVouchrObjNames = {"templateTitle", "voucherNumTable", "entranceTable", "productionTable", "consumptionTable", "quantityTotalTable", "bottomImage"};
 
     const double mmA4Width = 210.0;  // a4 full size
@@ -72,6 +73,7 @@ private :
 
     void drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
     void defectReportTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
+    void orderFormTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
     void drawReceiptVoucherTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
 
     void testDrawFullRectWithRect(QPainter &painter);

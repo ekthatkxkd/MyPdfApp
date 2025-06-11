@@ -855,6 +855,103 @@ void PdfExporter::defectReportTemplate(QPainter &painter, QPdfWriter &pdfWriter,
     ////////
 }
 
+void PdfExporter::orderFormTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem) {
+    QPointF cursorPoint(0, 0);
+
+    std::vector<QRectF> childItemRect(orderFromObjNames.length());
+
+    QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, orderFromObjNames);
+
+    if (templateQuickItems.size() == 0) {
+        qDebug() << "drawMaterialTemplate, could not fount childitems...";
+        return;
+    }
+
+    //////// template title 그리기
+    ///
+    ///
+    if (templateQuickItems[orderFromObjNames[0]] != nullptr) {
+        childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[orderFromObjNames[0]]);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 발주일자 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
+    if (templateQuickItems[orderFromObjNames[1]] != nullptr) {
+        QQuickItem * orderDateItem = templateQuickItems[orderFromObjNames[1]];
+
+        QString orderDateText = orderDateItem->property("orderDateItemText").toString();
+
+        QFontMetrics metrics(painter.font());
+        QRectF boundingBox(QPointF(pxContentsFullSize.width() - metrics.horizontalAdvance(orderDateText), cursorPoint.y()),
+                           QSizeF(metrics.horizontalAdvance(orderDateText), metrics.height()));
+
+        Qt::Alignment align = Qt::AlignVCenter;
+
+        painter.drawText(boundingBox, align, orderDateText);
+
+        childItemRect[1] = boundingBox;
+    }
+    ///
+    ///
+    ////////
+
+    //////// 수신자 정보 테이블 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[0].height() + templateItemSpacing);
+    if (templateQuickItems[orderFromObjNames[2]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.2, 0.3, 0.2, 0.3};
+
+        childItemRect[2] = drawTemplateTable(painter, pdfWriter, templateQuickItems[orderFromObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+
+    //////// 발신자 정보 테이블 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[2].y() + childItemRect[2].height() + templateItemSpacing);
+    if (templateQuickItems[orderFromObjNames[3]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.2, 0.3, 0.2, 0.3};
+
+        childItemRect[3] = drawTemplateTable(painter, pdfWriter, templateQuickItems[orderFromObjNames[3]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+
+    ///
+    ///
+    ////////
+
+    //////// 발주 내용 테이블 그리기
+    ///
+    ///
+    setFont(painter);
+
+    cursorPoint = QPointF(0, childItemRect[3].y() + childItemRect[3].height() + templateItemSpacing);
+    if (templateQuickItems[orderFromObjNames[4]] != nullptr) {
+        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        std::vector<qreal> tableWidthRatio{0.05, 0.1, 0.15, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+
+        childItemRect[4] = drawTemplateTable(painter, pdfWriter, templateQuickItems[orderFromObjNames[4]], cursorPoint, pxTableFullWidthSize, tableWidthRatio);
+    }
+    ///
+    ///
+    ////////
+}
+
 void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem) {
     QPointF cursorPoint(0, 0);
 
@@ -996,6 +1093,8 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
         drawMaterialTemplate(painter, pdfWriter, rootItem);
     } else if (rootItem->objectName() == templateObjNames[1]) {
         defectReportTemplate(painter, pdfWriter, rootItem);
+    } else if (rootItem->objectName() == templateObjNames[2]) {
+        orderFormTemplate(painter, pdfWriter, rootItem);
     } else if (rootItem->objectName() == templateObjNames[3]) {
         drawReceiptVoucherTemplate(painter, pdfWriter, rootItem);
     }

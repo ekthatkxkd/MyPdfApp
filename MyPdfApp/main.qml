@@ -22,7 +22,7 @@ Window {
         } else if (templateList[templateIndex] === templateList[1]) {
             templateFormLoader.sourceComponent = defectReportComp
         } else if (templateList[templateIndex] === templateList[2]) {
-
+            templateFormLoader.sourceComponent = orderFormComp
         } else if (templateList[templateIndex] === templateList[3]) {
             templateFormLoader.sourceComponent = receiptVoucherComp
         }
@@ -33,19 +33,12 @@ Window {
             return
         }
 
-        if (pdfFuncText[clickedIndex] === pdfFuncText[0]) {
-            callExportToPdf(templateFormLoader.item.templateItemArea)
-        } else if (pdfFuncText[clickedIndex] === pdfFuncText[1]) {
-            callExportToPdf(templateFormLoader.item.templateItemArea)
-        } else if (pdfFuncText[clickedIndex] === pdfFuncText[2]) {
-        } else if (pdfFuncText[clickedIndex] === pdfFuncText[3]) {
-            callExportToPdf(templateFormLoader.item.templateItemArea)
-        }
+        callExportToPdf(templateFormLoader.item.templateItemArea)
     }
 
     function callExportToPdf(templateItemArea) {
         console.log("[LLDDSS] callExportToPdf")
-        pdfExporter.exportToPdf(templateItemArea, "D:/realTest.pdf")
+        pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
     }
 
     // 자재구매확인서
@@ -59,6 +52,13 @@ Window {
     Component {
         id : defectReportComp
         DefectReportForm {
+        }
+    }
+
+    // 발주서
+    Component {
+        id : orderFormComp
+        OrderForm {
         }
     }
 
