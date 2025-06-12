@@ -121,6 +121,7 @@ private :
     void testOutputCellDatas(const CellData &cellData);
     void testDrawTable(QPainter &painter, QPointF &cursorPoint, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights);
 
+    void testDrawContent(QPainter& painter, const QSize& size);
 
     void drawPageFrame(QPainter *painter) const;
 
