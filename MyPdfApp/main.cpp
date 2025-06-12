@@ -10,8 +10,13 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+
+    // 이미지 프로바이더 생성 및 등록
+    PreviewImageProvider* previewProvider = new PreviewImageProvider();
+    engine.addImageProvider("preview", previewProvider);
+
     //////// PdfExporter 객체 생성.
-    PdfExporter pdfExporter;
+    PdfExporter pdfExporter(previewProvider);
     engine.rootContext()->setContextProperty("pdfExporter", &pdfExporter);
 
     // 명시적 QML 타입 등록

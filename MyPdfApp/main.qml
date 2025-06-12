@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Dialogs
 import "qrc:/templateForm/"
+import "qrc:/myComponents/"
 
 Window {
     id : mainWindow
@@ -17,6 +18,9 @@ Window {
 
     readonly property list<string> pdfFuncText : ["파일저장", "미리보기"]
 
+    // 미리보기 윈도우 인스턴스
+    property var previewWindowInstance: null
+
     function loadTemplateForm(templateIndex) {
         if (templateList[templateIndex] === templateList[0]) {
             templateFormLoader.sourceComponent = materialComp
@@ -29,18 +33,41 @@ Window {
         }
     }
 
-    // function bottomTapClicked(clickedIndex) {
-    //     if (templateFormLoader.status !== Loader.Ready) {
-    //         return
-    //     }
-
-    //     callExportToPdf(templateFormLoader.item.templateItemArea)
-    // }
+    function bottomTapClicked(clickedIndex) {
+        if (clickedIndex === 0) {
+            saveDialog.open()
+        } else if (clickedIndex === 1) {
+            pdfExporter.generatePreview(templateFormLoader.item.templateItemArea)
+        }
+    }
 
     function callExportToPdf(templateItemArea, path) {
         console.log("[LLDDSS] callExportToPdf")
         // pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
         pdfExporter.exportToPdf(templateItemArea, path)
+    }
+
+
+    // 미리보기 윈도우를 여는 함수
+    function openPreviewWindow() {
+        // 기존 윈도우가 있으면 닫기
+        if (previewWindowInstance) {
+            previewWindowInstance.close()
+            previewWindowInstance = null
+        }
+
+        // 새 미리보기 윈도우 생성
+        var component = Qt.createComponent("qrc:/myComponents/PreviewWindow.qml")
+        if (component.status === Component.Ready) {
+            previewWindowInstance = component.createObject(mainWindow)
+            if (previewWindowInstance) {
+                previewWindowInstance.show()
+                previewWindowInstance.raise()
+                previewWindowInstance.requestActivate()
+            }
+        } else {
+            console.log("미리보기 윈도우 생성 실패:", component.errorString())
+        }
     }
 
     // 자재구매확인서
@@ -80,6 +107,15 @@ Window {
             var path = selectedFile.toString().replace("file:///", "")
             // exportToPdfWithPath(path)
             callExportToPdf(templateFormLoader.item.templateItemArea, path)
+        }
+    }
+
+    Connections {
+        target : pdfExporter
+
+        function onPreviewUpdated() {
+            console.log("메인: 미리보기 업데이트됨 - 새 창 열기")
+            openPreviewWindow()
         }
     }
 
@@ -170,11 +206,9 @@ Window {
                             MouseArea {
                                 anchors.fill : parent
                                 onClicked : {
-                                    // bottomTapClicked(index)
-                                    if (templateFormLoader.status !== Loader.Ready) {
-                                        return
+                                    if (templateFormLoader.status === Loader.Ready) {
+                                        bottomTapClicked(index)
                                     }
-                                    saveDialog.open()
                                 }
                             }
                         }

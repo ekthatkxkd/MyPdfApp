@@ -8,7 +8,53 @@
 
 #include <QDebug>
 
-PdfExporter::PdfExporter(QObject *parent) : QObject(parent) {
+const qreal PdfExporter::A4_WIDTH_PTS = 595.27559;
+const qreal PdfExporter::A4_HEIGHT_PTS = 841.88976;
+const qreal PdfExporter::MARGIN_PTS = 15;
+const qreal PdfExporter::CELL_PADDING_PTS = 5;
+
+PreviewImageProvider::PreviewImageProvider()
+    : QQuickImageProvider(QQuickImageProvider::Image)
+{
+    QImage defaultPage(PdfExporter::PREVIEW_PIXEL_WIDTH,
+                       PdfExporter::PREVIEW_PIXEL_HEIGHT,
+                       QImage::Format_ARGB32);
+    defaultPage.fill(Qt::white);
+    m_previewPages.append(defaultPage);
+}
+
+QImage PreviewImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
+{
+    if (id.startsWith("page_")) {
+        bool ok;
+        int pageIndex = id.mid(5).toInt(&ok);
+        if (ok && pageIndex >= 0 && pageIndex < m_previewPages.size()) {
+            if (size) {
+                *size = m_previewPages[pageIndex].size();
+            }
+            if (requestedSize.isValid()) {
+                return m_previewPages[pageIndex].scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+            return m_previewPages[pageIndex];
+        }
+    }
+
+    QImage emptyPage(PdfExporter::PREVIEW_PIXEL_WIDTH,
+                     PdfExporter::PREVIEW_PIXEL_HEIGHT,
+                     QImage::Format_ARGB32);
+    emptyPage.fill(Qt::white);
+    return emptyPage;
+}
+
+void PreviewImageProvider::updatePreviewImages(const QList<QImage> &images)
+{
+    m_previewPages = images;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+
+PdfExporter::PdfExporter(PreviewImageProvider* provider, QObject *parent) : QObject(parent), m_imageProvider(provider) {
     initPxContentsFullSize();
 }
 
@@ -24,6 +70,9 @@ void PdfExporter::initPxContentsFullSize() {
 qreal PdfExporter::convertMMtoPixel(double mmValue) {
     return (mmValue / 25.4) * pdfDefaultDPI;
 }
+
+bool PdfExporter::hasPreview() const { return m_hasPreview; }
+int PdfExporter::pageCount() const { return m_pageCount; }
 
 void PdfExporter::setDefaultPdfEnvironment(QPdfWriter &pdfWriter) {
     pdfWriter.setPageSize(QPageSize(QPageSize::A4));
@@ -1089,6 +1138,32 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 
     setFont(painter);
 
+
+
+
+    //////// [LLDDSS] FOR TEST DELETE
+    ///
+    ///
+
+    // qreal pdfScaleFactor = (qreal)pdfWriter.resolution() / 72.0;
+    // qreal pageContentHeight = A4_HEIGHT_PTS - 2 * MARGIN_PTS;
+
+    // painter.scale(pdfScaleFactor, pdfScaleFactor);
+
+    // painter.setRenderHint(QPainter::Antialiasing, true);
+    // painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+    // painter.fillRect(0, 0, A4_WIDTH_PTS, A4_HEIGHT_PTS, Qt::white);
+    // painter.setPen(QPen(QColor("#e0e0e0"), 1));
+    // painter.drawRect(0, 0, A4_WIDTH_PTS, A4_HEIGHT_PTS);
+
+    // painter.translate(MARGIN_PTS, MARGIN_PTS);
+    ///
+    ///
+    ////////
+
+
+
     if (rootItem->objectName() == templateObjNames[0]) {
         drawMaterialTemplate(painter, pdfWriter, rootItem);
     } else if (rootItem->objectName() == templateObjNames[1]) {
@@ -1103,6 +1178,159 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 
     return true;
 }
+
+bool PdfExporter::generatePreview(QQuickItem *rootItem) {
+    qDebug() << "[LLDDSS] generatePreview";
+
+    m_hasPreview = false;
+    emit hasPreviewChanged();
+
+
+    // ★★★ 핵심 수정: 안전한 페이지별 렌더링 ★★★
+    QList<QImage> previewPages;
+
+    qreal scaleFactor = (qreal)PREVIEW_PIXEL_WIDTH / A4_WIDTH_PTS;
+    qreal pageContentHeight = A4_HEIGHT_PTS - 2 * MARGIN_PTS;
+
+    qDebug() << "페이지 콘텐츠 높이:" << pageContentHeight;
+    qDebug() << "스케일 팩터:" << scaleFactor;
+
+    int currentRow = 0;
+    int pageNumber = 1;
+
+    ////////
+    // // 새 페이지 이미지 생성
+    // QImage pageImage(PREVIEW_PIXEL_WIDTH, PREVIEW_PIXEL_HEIGHT, QImage::Format_ARGB32);
+    // pageImage.fill(Qt::white);
+    ////////
+    // PDF 설정에 맞는 페이지 이미지 생성
+    PdfPageSettings settings = calculatePdfPageSettings();
+    QImage pageImage = createPdfSizedImage();
+    ////////
+
+
+
+    // ★★★ 각 페이지마다 새로운 QPainter 인스턴스 사용 (스코프 기반 관리) ★★★
+    QPainter painter(&pageImage);
+    if (!painter.isActive()) {
+        qDebug() << "QPainter 초기화 실패";
+        return false;
+    }
+
+    ////////
+    // painter.scale(scaleFactor, scaleFactor);
+    // drawPageFrame(&painter);
+    // painter.translate(MARGIN_PTS, MARGIN_PTS);
+    ////////
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.translate(settings.marginPixels, settings.marginPixels);
+    painter.setPen(QPen(Qt::lightGray, 2, Qt::DashLine));
+    painter.drawRect(0, 0, settings.contentSize.width(), settings.contentSize.height());
+    ////////
+
+    qreal currentY = 0;
+    int rowsInThisPage = 0;
+
+    //////// PdfExporter::drawMaterialTemplate 함수 복사해옴.
+    if (rootItem->objectName() == templateObjNames[0]) {
+        ////////  MY SOURCE
+        ///
+        ///
+        // QPointF cursorPoint(0, 0);
+        // std::vector<QRectF> childItemRect(materialObjNames.length());
+        // QHash<QString, QQuickItem*> templateQuickItems = getChildItems(rootItem, materialObjNames);
+        // if (templateQuickItems.size() == 0) {
+        //     qDebug() << "drawMaterialTemplate, could not fount childitems...";
+        //     return false;
+        // }
+        // if (templateQuickItems[materialObjNames[0]] != nullptr) {
+        //     childItemRect[0] = drawTemplateTitle(painter, templateQuickItems[materialObjNames[0]]);
+        // }
+        QPdfWriter pdfWriter("");
+        drawMaterialTemplate(painter, pdfWriter, rootItem);
+        ///
+        ///
+        ////////
+
+        ////////  EXAMPLE
+        ///
+        ///
+        // QRectF cellRect(50, 50, 200, 200);
+        // painter.fillRect(cellRect, Qt::darkYellow);
+        // painter.setPen(QPen(QColor("#cccccc"), 2));
+        // painter.drawRect(cellRect);
+
+        // painter.setPen(Qt::black);
+        // QFont font("Arial", 12);
+        // painter.setFont(font);
+        // painter.drawText(0, 0,
+        //                  QString("A4 Page: %1×%2px, %3 DPI, Margin: %4px")
+        //                      .arg(settings.imageSize.width())
+        //                      .arg(settings.imageSize.height())
+        //                      .arg(settings.resolution)
+        //                      .arg(settings.marginPixels));
+        ///
+        ///
+        ////////
+
+        //////// EXAMPLE TEXT
+        ///
+        ///
+        // QRectF cellRect(0, 0, 200, 200);
+        // painter.fillRect(cellRect, Qt::darkYellow);
+        // painter.setPen(QPen(QColor("#cccccc"), 1));
+        // painter.drawRect(cellRect);
+
+        // setFont(painter, 20, true);
+        // QFontMetrics metrics(painter.font());
+        // QRectF boundingBox(QPointF(0, 0), QSizeF(PREVIEW_PIXEL_WIDTH, metrics.height()));
+
+        // Qt::Alignment align = Qt::AlignHCenter;
+
+        // painter.drawText(boundingBox, align, "test test test");
+        ///
+        ///
+        ////////
+
+
+        ////////  EXAMPLE RECT
+        ///
+        ///
+        // QRectF cellRect(0, 0, 200, 200);
+        // painter.fillRect(cellRect, Qt::darkYellow);
+        // painter.setPen(QPen(QColor("#cccccc"), 1));
+        // painter.drawRect(cellRect);
+        ///
+        ///
+        ////////
+
+
+
+
+        // 완성된 페이지를 리스트에 추가
+        previewPages.append(pageImage);
+        pageNumber++;
+    }
+    ////////
+
+    qDebug() << "총 생성된 페이지 수:" << previewPages.size();
+
+    // ★★★ 안전한 결과 설정 ★★★
+    m_pageCount = previewPages.size();
+    emit pageCountChanged();
+
+    m_imageProvider->updatePreviewImages(previewPages);
+
+    m_hasPreview = true;
+    emit hasPreviewChanged();
+    emit previewUpdated();
+
+    qDebug() << "안전한 미리보기 생성 완료 - 총" << m_pageCount << "페이지";
+
+    return true;
+}
+
 
 void PdfExporter::testDrawFullRectWithRect(QPainter &painter) {
     QRectF calculatedRect(QPointF(0, 0),
@@ -1209,4 +1437,60 @@ QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, cons
     }
 
     return m_processedTableData;
+}
+
+void PdfExporter::drawPageFrame(QPainter *painter) const {
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::TextAntialiasing, true);
+
+    painter->fillRect(0, 0, A4_WIDTH_PTS, A4_HEIGHT_PTS, Qt::white);
+    painter->setPen(QPen(QColor("#e0e0e0"), 1));
+    painter->drawRect(0, 0, A4_WIDTH_PTS, A4_HEIGHT_PTS);
+}
+
+PdfPageSettings PdfExporter::calculatePdfPageSettings() const {
+    PdfPageSettings settings;
+
+    // A4 페이지 크기 설정
+    QPageSize pageSize(QPageSize::A4);
+    settings.pageSizeInMM = pageSize.size(QPageSize::Millimeter);
+
+    // 여백 설정 (QPdfWriter와 동일)
+    settings.marginsInMM = QMarginsF(15, 15, 15, 15);
+    settings.resolution = PDF_RESOLUTION;
+
+    // 전체 페이지 크기를 픽셀로 변환
+    double pageWidthInInches = settings.pageSizeInMM.width() * MM_TO_INCH;
+    double pageHeightInInches = settings.pageSizeInMM.height() * MM_TO_INCH;
+
+    settings.imageSize = QSize(
+        qRound(pageWidthInInches * settings.resolution),
+        qRound(pageHeightInInches * settings.resolution)
+        );
+
+    // 여백을 픽셀로 변환
+    settings.marginPixels = qRound(settings.marginsInMM.left() * MM_TO_INCH * settings.resolution);
+
+    // 내용 영역 크기 계산 (여백 제외)
+    settings.contentSize = QSize(
+        settings.imageSize.width() - (2 * settings.marginPixels),
+        settings.imageSize.height() - (2 * settings.marginPixels)
+        );
+
+    return settings;
+}
+
+QImage PdfExporter::createPdfSizedImage() const {
+    PdfPageSettings settings = calculatePdfPageSettings();
+
+    // PDF와 동일한 크기의 QImage 생성
+    QImage pageImage(settings.imageSize, QImage::Format_ARGB32);
+    pageImage.fill(Qt::white);
+
+    // DPI 정보 설정 (QPainter 스케일링 정확성을 위해)
+    double dotsPerMeter = settings.resolution * 39.3701; // 1인치 = 39.3701 dots/meter
+    pageImage.setDotsPerMeterX(qRound(dotsPerMeter));
+    pageImage.setDotsPerMeterY(qRound(dotsPerMeter));
+
+    return pageImage;
 }
