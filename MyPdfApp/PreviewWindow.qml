@@ -92,9 +92,12 @@ ApplicationWindow {
                                     id: pageImage
                                     source: "image://preview/page_" + index
                                     width: Math.min(600, previewColumn.width - 40)
+                                    // width : 600
+                                    // height : 848
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
                                     cache: false
+
 
                                     // 로딩 인디케이터
                                     BusyIndicator {
@@ -125,16 +128,7 @@ ApplicationWindow {
                                     }
                                 }
 
-
-
-
-
-
-
                             }
-
-
-
                         }
 
                     }

@@ -33,9 +33,12 @@ QImage PreviewImageProvider::requestImage(const QString &id, QSize *size, const 
                 *size = m_previewPages[pageIndex].size();
             }
             if (requestedSize.isValid()) {
-                return m_previewPages[pageIndex].scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                // return m_previewPages[pageIndex].scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                // return m_previewPages[pageIndex].scaled(QSize(600, 800), Qt::KeepAspectRatio, Qt::SmoothTransformation);
             }
-            return m_previewPages[pageIndex];
+            // mm to pixel with dpi
+            return m_previewPages[pageIndex].scaled(QSize((210*97)/25.4, (297*97)/25.4), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            // return m_previewPages[pageIndex];
         }
     }
 
