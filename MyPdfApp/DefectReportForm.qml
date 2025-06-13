@@ -136,6 +136,9 @@ Item {
                         initDividedWidths([0.2, 0.8])
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "전표번호", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "2025/03/25 - 7", true, "white", false, 12, "left")
@@ -145,6 +148,9 @@ Item {
                                             initCell(0, 1, 1, 1, "처리방법", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "품목대체", true, "white", false, 12, "left")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 
@@ -165,6 +171,9 @@ Item {
                         initDividedWidths([0.2, 0.8])
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "담당자", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "()", true, "white", false, 12, "left")
@@ -174,6 +183,9 @@ Item {
                                             initCell(0, 1, 1, 1, "발견창고", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "Rework창고(00186)", true, "white", false, 12, "left")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 
@@ -204,6 +216,9 @@ Item {
                         headerTableModel.setTableSize(1, dividedRowCount)
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// header data
+                        ///
+                        ///
                         initHeaderData([
                                            initCell(0, 0, 1, 1, "순번", false, headerBgColor, true, 12, "center"),
                                            initCell(1, 0, 1, 1, "품목코드", false, headerBgColor, true, 12, "center"),
@@ -212,9 +227,13 @@ Item {
                                            initCell(4, 0, 1, 1, "증가수량", false, headerBgColor, true, 12, "center"),
                                            initCell(5, 0, 1, 1, "적요", false, headerBgColor, true, 12, "center")
                                        ])
+                        ///
+                        ///
+                        ////////
 
-
-
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "1", true, "white", false, 12, "center"),
                                             initCell(1, 0, 1, 1, "P001-0162", true, "white", false, 12, "left"),
@@ -255,6 +274,9 @@ Item {
                                             initCell(4, 4, 1, 1, "", true, "white", false, 12, "right"),
                                             initCell(5, 4, 1, 1, "", true, "white", false, 12, "right")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 
@@ -276,6 +298,9 @@ Item {
 
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "감소수량", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "102.00", true, "white", false, 12, "right"),
@@ -284,6 +309,9 @@ Item {
                                             initCell(4, 0, 1, 1, "인수", false, headerBgColor, true, 12, "center"),
                                             initCell(5, 0, 1, 1, "인", false, "white", false, 12, "right")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
             }

@@ -164,6 +164,9 @@ Item {
                         initDividedWidths([0.2, 0.8])
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "전표번호", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "", true, "white", false, 12, "left")
@@ -173,6 +176,9 @@ Item {
                                             initCell(0, 1, 1, 1, "DATE", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 
@@ -193,6 +199,9 @@ Item {
                         initDividedWidths([0.2, 0.8])
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "출고처", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "", true, "white", false, 12, "left")
@@ -202,6 +211,9 @@ Item {
                                             initCell(0, 1, 1, 1, "입고처", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 
@@ -254,6 +266,9 @@ Item {
                             tableModel.setTableSize(dividedColCount, dividedRowCount)
                             footerTableModel.setTableSize(1, dividedRowCount)
 
+                            /////// header data
+                            ///
+                            ///
                             initHeaderData([
                                                initCell(0, 0, 1, 1, "구분", false, headerBgColor, true, 12, "center"),
                                                initCell(1, 0, 1, 1, "품목코드", false, headerBgColor, true, 12, "center"),
@@ -261,9 +276,13 @@ Item {
                                                initCell(3, 0, 1, 1, "수량", false, headerBgColor, true, 12, "center"),
                                                initCell(4, 0, 1, 1, "적요", false, headerBgColor, true, 12, "center")
                                            ])
+                            ///
+                            ///
+                            ////////
 
-
-
+                            /////// inner data
+                            ///
+                            ///
                             addInnerRowData([
                                                 initCell(0, 0, 1, 1, "생산", false, "white", false, 12, "left"),
                                                 initCell(1, 0, 1, 1, "E001-0051", true, "white", false, 12, "left"),
@@ -299,12 +318,21 @@ Item {
                                                 initCell(3, 4, 1, 1, "685.00", true, "white", false, 12, "right"),
                                                 initCell(4, 4, 1, 1, "", true, "white", false, 12, "left")
                                             ])
+                            ///
+                            ///
+                            ////////
 
+                            /////// footer data
+                            ///
+                            ///
                             initFooterData([
                                                initCell(0, 0, 3, 1, "총합계", false, headerBgColor, true, 12, "center"),
                                                initCell(3, 0, 1, 1, "3,425.00", true, headerBgColor, true, 12, "right"),
                                                initCell(4, 0, 1, 1, "", true, headerBgColor, true, 12, "left")
                                            ])
+                            ///
+                            ///
+                            ////////
                         }
                     }
 
@@ -332,6 +360,9 @@ Item {
 
                             tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                            /////// inner data
+                            ///
+                            ///
                             addInnerRowData([
                                                 initCell(0, 0, 1, 1, "소모", false, "white", false, 12, "left"),
                                                 initCell(1, 0, 1, 1, "E003-0020", true, "white", false, 12, "left"),
@@ -379,6 +410,9 @@ Item {
                                                 initCell(3, 5, 1, 1, "685.00", true, "white", false, 12, "right"),
                                                 initCell(4, 5, 1, 1, "", true, "white", false, 12, "left")
                                             ])
+                            ///
+                            ///
+                            ////////
                         }
                     }
                 }
@@ -400,6 +434,9 @@ Item {
                         initDividedWidths([0.1, 0.25, 0.1, 0.25, 0.1, 0.2])
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
+                        /////// inner data
+                        ///
+                        ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "생산수량", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 0, 1, 1, "3,425.00", true, "white", false, 12, "right"),
@@ -408,6 +445,9 @@ Item {
                                             initCell(4, 0, 1, 1, "인수", false, headerBgColor, true, 12, "center"),
                                             initCell(5, 0, 1, 1, "인", false, "white", false, 12, "right")
                                         ])
+                        ///
+                        ///
+                        ////////
                     }
                 }
 

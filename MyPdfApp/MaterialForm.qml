@@ -135,18 +135,6 @@ Item {
 
                         tableModel.setTableSize(dividedColCount, dividedRowCount)
 
-                        //////// header data
-                        ///
-                        ///
-                        // initHeaderData([
-                        //                    initCell(0, 0, 1, 1, "테스트1", true, headerBgColor, true, 12, "center"),
-                        //                    initCell(1, 0, 2, 1, "테스트2", true, headerBgColor, true, 12, "center"),
-                        //                    initCell(3, 0, 2, 1, "테스트3", true, headerBgColor, true, 12, "center")
-                        //                ])
-                        ///
-                        ///
-                        ////////
-
                         //////// inner data
                         ///
                         ///
@@ -172,17 +160,6 @@ Item {
                                             initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
                                             initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
                                         ])
-                        ///
-                        ///
-                        ////////
-
-                        //////// footer data
-                        ///
-                        ///
-                        // initFooterData([
-                        //                    initCell(0, 0, 2, 1, "footer테스트", true, headerBgColor, true, 12, "center"),
-                        //                    initCell(2, 0, 3, 1, "", true, headerBgColor, false, 12)
-                        //                ])
                         ///
                         ///
                         ////////
@@ -246,11 +223,6 @@ Item {
                         addInnerDefaultRowData()
                         addInnerDefaultRowData()
                         addInnerDefaultRowData()
-
-                        for (let i = 0; i < 35; i++) {
-                            addInnerDefaultRowData()
-                        }
-
                         ///
                         ///
                         ////////
