@@ -41,11 +41,11 @@ class PreviewImageProvider : public QQuickImageProvider
 public:
     PreviewImageProvider();
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
-    void updatePreviewImages(const QList<QImage> &images);
+    void updatePreviewImages(QList<std::shared_ptr<QImage>> &images);
     int getPageCount() const { return m_previewPages.size(); }
 
 private:
-    QList<QImage> m_previewPages;
+    QList<std::shared_ptr<QImage>> m_previewPages;
 };
 
 class PdfExporter : public QObject {
@@ -100,7 +100,7 @@ private :
     QQuickItem* getChildItem(QQuickItem *rootItem, const QString &childObjName);
     QQuickItem* getInnerItem(QQuickItem *rootItem, const QString &objNameToFound);
 
-    void setDefaultPdfEnvironment(QPdfWriter &pdfWriter);
+    void setDefaultPdfEnvironment(std::shared_ptr<QPdfWriter> pdfWriter);
     void setFont(QPainter &painter, int fontSize = 10, bool isBold = false);
 
     void initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QVector<QVector<CellData>> &cellDatas,
@@ -108,13 +108,13 @@ private :
     QSizeF getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical = false, const QTextOption::WrapMode &wrapMode = QTextOption::NoWrap, qreal fixedWidth = 0);
 
     QRectF drawTemplateTitle(QPainter &painter, QQuickItem *textItem);
-    QRectF drawTemplateTable(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);
-    QRectF drawTemplateImage(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *imageItem, QPointF &cursorPoint, const int settingPxImageWidth = 0, const bool isHCenter = false);
+    QRectF drawTemplateTable(QPainter &painter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio, const bool &isPdf);
+    QRectF drawTemplateImage(QPainter &painter, QQuickItem *imageItem, QPointF &cursorPoint, const bool &isPdf, const int settingPxImageWidth = 0, const bool isHCenter = false);
 
-    void drawMaterialTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
-    void defectReportTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
-    void orderFormTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
-    void drawReceiptVoucherTemplate(QPainter &painter, QPdfWriter &pdfWriter, QQuickItem *rootItem);
+    void drawMaterialTemplate(QPainter &painter, QQuickItem *rootItem, const bool &isPdf);
+    void defectReportTemplate(QPainter &painter, QQuickItem *rootItem, const bool &isPdf);
+    void orderFormTemplate(QPainter &painter, QQuickItem *rootItem, const bool &isPdf);
+    void drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *rootItem, const bool &isPdf);
 
     void testDrawFullRectWithRect(QPainter &painter);
     void testDrawFullRectWithWindow(QPainter &painter);
@@ -124,6 +124,19 @@ private :
     void testDrawContent(QPainter& painter, const QSize& size);
 
     void drawPageFrame(QPainter *painter) const;
+
+
+
+
+
+    void createNewPage(QPainter &painter, const bool &isPdf);
+    std::shared_ptr<QPdfWriter> pdfWriter;
+    QList<std::shared_ptr<QImage>> previewPages;
+
+
+
+
+
 
     QSizeF pxContentsFullSize{0, 0};  // A4 전체 pixel size 가 아닌 margin 이 반영된 pixel size.
 

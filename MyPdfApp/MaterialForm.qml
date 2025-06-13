@@ -247,9 +247,9 @@ Item {
                         addInnerDefaultRowData()
                         addInnerDefaultRowData()
 
-                        // for (let i = 0; i < 35; i++) {
-                        //     addInnerDefaultRowData()
-                        // }
+                        for (let i = 0; i < 35; i++) {
+                            addInnerDefaultRowData()
+                        }
 
                         ///
                         ///
