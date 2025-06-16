@@ -181,12 +181,12 @@ void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxC
     //////// inner cell height init
     ///
     ///
-    for (int colIndex = 0; colIndex < cellDatas.size(); colIndex++) {
-        std::vector<std::pair<int, qreal>> verticalCell;
+    for (int rowIndex = 0; rowIndex < cellDatas.size(); rowIndex++) {
+        std::vector<std::pair<int, qreal>> verticalTextCells;
 
-        for (int rowIndex = 0; rowIndex < cellDatas[colIndex].size(); rowIndex++) {
+        for (int colIndex = 0; colIndex < cellDatas[rowIndex].size(); colIndex++) {
             QSizeF textAreaSize;
-            const auto &cellData = cellDatas[colIndex][rowIndex];
+            const auto &cellData = cellDatas[rowIndex][colIndex];
 
             QString cellText = cellData.cellText;
 
@@ -197,38 +197,38 @@ void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxC
 
                 textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir);
 
-                verticalCell.push_back(std::make_pair(rowIndex, textAreaSize.height()));
+                verticalTextCells.push_back(std::make_pair(colIndex, textAreaSize.height()));
             } else {
                 qreal actualCellWidth = 0;
-                for (int widthIndex = cellData.startRow; widthIndex < (cellData.startRow + cellData.rowSpan); widthIndex++) {
+                for (int widthIndex = cellData.startCol; widthIndex < (cellData.startCol + cellData.colSpan); widthIndex++) {
                     actualCellWidth += pxCellWidths[widthIndex];
                 }
 
                 textAreaSize = getCalculatedCellTextArea(cellText, painter.font(), cellData.isVerticalDir, QTextOption::WrapAnywhere, (actualCellWidth - (2 * cellTextMargins)));
-                if ((textAreaSize.height() + (2 * cellTextMargins)) > pxCellHeights[colIndex]) {
-                    pxCellHeights[colIndex] = textAreaSize.height() + (2 * cellTextMargins);
+                if ((textAreaSize.height() + (2 * cellTextMargins)) > pxCellHeights[rowIndex]) {
+                    pxCellHeights[rowIndex] = textAreaSize.height() + (2 * cellTextMargins);
                 }
             }
         }
 
-        for (int verticalCellIndex = 0; verticalCellIndex < verticalCell.size(); verticalCellIndex++) {
-            const auto &cellData = cellDatas[colIndex][verticalCell[verticalCellIndex].first];
+        for (int verticalCellIndex = 0; verticalCellIndex < verticalTextCells.size(); verticalCellIndex++) {
+            const auto &cellData = cellDatas[rowIndex][verticalTextCells[verticalCellIndex].first];
 
-            qreal cellHeight = verticalCell[verticalCellIndex].second + (2 * cellTextMargins);
+            qreal cellHeight = verticalTextCells[verticalCellIndex].second + (2 * cellTextMargins);
 
-            int cellColSpan = cellData.colSpan;
+            int cellRowSpan = cellData.rowSpan;
 
 
-            qreal remainingCellHeight = cellHeight - pxCellHeights[colIndex];
+            qreal remainingCellHeight = cellHeight - pxCellHeights[rowIndex];
 
-            for (int cellStartCol = (cellData.startCol+1); cellStartCol < (cellData.startCol + cellColSpan); cellStartCol++) {
-                qreal dividedHeight = remainingCellHeight / ((cellData.startCol + cellColSpan) - cellStartCol);
+            for (int cellStartRow = (cellData.startRow+1); cellStartRow < (cellData.startRow + cellRowSpan); cellStartRow++) {
+                qreal dividedHeight = remainingCellHeight / ((cellData.startRow + cellRowSpan) - cellStartRow);
 
-                if (dividedHeight > pxCellHeights[cellStartCol]) {
-                    pxCellHeights[cellStartCol] = dividedHeight;
+                if (dividedHeight > pxCellHeights[cellStartRow]) {
+                    pxCellHeights[cellStartRow] = dividedHeight;
                     remainingCellHeight -= dividedHeight;
                 } else {
-                    remainingCellHeight -= pxCellHeights[cellStartCol];
+                    remainingCellHeight -= pxCellHeights[cellStartRow];
                 }
             }
         }
@@ -293,14 +293,14 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
     QString tableTitle = tableItem->property("tableTextValue").toString();
 
-    QVector<QVector<CellData>> headerDatas = getCellDatas(tableItem, "headerColRep");
-    QVector<QVector<CellData>> innerDatas = getCellDatas(tableItem, "innerColRep");
-    QVector<QVector<CellData>> footerDatas = getCellDatas(tableItem, "footerColRep");
+    QVector<QVector<CellData>> headerDatas = getCellDatas(tableItem, "headerRowRep");
+    QVector<QVector<CellData>> innerDatas = getCellDatas(tableItem, "innerRowRep");
+    QVector<QVector<CellData>> footerDatas = getCellDatas(tableItem, "footerRowRep");
 
-    int tableRowCount = tableItem->property("dividedRowCount").toInt();
+    int tableColCount = tableItem->property("dividedColCount").toInt();
     int innerTableColCount = innerDatas.size();
 
-    std::vector<double> pxCellWidths(tableRowCount, 0);
+    std::vector<double> pxCellWidths(tableColCount, 0);
     std::vector<double> pxCellHeights(innerTableColCount, 0);
 
 
@@ -346,23 +346,23 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
         QPointF headerCursorPoint = tableCursorPoint;
 
-        std::vector<double> pxHeaderCellWidths(tableRowCount, 0);
+        std::vector<double> pxHeaderCellWidths(tableColCount, 0);
         std::vector<double> pxHeaderCellHeights(1, 0);
 
         initTableCellSizes(painter, pxHeaderCellWidths, pxHeaderCellHeights, headerDatas,
                            pxTableFullWidthSize, tableWidthRatio);
 
         for (const auto &headerData : headerDatas) {
-            for (int rowIndex = 0; rowIndex < headerData.size(); rowIndex++) {
-                QString cellText = headerData[rowIndex].cellText;
-                int cellStartRow = headerData[rowIndex].startRow;
-                int cellRowSpan = headerData[rowIndex].rowSpan;
-                QColor cellBgColor = headerData[rowIndex].bgColor;
-                QString cellAlign = headerData[rowIndex].alignPosition;
+            for (int colIndex = 0; colIndex < headerData.size(); colIndex++) {
+                QString cellText = headerData[colIndex].cellText;
+                int cellStartCol = headerData[colIndex].startCol;
+                int cellColSpan = headerData[colIndex].colSpan;
+                QColor cellBgColor = headerData[colIndex].bgColor;
+                QString cellAlign = headerData[colIndex].alignPosition;
 
                 qreal actualWidth = 0;
 
-                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
                     actualWidth += pxCellWidths[widthIndex];
                 }
 
@@ -412,9 +412,9 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
         qreal cellRectYPos = innerCursorPoint.y();
 
-        for (int colIndex = 0; colIndex < innerDatas.size(); colIndex++) {
+        for (int rowIndex = 0; rowIndex < innerDatas.size(); rowIndex++) {
 
-            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.height()) {
+            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pxContentsFullSize.height()) {
                 // pdfWriter.newPage();
                 createNewPage(painter, isPdf);
 
@@ -424,32 +424,32 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
                 cellRectYPos = 0;
             }
 
-            for (int rowIndex = 0; rowIndex < innerDatas[colIndex].size(); rowIndex++) {
-                QString cellText = innerDatas[colIndex][rowIndex].cellText;
+            for (int colIndex = 0; colIndex < innerDatas[rowIndex].size(); colIndex++) {
+                QString cellText = innerDatas[rowIndex][colIndex].cellText;
 
-                int cellStartRow = innerDatas[colIndex][rowIndex].startRow;
-                int cellRowSpan = innerDatas[colIndex][rowIndex].rowSpan;
-                int cellStartCol = innerDatas[colIndex][rowIndex].startCol;
-                int cellColSpan = innerDatas[colIndex][rowIndex].colSpan;
+                int cellStartCol = innerDatas[rowIndex][colIndex].startCol;
+                int cellColSpan = innerDatas[rowIndex][colIndex].colSpan;
+                int cellStartRow = innerDatas[rowIndex][colIndex].startRow;
+                int cellRowSpan = innerDatas[rowIndex][colIndex].rowSpan;
 
                 qreal cellRectXPos = tableCursorPoint.x();
 
-                for (int widthIndex = 0; widthIndex < cellStartRow; widthIndex++) {
+                for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
                     cellRectXPos += pxCellWidths[widthIndex];
                 }
 
                 qreal cellRectWidth = 0;
                 qreal cellRectHeight = 0;
 
-                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
                     cellRectWidth += pxCellWidths[widthIndex];
                 }
 
-                for (int heightIndex = cellStartCol; heightIndex < (cellStartCol + cellColSpan); heightIndex++) {
+                for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
                     cellRectHeight += pxCellHeights[heightIndex];
                 }
 
-                QColor cellRectBgColor = innerDatas[colIndex][rowIndex].bgColor;
+                QColor cellRectBgColor = innerDatas[rowIndex][colIndex].bgColor;
 
                 QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
                                    QSizeF(cellRectWidth, cellRectHeight));
@@ -459,8 +459,8 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
                                  QColor(cellRectBgColor));
                 painter.drawRect(boundingBox);
 
-                QString cellTextAlign = innerDatas[colIndex][rowIndex].alignPosition;
-                bool cellTextBold = innerDatas[colIndex][rowIndex].isBold;
+                QString cellTextAlign = innerDatas[rowIndex][colIndex].alignPosition;
+                bool cellTextBold = innerDatas[rowIndex][colIndex].isBold;
 
                 setFont(painter, 8, cellTextBold);
 
@@ -484,9 +484,9 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
             }
 
             innerCursorPoint = QPointF(innerCursorPoint.x(),
-                                       innerCursorPoint.y() + pxCellHeights[colIndex]);
+                                       innerCursorPoint.y() + pxCellHeights[rowIndex]);
 
-            cellRectYPos += pxCellHeights[colIndex];
+            cellRectYPos += pxCellHeights[rowIndex];
         }
 
         tableCursorPoint = QPointF(tableCursorPoint.x(),
@@ -504,9 +504,9 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
         qreal cellRectYPos = innerCursorPoint.y();
 
-        for (int colIndex = 0; colIndex < footerDatas.size(); colIndex++) {
+        for (int rowIndex = 0; rowIndex < footerDatas.size(); rowIndex++) {
 
-            if (innerCursorPoint.y() + pxCellHeights[colIndex] > pxContentsFullSize.height()) {
+            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pxContentsFullSize.height()) {
                 // pdfWriter.newPage();
                 createNewPage(painter, isPdf);
 
@@ -516,32 +516,32 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
                 cellRectYPos = 0;
             }
 
-            for (int rowIndex = 0; rowIndex < footerDatas[colIndex].size(); rowIndex++) {
-                QString cellText = footerDatas[colIndex][rowIndex].cellText;
+            for (int colIndex = 0; colIndex < footerDatas[rowIndex].size(); colIndex++) {
+                QString cellText = footerDatas[rowIndex][colIndex].cellText;
 
-                int cellStartRow = footerDatas[colIndex][rowIndex].startRow;
-                int cellRowSpan = footerDatas[colIndex][rowIndex].rowSpan;
-                int cellStartCol = footerDatas[colIndex][rowIndex].startCol;
-                int cellColSpan = footerDatas[colIndex][rowIndex].colSpan;
+                int cellStartCol = footerDatas[rowIndex][colIndex].startCol;
+                int cellColSpan = footerDatas[rowIndex][colIndex].colSpan;
+                int cellStartRow = footerDatas[rowIndex][colIndex].startRow;
+                int cellRowSpan = footerDatas[rowIndex][colIndex].rowSpan;
 
                 qreal cellRectXPos = tableCursorPoint.x();
 
-                for (int widthIndex = 0; widthIndex < cellStartRow; widthIndex++) {
+                for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
                     cellRectXPos += pxCellWidths[widthIndex];
                 }
 
                 qreal cellRectWidth = 0;
                 qreal cellRectHeight = 0;
 
-                for (int widthIndex = cellStartRow; widthIndex < (cellStartRow + cellRowSpan); widthIndex++) {
+                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
                     cellRectWidth += pxCellWidths[widthIndex];
                 }
 
-                for (int heightIndex = cellStartCol; heightIndex < (cellStartCol + cellColSpan); heightIndex++) {
+                for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
                     cellRectHeight += pxCellHeights[heightIndex];
                 }
 
-                QColor cellRectBgColor = footerDatas[colIndex][rowIndex].bgColor;
+                QColor cellRectBgColor = footerDatas[rowIndex][colIndex].bgColor;
 
                 QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
                                    QSizeF(cellRectWidth, cellRectHeight));
@@ -551,8 +551,8 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
                                  QColor(cellRectBgColor));
                 painter.drawRect(boundingBox);
 
-                QString cellTextAlign = footerDatas[colIndex][rowIndex].alignPosition;
-                bool cellTextBold = footerDatas[colIndex][rowIndex].isBold;
+                QString cellTextAlign = footerDatas[rowIndex][colIndex].alignPosition;
+                bool cellTextBold = footerDatas[rowIndex][colIndex].isBold;
 
                 setFont(painter, 8, cellTextBold);
 
@@ -576,9 +576,9 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
             }
 
             innerCursorPoint = QPointF(innerCursorPoint.x(),
-                                       innerCursorPoint.y() + pxCellHeights[colIndex]);
+                                       innerCursorPoint.y() + pxCellHeights[rowIndex]);
 
-            cellRectYPos += pxCellHeights[colIndex];
+            cellRectYPos += pxCellHeights[rowIndex];
         }
 
         tableCursorPoint = QPointF(tableCursorPoint.x(),

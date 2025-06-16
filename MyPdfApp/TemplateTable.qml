@@ -286,11 +286,11 @@ Item {
                 width : parent.width
 
                 Repeater {
-                    objectName : "headerColRep"
+                    objectName : "headerRowRep"
                     model : headerTableModel  // headerData
 
                     Repeater {
-                        id : headerRowRep
+                        id : headerColRep
 
                         model : rowData
 
@@ -301,12 +301,12 @@ Item {
                             readonly property int headerTextMargin : 5
 
                             width : {
-                                let getColSpan = modelData.colSpan  // [250616] let getRowSpan = modelData.rowSpan
+                                let getColSpan = modelData.colSpan
                                 let actualWidth = 0
 
-                                let getStartCol = modelData.startCol  // [250616] let getStartRow = modelData.startRow
+                                let getStartCol = modelData.startCol
 
-                                for (let i = getStartCol; i < (getStartCol + getColSpan); i++) {  // [250616] for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
+                                for (let i = getStartCol; i < (getStartCol + getColSpan); i++) {
                                     actualWidth += dividedWidths[i]
                                 }
 
@@ -344,14 +344,14 @@ Item {
             height : childrenRect.height
 
             Repeater {
-                id : innerColRep
-                objectName : "innerColRep"
+                id : innerRowRep
+                objectName : "innerRowRep"
 
                 model : tableModel // innerDatas.length
 
                 Repeater {
-                    id : innerRowRep
-                    readonly property int innerRowIndex : index  // [250616] readonly property int innerColIndex : index
+                    id : innerColRep
+                    readonly property int innerRowIndex : index
 
                     model : rowData
 
@@ -360,13 +360,13 @@ Item {
 
                         property var cellData : modelData
 
-                        readonly property int innerColIndex : index  // [250616] readonly property int innerRowIndex : index
+                        readonly property int innerColIndex : index
                         readonly property int innerTextMargin : 5
 
                         x : {
                             let basicXpos = 0  // dividedWidths[modelData.startRow]
 
-                            for (let index = 0; index < (modelData.startCol); index++) {  // [250616] for (let index = 0; index < (modelData.startRow); index++) {
+                            for (let index = 0; index < (modelData.startCol); index++) {
                                 basicXpos += dividedWidths[index];
                             }
 
@@ -376,7 +376,7 @@ Item {
                         y : {
                             let basicYpos = 0  // dividedInnerHeights[modelData.startCol]
 
-                            for (let index = 0; index < (modelData.startRow); index++) {  // [250616] for (let index = 0; index < (modelData.startCol); index++) {
+                            for (let index = 0; index < (modelData.startRow); index++) {
                                 basicYpos += dividedInnerHeights[index];
                             }
 
@@ -386,7 +386,7 @@ Item {
                         width : {
                             let sumWidth = 0
 
-                            for (let index = modelData.startCol; index < (modelData.startCol + modelData.colSpan); index++) {  // [250616] for (let index = modelData.startRow; index < (modelData.startRow + modelData.rowSpan); index++) {
+                            for (let index = modelData.startCol; index < (modelData.startCol + modelData.colSpan); index++) {
                                 sumWidth += dividedWidths[index]
                             }
 
@@ -396,7 +396,7 @@ Item {
                         height : {
                             let sumHeight = 0
 
-                            for (let index = modelData.startRow; index < (modelData.startRow + modelData.rowSpan); index++) {  // [250616] for (let index = modelData.startCol; index < (modelData.startCol + modelData.colSpan); index++) {
+                            for (let index = modelData.startRow; index < (modelData.startRow + modelData.rowSpan); index++) {
                                 sumHeight += dividedInnerHeights[index]
                             }
 
@@ -427,7 +427,7 @@ Item {
                                 if (status === Loader.Ready) {
                                     item.tableModelRef = tableModel
 
-                                    let rowHeight = dividedInnerHeights[innerRowRep.innerRowIndex]  // [250616] let colHeight = dividedInnerHeights[innerRowRep.innerColIndex]
+                                    let rowHeight = dividedInnerHeights[innerColRep.innerRowIndex]
 
                                     let contentTextHeight = 0
 
@@ -435,8 +435,8 @@ Item {
                                         contentTextHeight = innerTextTypeLoader.item.contentHeight
                                     }
 
-                                    if (contentTextHeight > rowHeight) {  // [250616] if (contentTextHeight > colHeight) {
-                                        dividedInnerHeights[innerRowRep.innerRowIndex] = contentTextHeight + (2*innerTextMargin)  // [250616] dividedInnerHeights[innerRowRep.innerColIndex] = contentTextHeight + (2*innerTextMargin)
+                                    if (contentTextHeight > rowHeight) {
+                                        dividedInnerHeights[innerColRep.innerRowIndex] = contentTextHeight + (2*innerTextMargin)
 
                                         dividedInnerHeights = dividedInnerHeights
                                     }
@@ -451,7 +451,7 @@ Item {
                                       (innerTextTypeLoader.item !== null))
 
                             function onContentHeightChanged() {
-                                let rowHeight = dividedInnerHeights[innerRowRep.innerRowIndex]  // [250616] let colHeight = dividedInnerHeights[innerRowRep.innerColIndex]
+                                let rowHeight = dividedInnerHeights[innerColRep.innerRowIndex]
 
                                 let contentTextHeight = 0
 
@@ -459,8 +459,8 @@ Item {
                                     contentTextHeight = innerTextTypeLoader.item.contentHeight
                                 }
 
-                                if (contentTextHeight > rowHeight) {  // [250616] if (contentTextHeight > colHeight) {
-                                    dividedInnerHeights[innerRowRep.innerRowIndex] = contentTextHeight + (2*innerTextMargin)  // [250616] dividedInnerHeights[innerRowRep.innerColIndex] = contentTextHeight + (2*innerTextMargin)
+                                if (contentTextHeight > rowHeight) {
+                                    dividedInnerHeights[innerColRep.innerRowIndex] = contentTextHeight + (2*innerTextMargin)
 
                                     dividedInnerHeights = dividedInnerHeights
                                 }
@@ -470,7 +470,7 @@ Item {
                             Component.onCompleted: {
                                 if (innerTextTypeLoader.item && innerTextTypeLoader.item.textModified) {
                                     innerTextTypeLoader.item.textModified.connect(function(newText) {
-                                        tableModel.updateCellText(innerRowRep.innerRowIndex, cellArea.innerColIndex, newText);  // [250616] tableModel.updateCellText(innerRowRep.innerColIndex, cellArea.innerRowIndex, newText);
+                                        tableModel.updateCellText(innerColRep.innerRowIndex, cellArea.innerColIndex, newText);
                                     })
                                 }
                             }
@@ -495,12 +495,12 @@ Item {
                 width : parent.width
 
                 Repeater {
-                    objectName : "footerColRep"
+                    objectName : "footerRowRep"
                     model : footerTableModel  // footerData
 
                     Repeater {
-                        id : footerRowRep
-                        readonly property int footerRowIndex : index  // [250616] readonly property int footerColIndex : index
+                        id : footerColRep
+                        readonly property int footerRowIndex : index
 
                         model : rowData
 
@@ -510,16 +510,16 @@ Item {
 
                             property var cellData : modelData
 
-                            readonly property int footerColIndex : index  // [250616] readonly property int footerRowIndex : index
+                            readonly property int footerColIndex : index
                             readonly property int footerTextMargin : 5
 
                             width : {
-                                let getStartCol = modelData.startCol  // [250616] let getStartRow = modelData.startRow
-                                let getColSpan = modelData.colSpan  // [250616] let getRowSpan = modelData.rowSpan
+                                let getStartCol = modelData.startCol
+                                let getColSpan = modelData.colSpan
 
                                 let actualWidth = 0
 
-                                for (let i = getStartCol; i < (getStartCol + getColSpan); i++) {  // [250616] for (let i = getStartRow; i < (getStartRow + getRowSpan); i++) {
+                                for (let i = getStartCol; i < (getStartCol + getColSpan); i++) {
                                     actualWidth += dividedWidths[i]
                                 }
 
@@ -562,7 +562,7 @@ Item {
                                           (footerTextTypeLoader.item !== null))
 
                                 function onContentHeightChanged() {
-                                    let rowHeight = footerHeight  // [250616] let colHeight = footerHeight
+                                    let rowHeight = footerHeight
 
                                     let contentTextHeight = 0
 
@@ -570,7 +570,7 @@ Item {
                                         contentTextHeight = footerTextTypeLoader.item.contentHeight
                                     }
 
-                                    if (contentTextHeight > rowHeight) {  // [250616] if (contentTextHeight > colHeight) {
+                                    if (contentTextHeight > rowHeight) {
                                         footerHeight = contentTextHeight + (2*footerCell.footerTextMargin)
 
                                         footerHeight = footerHeight
@@ -580,7 +580,7 @@ Item {
                                 Component.onCompleted: {
                                     if (footerTextTypeLoader.item && footerTextTypeLoader.item.textModified) {
                                         footerTextTypeLoader.item.textModified.connect(function(newText) {
-                                            footerTableModel.updateCellText(footerRowRep.footerRowIndex, footerCell.footerColIndex, newText);
+                                            footerTableModel.updateCellText(footerColRep.footerRowIndex, footerCell.footerColIndex, newText);
                                         })
                                     }
                                 }
