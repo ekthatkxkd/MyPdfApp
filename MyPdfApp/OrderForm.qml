@@ -192,45 +192,45 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    dividedColCount : 5
-                    dividedRowCount : 4
+                    dividedRowCount : 5
+                    dividedColCount : 4
 
                     tableTextValue : "■ 수신자 정보"
 
                     Component.onCompleted: {
                         initDividedWidths([0.2, 0.3, 0.2, 0.3])
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "사업자등록번호", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(2, 0, 1, 1, "거래담당자/TEL", false, headerBgColor, true, 12, "center"),
-                                            initCell(3, 0, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(0, 1, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(0, 2, 1, 1, "거래담당자/TEL", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 3, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "회사명/대표", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "회사명/대표", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(2, 1, 1, 1, "TEL/FAX", false, headerBgColor, true, 12, "center"),
-                                            initCell(3, 1, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(1, 2, 1, 1, "TEL/FAX", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 3, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 2, 1, 1, "주  소", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 2, 3, 1, "", true, "white", false, 12, "left")
+                                            initCell(2, 0, 1, 1, "주  소", false, headerBgColor, true, 12, "center"),
+                                            initCell(2, 1, 1, 3, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 3, 1, 1, "납기희망일", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 3, 3, 1, "", true, "white", false, 12, "left")
+                                            initCell(3, 0, 1, 1, "납기희망일", false, headerBgColor, true, 12, "center"),
+                                            initCell(3, 1, 1, 3, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 4, 1, 1, "참고사항", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 4, 3, 1, "", true, "white", false, 12, "left")
+                                            initCell(4, 0, 1, 1, "참고사항", false, headerBgColor, true, 12, "center"),
+                                            initCell(4, 1, 1, 3, "", true, "white", false, 12, "left")
                                         ])
                         ///
                         ///
@@ -248,40 +248,40 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    dividedColCount : 4
                     dividedRowCount : 4
+                    dividedColCount : 4
 
                     tableTextValue : "■ 발신자 정보"
 
                     Component.onCompleted: {
                         initDividedWidths([0.2, 0.3, 0.2, 0.3])
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "발주번호", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 3, 1, "", true, "white", false, 12, "left")
+                                            initCell(0, 1, 1, 3, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "사업자등록번호", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "사업자등록번호", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(2, 1, 1, 1, "담당자", false, headerBgColor, true, 12, "center"),
-                                            initCell(3, 1, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(1, 2, 1, 1, "담당자", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 3, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 2, 1, 1, "회사명/대표", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 2, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(2, 0, 1, 1, "회사명/대표", false, headerBgColor, true, 12, "center"),
+                                            initCell(2, 1, 1, 1, "", true, "white", false, 12, "left"),
                                             initCell(2, 2, 1, 1, "TEL/FAX", false, headerBgColor, true, 12, "center"),
-                                            initCell(3, 2, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(2, 3, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 3, 1, 1, "주  소", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 3, 3, 1, "", true, "white", false, 12, "left")
+                                            initCell(3, 0, 1, 1, "주  소", false, headerBgColor, true, 12, "center"),
+                                            initCell(3, 1, 1, 3, "", true, "white", false, 12, "left")
                                         ])
                         ///
                         ///
@@ -299,43 +299,43 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    dividedColCount : 1
-                    dividedRowCount : 9
+                    dividedRowCount : 1
+                    dividedColCount : 9
 
                     tableTextValue : "■ 발주 내용"
 
                     innerDefaultData : [
                         initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(1, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(2, 0, 1, 1, "", true, "white", false, 12, "left"),
-                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(4, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(5, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(6, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(7, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(8, 0, 1, 1, "", true, "white", false, 12, "right")
+                        initCell(0, 1, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(0, 2, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(0, 3, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(0, 4, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(0, 5, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(0, 6, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(0, 7, 1, 1, "", true, "white", false, 12, "center"),
+                        initCell(0, 8, 1, 1, "", true, "white", false, 12, "right")
                     ]
 
                     Component.onCompleted: {
                         initDividedWidths([0.05, 0.1, 0.15, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
 
-                        headerTableModel.setTableSize(1, dividedRowCount)
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
-                        footerTableModel.setTableSize(1, dividedRowCount)
+                        headerTableModel.setTableSize(1, dividedColCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
+                        footerTableModel.setTableSize(1, dividedColCount)
 
                         /////// header data
                         ///
                         ///
                         initHeaderData([
                                            initCell(0, 0, 1, 1, "NO", true, headerBgColor, true, 12, "center"),
-                                           initCell(1, 0, 1, 1, "품목코드", true, headerBgColor, true, 12, "center"),
-                                           initCell(2, 0, 1, 1, "품목명[규격]", true, headerBgColor, true, 12, "center"),
-                                           initCell(3, 0, 1, 1, "수량", true, headerBgColor, true, 12, "center"),
-                                           initCell(4, 0, 1, 1, "단가", true, headerBgColor, true, 12, "center"),
-                                           initCell(5, 0, 1, 1, "공급가액", true, headerBgColor, true, 12, "center"),
-                                           initCell(6, 0, 1, 1, "부가세", true, headerBgColor, true, 12, "center"),
-                                           initCell(7, 0, 1, 1, "합계", true, headerBgColor, true, 12, "center"),
-                                           initCell(8, 0, 1, 1, "적요", true, headerBgColor, true, 12, "center")
+                                           initCell(0, 1, 1, 1, "품목코드", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 2, 1, 1, "품목명[규격]", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 3, 1, 1, "수량", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 4, 1, 1, "단가", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 5, 1, 1, "공급가액", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 6, 1, 1, "부가세", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 7, 1, 1, "합계", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 8, 1, 1, "적요", true, headerBgColor, true, 12, "center")
                                        ])
                         ///
                         ///
@@ -346,14 +346,14 @@ Item {
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "1", true, "white", false, 12, "center"),
-                                            initCell(1, 0, 1, 1, "L005-0061", true, "white", false, 12, "center"),
-                                            initCell(2, 0, 1, 1, "이태리 전시회 리플렛 [210X297, 아트지 150g, 양면인쇄]", true, "white", false, 12, "left"),
-                                            initCell(3, 0, 1, 1, "500.00", true, "white", false, 12, "center"),
-                                            initCell(4, 0, 1, 1, "320.00", true, "white", false, 12, "center"),
-                                            initCell(5, 0, 1, 1, "160,000.00", true, "white", false, 12, "right"),
-                                            initCell(6, 0, 1, 1, "16,000.00", true, "white", false, 12, "right"),
-                                            initCell(7, 0, 1, 1, "176,000.00", true, "white", false, 12, "center"),
-                                            initCell(8, 0, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(0, 1, 1, 1, "L005-0061", true, "white", false, 12, "center"),
+                                            initCell(0, 2, 1, 1, "이태리 전시회 리플렛 [210X297, 아트지 150g, 양면인쇄]", true, "white", false, 12, "left"),
+                                            initCell(0, 3, 1, 1, "500.00", true, "white", false, 12, "center"),
+                                            initCell(0, 4, 1, 1, "320.00", true, "white", false, 12, "center"),
+                                            initCell(0, 5, 1, 1, "160,000.00", true, "white", false, 12, "right"),
+                                            initCell(0, 6, 1, 1, "16,000.00", true, "white", false, 12, "right"),
+                                            initCell(0, 7, 1, 1, "176,000.00", true, "white", false, 12, "center"),
+                                            initCell(0, 8, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         ///
                         ///
@@ -364,13 +364,13 @@ Item {
                         ///
                         ///
                         initFooterData([
-                                           initCell(0, 0, 3, 1, "합계(VAT포함)", false, headerBgColor, true, 12, "center"),
-                                           initCell(3, 0, 1, 1, "500.00", true, headerBgColor, true, 12, "center"),
-                                           initCell(4, 0, 1, 1, "320.00", true, headerBgColor, true, 12, "center"),
-                                           initCell(5, 0, 1, 1, "160,000.00", true, headerBgColor, true, 12, "right"),
-                                           initCell(6, 0, 1, 1, "16,000.00", true, headerBgColor, true, 12, "right"),
-                                           initCell(7, 0, 1, 1, "176,000.00", true, headerBgColor, true, 12, "center"),
-                                           initCell(8, 0, 1, 1, "", true, headerBgColor, true, 12, "right")
+                                           initCell(0, 0, 1, 3, "합계(VAT포함)", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 3, 1, 1, "500.00", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 4, 1, 1, "320.00", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 5, 1, 1, "160,000.00", true, headerBgColor, true, 12, "right"),
+                                           initCell(0, 6, 1, 1, "16,000.00", true, headerBgColor, true, 12, "right"),
+                                           initCell(0, 7, 1, 1, "176,000.00", true, headerBgColor, true, 12, "center"),
+                                           initCell(0, 8, 1, 1, "", true, headerBgColor, true, 12, "right")
                                        ])
                         ///
                         ///

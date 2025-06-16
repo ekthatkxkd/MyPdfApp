@@ -127,38 +127,38 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    dividedColCount : 3
-                    dividedRowCount : 5
+                    dividedRowCount : 3
+                    dividedColCount : 5
 
                     Component.onCompleted: {
                         initDividedWidths([0.15, 0.3, 0.1, 0.15, 0.3])
 
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         //////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "구매번호", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(2, 0, 1, 3, "구매처", false, headerBgColor, true, 12, "center", true),
-                                            initCell(3, 0, 1, 1, "상호", false, headerBgColor, true, 12, "center"),
-                                            initCell(4, 0, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(0, 1, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(0, 2, 3, 1, "구매처", false, headerBgColor, true, 12, "center", true),
+                                            initCell(0, 3, 1, 1, "상호", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 4, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "구매창고", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "구매창고", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(3, 1, 1, 1, "주소", false, headerBgColor, true, 12, "center"),
-                                            initCell(4, 1, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(1, 3, 1, 1, "주소", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 4, 1, 1, "", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 2, 1, 1, "구매담당자", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 2, 1, 1, "", true, "white", false, 12, "left"),
-                                            initCell(3, 2, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
-                                            initCell(4, 2, 1, 1, "", true, "white", false, 12, "left")
+                                            initCell(2, 0, 1, 1, "구매담당자", false, headerBgColor, true, 12, "center"),
+                                            initCell(2, 1, 1, 1, "", true, "white", false, 12, "left"),
+                                            initCell(2, 3, 1, 1, "TEL", false, headerBgColor, true, 12, "center"),
+                                            initCell(2, 4, 1, 1, "", true, "white", false, 12, "left")
                                         ])
                         ///
                         ///
@@ -177,33 +177,33 @@ Item {
                     anchors.left : parent.left
                     anchors.right : parent.right
 
-                    dividedColCount : 5
-                    dividedRowCount : 4
+                    dividedRowCount : 5
+                    dividedColCount : 4
 
                     tableTextValue : "▶ 자재구매 내역"
 
                     innerDefaultData : [
                         initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
-                        initCell(2, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "center")
+                        initCell(0, 1, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(0, 2, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(0, 3, 1, 1, "", true, "white", false, 12, "center")
                     ]
 
                     Component.onCompleted: {
                         initDividedWidths([0.1, 0.6, 0.1, 0.2])
 
-                        headerTableModel.setTableSize(1, dividedRowCount)
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
-                        footerTableModel.setTableSize(1, dividedRowCount)
+                        headerTableModel.setTableSize(1, dividedColCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
+                        footerTableModel.setTableSize(1, dividedColCount)
 
                         //////// header data
                         ///
                         ///
                         initHeaderData([
                                            initCell(0, 0, 1, 1, "일자", false, headerBgColor, true, 12, "center"),
-                                           initCell(1, 0, 1, 1, "품목명[규격명]", false, headerBgColor, true, 12, "center"),
-                                           initCell(2, 0, 1, 1, "수랑", false, headerBgColor, true, 12, "center"),
-                                           initCell(3, 0, 1, 1, "적요", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 1, 1, 1, "품목명[규격명]", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 2, 1, 1, "수랑", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 3, 1, 1, "적요", false, headerBgColor, true, 12, "center"),
                                        ])
                         ///
                         ///
@@ -214,9 +214,9 @@ Item {
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "03/13", true, "white", false, 12, "center"),
-                                            initCell(1, 0, 1, 1, "[EFFECT_V2_SKY] FRONT BUTTON DECO", true, "white", false, 12, "left"),
-                                            initCell(2, 0, 1, 1, "1,232.00", true, "white", false, 12, "right"),
-                                            initCell(3, 0, 1, 1, "", true, "white", false, 12, "center"),
+                                            initCell(0, 1, 1, 1, "[EFFECT_V2_SKY] FRONT BUTTON DECO", true, "white", false, 12, "left"),
+                                            initCell(0, 2, 1, 1, "1,232.00", true, "white", false, 12, "right"),
+                                            initCell(0, 3, 1, 1, "", true, "white", false, 12, "center"),
                                         ])
 
                         addInnerDefaultRowData()
@@ -231,9 +231,9 @@ Item {
                         ///
                         ///
                         initFooterData([
-                                           initCell(0, 0, 2, 1, "총합계", false, headerBgColor, true, 12, "center"),
-                                           initCell(2, 0, 1, 1, "1,232.00", false, headerBgColor, true, 12, "right"),
-                                           initCell(3, 0, 1, 1, "", false, headerBgColor, true, 12, "center")
+                                           initCell(0, 0, 1, 2, "총합계", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 2, 1, 1, "1,232.00", false, headerBgColor, true, 12, "right"),
+                                           initCell(0, 3, 1, 1, "", false, headerBgColor, true, 12, "center")
                                        ])
                         ///
                         ///
