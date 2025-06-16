@@ -2,6 +2,8 @@ QT += quick widgets printsupport core qml gui
 
 SOURCES += \
         main.cpp \
+        src/drawingtemplate/DrawingMaterialTemplate.cpp \
+        src/drawingtemplate/DrawingTemplate.cpp \
         src/model/listmodel/TableModel.cpp \
         src/pdfExporter/PdfExporter.cpp
 
@@ -24,6 +26,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES +=
 
 HEADERS += \
+    include/drawingtemplate/DrawingMaterialTemplate.h \
+    include/drawingtemplate/DrawingTemplate.h \
     include/model/listmodel/CellData.h \
     include/model/listmodel/TableModel.h \
     include/pdfExporter/PdfExporter.h
