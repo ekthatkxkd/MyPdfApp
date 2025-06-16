@@ -134,18 +134,18 @@ Item {
 
                     Component.onCompleted: {
                         initDividedWidths([0.2, 0.8])
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "전표번호", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 1, 1, "2025/03/25 - 7", true, "white", false, 12, "left")
+                                            initCell(0, 1, 1, 1, "2025/03/25 - 7", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "처리방법", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "처리방법", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "품목대체", true, "white", false, 12, "left")
                                         ])
                         ///
@@ -169,18 +169,18 @@ Item {
 
                     Component.onCompleted: {
                         initDividedWidths([0.2, 0.8])
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "담당자", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 1, 1, "()", true, "white", false, 12, "left")
+                                            initCell(0, 1, 1, 1, "()", true, "white", false, 12, "left")
                                         ])
 
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "발견창고", false, headerBgColor, true, 12, "center"),
+                                            initCell(1, 0, 1, 1, "발견창고", false, headerBgColor, true, 12, "center"),
                                             initCell(1, 1, 1, 1, "Rework창고(00186)", true, "white", false, 12, "left")
                                         ])
                         ///
@@ -198,34 +198,34 @@ Item {
 
                     width : parent.width
 
-                    dividedColCount : 4
-                    dividedRowCount : 6
+                    dividedRowCount : 4
+                    dividedColCount : 6
 
                     innerDefaultData : [
                         initCell(0, 0, 1, 1, "", true, "white", false, 12, "center"),
-                        initCell(1, 0, 1, 1, "", true, "white", false, 12, "left"),
-                        initCell(2, 0, 1, 1, "", true, "white", false, 12, "left"),
-                        initCell(3, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(4, 0, 1, 1, "", true, "white", false, 12, "right"),
-                        initCell(5, 0, 1, 1, "", true, "white", false, 12, "right")
+                        initCell(0, 1, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(0, 2, 1, 1, "", true, "white", false, 12, "left"),
+                        initCell(0, 3, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(0, 4, 1, 1, "", true, "white", false, 12, "right"),
+                        initCell(0, 5, 1, 1, "", true, "white", false, 12, "right")
                     ]
 
                     Component.onCompleted: {
                         initDividedWidths([0.05, 0.25 ,0.36, 0.12, 0.12, 0.1])  // initDividedWidths([0.05, 0.15, 0.5, 0.1, 0.2])
 
-                        headerTableModel.setTableSize(1, dividedRowCount)
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        headerTableModel.setTableSize(1, dividedColCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// header data
                         ///
                         ///
                         initHeaderData([
                                            initCell(0, 0, 1, 1, "순번", false, headerBgColor, true, 12, "center"),
-                                           initCell(1, 0, 1, 1, "품목코드", false, headerBgColor, true, 12, "center"),
-                                           initCell(2, 0, 1, 1, "품목명[규격]", false, headerBgColor, true, 12, "center"),
-                                           initCell(3, 0, 1, 1, "감소수량", false, headerBgColor, true, 12, "center"),
-                                           initCell(4, 0, 1, 1, "증가수량", false, headerBgColor, true, 12, "center"),
-                                           initCell(5, 0, 1, 1, "적요", false, headerBgColor, true, 12, "center")
+                                           initCell(0, 1, 1, 1, "품목코드", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 2, 1, 1, "품목명[규격]", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 3, 1, 1, "감소수량", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 4, 1, 1, "증가수량", false, headerBgColor, true, 12, "center"),
+                                           initCell(0, 5, 1, 1, "적요", false, headerBgColor, true, 12, "center")
                                        ])
                         ///
                         ///
@@ -236,43 +236,43 @@ Item {
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "1", true, "white", false, 12, "center"),
-                                            initCell(1, 0, 1, 1, "P001-0162", true, "white", false, 12, "left"),
-                                            initCell(2, 0, 1, 1, "[EFFECT_V2_WHITE_GRAY_SKY] PRODUCT", true, "white", false, 12, "left"),
-                                            initCell(3, 0, 1, 1, "102.00", true, "white", false, 12, "right"),
-                                            initCell(4, 0, 1, 1, "", true, "white", false, 12, "right"),
-                                            initCell(5, 0, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(0, 1, 1, 1, "P001-0162", true, "white", false, 12, "left"),
+                                            initCell(0, 2, 1, 1, "[EFFECT_V2_WHITE_GRAY_SKY] PRODUCT", true, "white", false, 12, "left"),
+                                            initCell(0, 3, 1, 1, "102.00", true, "white", false, 12, "right"),
+                                            initCell(0, 4, 1, 1, "", true, "white", false, 12, "right"),
+                                            initCell(0, 5, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         addInnerRowData([
-                                            initCell(0, 1, 1, 1, "2", true, "white", false, 12, "center"),
+                                            initCell(1, 0, 1, 1, "2", true, "white", false, 12, "center"),
                                             initCell(1, 1, 1, 1, "E002-0002", true, "white", false, 12, "left"),
-                                            initCell(2, 1, 1, 1, "TPS61088 [TI, SMD,VQFN-20, 4.5Vto12.6V, 11.4A, Reel250]", true, "white", false, 12, "left"),
-                                            initCell(3, 1, 1, 1, "", true, "white", false, 12, "right"),
-                                            initCell(4, 1, 1, 1, "102.00", true, "white", false, 12, "right"),
-                                            initCell(5, 1, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(1, 2, 1, 1, "TPS61088 [TI, SMD,VQFN-20, 4.5Vto12.6V, 11.4A, Reel250]", true, "white", false, 12, "left"),
+                                            initCell(1, 3, 1, 1, "", true, "white", false, 12, "right"),
+                                            initCell(1, 4, 1, 1, "102.00", true, "white", false, 12, "right"),
+                                            initCell(1, 5, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         addInnerRowData([
-                                            initCell(0, 2, 1, 1, "3", true, "white", false, 12, "center"),
-                                            initCell(1, 2, 1, 1, "E002-0003", true, "white", false, 12, "left"),
+                                            initCell(2, 0, 1, 1, "3", true, "white", false, 12, "center"),
+                                            initCell(2, 1, 1, 1, "E002-0003", true, "white", false, 12, "left"),
                                             initCell(2, 2, 1, 1, "STM32F030CC_LQFP48 [ST, SMD, LQFP-48, 2.4Vto3.6V, 메모리 크기: 256kB, RAM크기:32kB, Reel 2K4]", true, "white", false, 12, "left"),
-                                            initCell(3, 2, 1, 1, "102.00", true, "white", false, 12, "right"),
-                                            initCell(4, 2, 1, 1, "", true, "white", false, 12, "right"),
-                                            initCell(5, 2, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(2, 3, 1, 1, "102.00", true, "white", false, 12, "right"),
+                                            initCell(2, 4, 1, 1, "", true, "white", false, 12, "right"),
+                                            initCell(2, 5, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         addInnerRowData([
-                                            initCell(0, 3, 1, 1, "4", true, "white", false, 12, "center"),
-                                            initCell(1, 3, 1, 1, "E002-0004", true, "white", false, 12, "left"),
-                                            initCell(2, 3, 1, 1, "TPS55340RTE [TI, SMD, WQFN-16, 2.9Vto32V, 2.9Vto38V, 6.6A, Reel3K]", true, "white", false, 12, "left"),
+                                            initCell(3, 0, 1, 1, "4", true, "white", false, 12, "center"),
+                                            initCell(3, 1, 1, 1, "E002-0004", true, "white", false, 12, "left"),
+                                            initCell(3, 2, 1, 1, "TPS55340RTE [TI, SMD, WQFN-16, 2.9Vto32V, 2.9Vto38V, 6.6A, Reel3K]", true, "white", false, 12, "left"),
                                             initCell(3, 3, 1, 1, "102.00", true, "white", false, 12, "right"),
-                                            initCell(4, 3, 1, 1, "", true, "white", false, 12, "right"),
-                                            initCell(5, 3, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(3, 4, 1, 1, "", true, "white", false, 12, "right"),
+                                            initCell(3, 5, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         addInnerRowData([
-                                            initCell(0, 4, 1, 1, "5", true, "white", false, 12, "center"),
-                                            initCell(1, 4, 1, 1, "E002-0006", true, "white", false, 12, "left"),
-                                            initCell(2, 4, 1, 1, "SN74AHC4066RGYR((VQFN) [TI, SMD, VQFN-14, 4 Switch, 2Vto5.5V, Reel 3K])", true, "white", false, 12, "left"),
-                                            initCell(3, 4, 1, 1, "102.00", true, "white", false, 12, "right"),
+                                            initCell(4, 0, 1, 1, "5", true, "white", false, 12, "center"),
+                                            initCell(4, 1, 1, 1, "E002-0006", true, "white", false, 12, "left"),
+                                            initCell(4, 2, 1, 1, "SN74AHC4066RGYR((VQFN) [TI, SMD, VQFN-14, 4 Switch, 2Vto5.5V, Reel 3K])", true, "white", false, 12, "left"),
+                                            initCell(4, 3, 1, 1, "102.00", true, "white", false, 12, "right"),
                                             initCell(4, 4, 1, 1, "", true, "white", false, 12, "right"),
-                                            initCell(5, 4, 1, 1, "", true, "white", false, 12, "right")
+                                            initCell(4, 5, 1, 1, "", true, "white", false, 12, "right")
                                         ])
                         ///
                         ///
@@ -289,25 +289,25 @@ Item {
 
                     width : parent.width
 
-                    dividedColCount : 1
-                    dividedRowCount : 6
+                    dividedRowCount : 1
+                    dividedColCount : 6
 
 
                     Component.onCompleted: {
                         initDividedWidths([0.1, 0.25, 0.1, 0.25, 0.1, 0.2])
 
-                        tableModel.setTableSize(dividedColCount, dividedRowCount)
+                        tableModel.setTableSize(dividedRowCount, dividedColCount)
 
                         /////// inner data
                         ///
                         ///
                         addInnerRowData([
                                             initCell(0, 0, 1, 1, "감소수량", false, headerBgColor, true, 12, "center"),
-                                            initCell(1, 0, 1, 1, "102.00", true, "white", false, 12, "right"),
-                                            initCell(2, 0, 1, 1, "증가수량", false, headerBgColor, true, 12, "center"),
-                                            initCell(3, 0, 1, 1, "47,532.00", true, "white", false, 12, "right"),
-                                            initCell(4, 0, 1, 1, "인수", false, headerBgColor, true, 12, "center"),
-                                            initCell(5, 0, 1, 1, "인", false, "white", false, 12, "right")
+                                            initCell(0, 1, 1, 1, "102.00", true, "white", false, 12, "right"),
+                                            initCell(0, 2, 1, 1, "증가수량", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 3, 1, 1, "47,532.00", true, "white", false, 12, "right"),
+                                            initCell(0, 4, 1, 1, "인수", false, headerBgColor, true, 12, "center"),
+                                            initCell(0, 5, 1, 1, "인", false, "white", false, 12, "right")
                                         ])
                         ///
                         ///
