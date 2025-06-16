@@ -61,6 +61,13 @@ Window {
         if (component.status === Component.Ready) {
             previewWindowInstance = component.createObject(mainWindow)
             if (previewWindowInstance) {
+                // 윈도우가 닫힐 때의 처리를 연결
+                previewWindowInstance.closing.connect(function() {
+                    console.log("Preview window is closing")
+                    previewWindowInstance.destroy()
+                    previewWindowInstance = null
+                })
+
                 previewWindowInstance.show()
                 previewWindowInstance.raise()
                 previewWindowInstance.requestActivate()
