@@ -11,8 +11,8 @@
 PreviewImageProvider::PreviewImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Image) {
 
-    std::shared_ptr<QImage> defaultPage = std::make_shared<QImage>(PdfExporter::PREVIEW_PIXEL_WIDTH,
-                                                                   PdfExporter::PREVIEW_PIXEL_HEIGHT,
+    std::shared_ptr<QImage> defaultPage = std::make_shared<QImage>(PREVIEW_PIXEL_WIDTH,
+                                                                   PREVIEW_PIXEL_HEIGHT,
                                                                    QImage::Format_ARGB32);
     defaultPage->fill(Qt::white);
     m_previewPages.append(defaultPage);
@@ -37,8 +37,8 @@ QImage PreviewImageProvider::requestImage(const QString &id, QSize *size, const 
         }
     }
 
-    QImage emptyPage(PdfExporter::PREVIEW_PIXEL_WIDTH,
-                     PdfExporter::PREVIEW_PIXEL_HEIGHT,
+    QImage emptyPage(PREVIEW_PIXEL_WIDTH,
+                     PREVIEW_PIXEL_HEIGHT,
                      QImage::Format_ARGB32);
     emptyPage.fill(Qt::white);
 
@@ -51,20 +51,12 @@ void PreviewImageProvider::updatePreviewImages(QList<std::shared_ptr<QImage>> &i
 
 //////// START PdfExporter definition.
 ///
-PdfExporter::PdfExporter(PreviewImageProvider* provider, QObject *parent) : QObject(parent), m_imageProvider(provider) {
-    initPxContentsFullSize();
+PdfExporter::PdfExporter(PreviewImageProvider* provider, QObject *parent)
+    : QObject(parent), m_imageProvider(provider) {
+    initPageSettings();
 }
 
 PdfExporter::~PdfExporter() {
-}
-
-void PdfExporter::initPxContentsFullSize() {
-    pxContentsFullSize = QSizeF(convertMMtoPixel((mmA4Width - (2 * mmPdfDefaultMargin))),
-                                convertMMtoPixel(mmA4Height - (2 * mmPdfDefaultMargin)));
-}
-
-qreal PdfExporter::convertMMtoPixel(double mmValue) {
-    return (mmValue / 25.4) * pdfDefaultDPI;
 }
 
 bool PdfExporter::hasPreview() const {
@@ -74,10 +66,22 @@ int PdfExporter::pageCount() const {
     return m_pageCount;
 }
 
-void PdfExporter::setDefaultPdfEnvironment(std::shared_ptr<QPdfWriter> pdfWriter) {
+void PdfExporter::initDefaultPdf(const QString &filePath) {
+    pdfWriter = std::make_shared<QPdfWriter>(filePath);
     pdfWriter->setPageSize(QPageSize(QPageSize::A4));
-    pdfWriter->setPageMargins(QMarginsF(mmPdfDefaultMargin, mmPdfDefaultMargin, mmPdfDefaultMargin, mmPdfDefaultMargin), QPageLayout::Millimeter);
-    pdfWriter->setResolution(pdfDefaultDPI);
+    pdfWriter->setPageMargins(pageSettings.mmMargins, QPageLayout::Millimeter);
+    pdfWriter->setResolution(pageSettings.resolution);
+}
+
+void PdfExporter::initDefaultImage() {
+    // PDF와 동일한 크기의 QImage 설정.
+    imagePtr = std::make_shared<QImage>(pageSettings.pxImageSize, QImage::Format_ARGB32);
+    imagePtr->fill(Qt::white);
+
+    // DPI 정보 설정 (QPainter 스케일링 정확성을 위해)
+    double dotsPerMeter = pageSettings.resolution * 39.3701; // 1인치 = 39.3701 dots/meter
+    imagePtr->setDotsPerMeterX(qRound(dotsPerMeter));
+    imagePtr->setDotsPerMeterY(qRound(dotsPerMeter));
 }
 
 void PdfExporter::setFont(QPainter &painter, int fontSize, bool isBold) {
@@ -90,24 +94,19 @@ void PdfExporter::setFont(QPainter &painter, int fontSize, bool isBold) {
     painter.setPen(QPen(Qt::black, 2));
 }
 
-QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames, const bool isInside) {
+QHash<QString, QQuickItem*> PdfExporter::getChildItems(QQuickItem *rootItem, const QList<QString> childObjNames, const bool &isSearchAllDepth) {
     QHash<QString, QQuickItem*> childItems;
 
     if (rootItem != nullptr) {
         for (QString childObjName : childObjNames) {
-            if (isInside) {
-                childItems[childObjName] = getInnerItem(rootItem, childObjName);
-            } else {
-                childItems[childObjName] = getChildItem(rootItem, childObjName);
-            }
+            childItems[childObjName] = getChildItem(rootItem, childObjName, isSearchAllDepth);
         }
     }
 
     return childItems;
 }
 
-QQuickItem* PdfExporter::getChildItem(QQuickItem *rootItem, const QString &childObjName) {
-    // Searches only up to 1 depth.
+QQuickItem* PdfExporter::getChildItem(QQuickItem *rootItem, const QString &childObjName, const bool &isSearchAllDepth) {
     QQuickItem *retChildItem = nullptr;
 
     if (rootItem != nullptr) {
@@ -119,37 +118,18 @@ QQuickItem* PdfExporter::getChildItem(QQuickItem *rootItem, const QString &child
             if (objectName == childObjName) {
                 retChildItem = childItem;
                 break;
-            }
-        }
-    }
+            } else if (isSearchAllDepth) {
+                // Search all depths within root.
+                retChildItem = getChildItem(childItem, childObjName, isSearchAllDepth);
 
-    return retChildItem;
-}
-
-QQuickItem* PdfExporter::getInnerItem(QQuickItem *rootItem, const QString &objNameToFound) {
-    // Search all depths within root.
-    QQuickItem *retInnerItem = nullptr;
-
-    if (rootItem != nullptr) {
-        const QList<QQuickItem*> childItems = rootItem->childItems();
-
-        for (QQuickItem *childItem : childItems) {
-            const QString childObjName = childItem->objectName();
-
-            if (childObjName == objNameToFound) {
-                retInnerItem = childItem;
-                break;
-            } else {
-                retInnerItem = getInnerItem(childItem, objNameToFound);
-
-                if (retInnerItem != nullptr) {
+                if (retChildItem != nullptr) {
                     break;
                 }
             }
         }
     }
 
-    return retInnerItem;
+    return retChildItem;
 }
 
 void PdfExporter::initTableCellSizes(QPainter &painter, std::vector<double> &pxCellWidths, std::vector<double> &pxCellHeights, const QVector<QVector<CellData>> &cellDatas,
@@ -275,7 +255,7 @@ QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
     setFont(painter, 20, true);
 
     QFontMetrics metrics(painter.font());
-    QRectF boundingBox(QPointF(0, 0), QSizeF(pxContentsFullSize.width(), metrics.height()));
+    QRectF boundingBox(QPointF(0, 0), QSizeF(pageSettings.pxContentSize.width(), metrics.height()));
 
     Qt::Alignment align = Qt::AlignHCenter;
 
@@ -414,7 +394,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
         for (int rowIndex = 0; rowIndex < innerDatas.size(); rowIndex++) {
 
-            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pxContentsFullSize.height()) {
+            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
                 // pdfWriter.newPage();
                 createNewPage(painter, isPdf);
 
@@ -506,7 +486,7 @@ QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, 
 
         for (int rowIndex = 0; rowIndex < footerDatas.size(); rowIndex++) {
 
-            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pxContentsFullSize.height()) {
+            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
                 // pdfWriter.newPage();
                 createNewPage(painter, isPdf);
 
@@ -625,17 +605,17 @@ QRectF PdfExporter::drawTemplateImage(QPainter &painter, QQuickItem *imageItem, 
             double aspectRatio = static_cast<double>(originPixmap.height()) / originPixmap.width();
             int targetImgHeight = static_cast<int>(targetImgWidth * aspectRatio);
 
-            if (targetImgWidth > pxContentsFullSize.width() || targetImgHeight > pxContentsFullSize.height()) {
-                scaledPixmap = originPixmap.scaled(pxContentsFullSize.width(), pxContentsFullSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            if (targetImgWidth > pageSettings.pxContentSize.width() || targetImgHeight > pageSettings.pxContentSize.height()) {
+                scaledPixmap = originPixmap.scaled(pageSettings.pxContentSize.width(), pageSettings.pxContentSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
             } else {
                 scaledPixmap = originPixmap.scaled(targetImgWidth, targetImgHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             }
         } else {
-            scaledPixmap = originPixmap.scaled(pxContentsFullSize.width(), pxContentsFullSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            scaledPixmap = originPixmap.scaled(pageSettings.pxContentSize.width(), pageSettings.pxContentSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
         // newPage
-        if ((imgCursorPoint.y() + scaledPixmap.height()) > pxContentsFullSize.height()) {
+        if ((imgCursorPoint.y() + scaledPixmap.height()) > pageSettings.pxContentSize.height()) {
             createNewPage(painter, isPdf);
 
             cursorPoint = QPointF(0, 0);
@@ -643,7 +623,7 @@ QRectF PdfExporter::drawTemplateImage(QPainter &painter, QQuickItem *imageItem, 
         }
 
         if (isHCenter) {
-            imgCursorPoint = QPointF((pxContentsFullSize.width() - scaledPixmap.width()) / 2,
+            imgCursorPoint = QPointF((pageSettings.pxContentSize.width() - scaledPixmap.width()) / 2,
                                      imgCursorPoint.y());
         }
 
@@ -686,7 +666,7 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QQuickItem *rootItem, 
     cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
 
     if (templateQuickItems[materialObjNames[1]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.15, 0.3, 0.05, 0.1, 0.4};
 
         childItemRect[1] = drawTemplateTable(painter, templateQuickItems[materialObjNames[1]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -702,7 +682,7 @@ void PdfExporter::drawMaterialTemplate(QPainter &painter, QQuickItem *rootItem, 
     cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[1].height() + templateItemSpacing);
 
     if (templateQuickItems[materialObjNames[2]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.1, 0.6, 0.1, 0.2};
 
         childItemRect[2] = drawTemplateTable(painter, templateQuickItems[materialObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -741,7 +721,7 @@ void PdfExporter::defectReportTemplate(QPainter &painter, QQuickItem *rootItem, 
 
     cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
     if (templateQuickItems[defectReportObjNames[1]] != nullptr) {
-        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - marginBetweenTables) / 2;
+        qreal pxTableFullWidthSize = (pageSettings.pxContentSize.width() - marginBetweenTables) / 2;
 
         std::vector<qreal> tableWidthRatio{0.2, 0.8};
 
@@ -758,7 +738,7 @@ void PdfExporter::defectReportTemplate(QPainter &painter, QQuickItem *rootItem, 
 
     cursorPoint = QPointF(childItemRect[1].x() + childItemRect[1].width() + marginBetweenTables, childItemRect[1].y());
     if (templateQuickItems[defectReportObjNames[2]] != nullptr) {
-        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - marginBetweenTables) / 2;
+        qreal pxTableFullWidthSize = (pageSettings.pxContentSize.width() - marginBetweenTables) / 2;
 
         std::vector<qreal> tableWidthRatio{0.2, 0.8};
 
@@ -778,7 +758,7 @@ void PdfExporter::defectReportTemplate(QPainter &painter, QQuickItem *rootItem, 
 
         cursorPoint = QPointF(0, childItemRect[1].y() + maxUpperTableHeight + templateItemSpacing);
 
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
 
         std::vector<qreal> tableWidthRatio{0.05, 0.25 ,0.36, 0.12, 0.12, 0.1};
 
@@ -795,7 +775,7 @@ void PdfExporter::defectReportTemplate(QPainter &painter, QQuickItem *rootItem, 
 
     cursorPoint = QPointF(0, childItemRect[3].y() + childItemRect[3].height() + templateItemSpacing);
     if (templateQuickItems[defectReportObjNames[4]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.1, 0.25, 0.1, 0.25, 0.1, 0.2};
 
         childItemRect[4] = drawTemplateTable(painter, templateQuickItems[defectReportObjNames[4]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -840,7 +820,7 @@ void PdfExporter::orderFormTemplate(QPainter &painter, QQuickItem *rootItem, con
         QString orderDateText = orderDateItem->property("orderDateItemText").toString();
 
         QFontMetrics metrics(painter.font());
-        QRectF boundingBox(QPointF(pxContentsFullSize.width() - metrics.horizontalAdvance(orderDateText), cursorPoint.y()),
+        QRectF boundingBox(QPointF(pageSettings.pxContentSize.width() - metrics.horizontalAdvance(orderDateText), cursorPoint.y()),
                            QSizeF(metrics.horizontalAdvance(orderDateText), metrics.height()));
 
         Qt::Alignment align = Qt::AlignVCenter;
@@ -860,7 +840,7 @@ void PdfExporter::orderFormTemplate(QPainter &painter, QQuickItem *rootItem, con
 
     cursorPoint = QPointF(0, childItemRect[0].height() + templateItemSpacing);
     if (templateQuickItems[orderFromObjNames[2]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.2, 0.3, 0.2, 0.3};
 
         childItemRect[2] = drawTemplateTable(painter, templateQuickItems[orderFromObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -876,7 +856,7 @@ void PdfExporter::orderFormTemplate(QPainter &painter, QQuickItem *rootItem, con
 
     cursorPoint = QPointF(0, childItemRect[2].y() + childItemRect[2].height() + templateItemSpacing);
     if (templateQuickItems[orderFromObjNames[3]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.2, 0.3, 0.2, 0.3};
 
         childItemRect[3] = drawTemplateTable(painter, templateQuickItems[orderFromObjNames[3]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -893,7 +873,7 @@ void PdfExporter::orderFormTemplate(QPainter &painter, QQuickItem *rootItem, con
 
     cursorPoint = QPointF(0, childItemRect[3].y() + childItemRect[3].height() + templateItemSpacing);
     if (templateQuickItems[orderFromObjNames[4]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.05, 0.1, 0.15, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 
         childItemRect[4] = drawTemplateTable(painter, templateQuickItems[orderFromObjNames[4]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -933,7 +913,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
     cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + childItemRect[0].height() + templateItemSpacing);
 
     if (templateQuickItems[receiptVouchrObjNames[1]] != nullptr) {
-        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - marginBetweenTables) / 2;
+        qreal pxTableFullWidthSize = (pageSettings.pxContentSize.width() - marginBetweenTables) / 2;
 
         std::vector<qreal> tableWidthRatio{0.2, 0.8};
 
@@ -951,7 +931,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
     cursorPoint = QPointF(childItemRect[1].x() + childItemRect[1].width() + marginBetweenTables, childItemRect[1].y());
 
     if (templateQuickItems[receiptVouchrObjNames[2]] != nullptr) {
-        qreal pxTableFullWidthSize = (pxContentsFullSize.width() - marginBetweenTables) / 2;
+        qreal pxTableFullWidthSize = (pageSettings.pxContentSize.width() - marginBetweenTables) / 2;
         std::vector<qreal> tableWidthRatio{0.2, 0.8};
 
         childItemRect[2] = drawTemplateTable(painter, templateQuickItems[receiptVouchrObjNames[2]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -969,7 +949,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
         int maxUpperTableHeight = (childItemRect[1].height() > childItemRect[2].height()) ? childItemRect[1].height() : childItemRect[2].height();
         cursorPoint = QPointF(0, childItemRect[1].y() + maxUpperTableHeight + templateItemSpacing);
 
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
 
         std::vector<qreal> tableWidthRatio{0.05, 0.15, 0.5, 0.1, 0.2};
 
@@ -996,7 +976,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
     cursorPoint = QPointF(0, childItemRect[4].y() + childItemRect[4].height() + templateItemSpacing);
 
     if (templateQuickItems[receiptVouchrObjNames[5]] != nullptr) {
-        qreal pxTableFullWidthSize = pxContentsFullSize.width();
+        qreal pxTableFullWidthSize = pageSettings.pxContentSize.width();
         std::vector<qreal> tableWidthRatio{0.1, 0.25, 0.1, 0.25, 0.1, 0.2};
 
         childItemRect[5] = drawTemplateTable(painter, templateQuickItems[receiptVouchrObjNames[5]], cursorPoint, pxTableFullWidthSize, tableWidthRatio, isPdf);
@@ -1014,7 +994,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
     cursorPoint = QPointF(0, childItemRect[5].y() + childItemRect[5].height() + templateItemSpacing);
 
     if (templateQuickItems[receiptVouchrObjNames[6]] != nullptr) {
-        childItemRect[6] = drawTemplateImage(painter, templateQuickItems[receiptVouchrObjNames[6]], cursorPoint, isPdf, pxContentsFullSize.width(), true);
+        childItemRect[6] = drawTemplateImage(painter, templateQuickItems[receiptVouchrObjNames[6]], cursorPoint, isPdf, pageSettings.pxContentSize.width(), true);
     }
     ///
     ///
@@ -1024,8 +1004,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
 bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     qDebug() << "exportToPdf, start";
 
-    pdfWriter = std::make_shared<QPdfWriter>(filePath);
-    setDefaultPdfEnvironment(pdfWriter);
+    initDefaultPdf(filePath);
 
     QPainter painter;
 
@@ -1060,8 +1039,7 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
     m_pageCount = 0;
     previewPages.clear();
 
-    PreviewPageSettings settings = calculatePreviewPageSettings();
-    std::shared_ptr<QImage> imagePtr = std::make_shared<QImage>(createPdfSizedImage());
+    initDefaultImage();
     previewPages.append(imagePtr);
 
     QPainter painter;
@@ -1072,7 +1050,7 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
     }
 
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.translate(settings.marginPixels, settings.marginPixels);
+    painter.translate(pageSettings.pxMargins, pageSettings.pxMargins);
 
     setFont(painter);
 
@@ -1103,7 +1081,7 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
 QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
     QVector<QVector<CellData>> m_processedTableData;
 
-    QQuickItem * innerRepQuickItem = getInnerItem(tableItem, repeaterObjName);
+    QQuickItem * innerRepQuickItem = getChildItem(tableItem, repeaterObjName, true);
 
     if (innerRepQuickItem) {
         QVariant modelProperty = innerRepQuickItem->property("model");
@@ -1161,68 +1139,45 @@ void PdfExporter::createNewPage(QPainter &painter, const bool &isPdf) {
 
         painter.end();
 
-        PreviewPageSettings settings = calculatePreviewPageSettings();
-        std::shared_ptr<QImage> imagePtr = std::make_shared<QImage>(createPdfSizedImage());
+        initDefaultImage();
         previewPages.append(imagePtr);
 
         painter.begin(imagePtr.get());
 
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.translate(settings.marginPixels, settings.marginPixels);
+        painter.translate(pageSettings.pxMargins, pageSettings.pxMargins);
 
         //////// test
         // painter.setPen(QPen(Qt::red, 2, Qt::DashLine));
-        // painter.drawRect(0, 0, settings.contentSize.width(), settings.contentSize.height());
+        // painter.drawRect(0, 0, pageSettings.pxContentSize.width(), pageSettings.pxContentSize.height());
         ////////
 
         painter.setFont(font);
     }
 }
 
-PreviewPageSettings PdfExporter::calculatePreviewPageSettings() const {
-    PreviewPageSettings settings;
-
+void PdfExporter::initPageSettings() {
     // A4 페이지 크기 설정
     QPageSize pageSize(QPageSize::A4);
-    settings.pageSizeInMM = pageSize.size(QPageSize::Millimeter);
+
+    pageSettings.mmPageFullSize = pageSize.size(QPageSize::Millimeter);
 
     // 여백 설정 (QPdfWriter와 동일)
-    settings.marginsInMM = QMarginsF(15, 15, 15, 15);
-    settings.resolution = pdfDefaultDPI;
+    pageSettings.mmMargins = QMarginsF(mmDefaultPageMargin, mmDefaultPageMargin, mmDefaultPageMargin, mmDefaultPageMargin);
+    pageSettings.resolution = defaultDPI;
 
-    // 전체 페이지 크기를 픽셀로 변환
-    double pageWidthInInches = settings.pageSizeInMM.width() * MM_TO_INCH;
-    double pageHeightInInches = settings.pageSizeInMM.height() * MM_TO_INCH;
-
-    // A4 SIZE 전체 크기
-    settings.imageSize = QSize(
-        qRound(pageWidthInInches * settings.resolution),
-        qRound(pageHeightInInches * settings.resolution)
+    // A4 SIZE 전체 크기 mm 을 pixel 단위로 변환.
+    pageSettings.pxImageSize = QSize(
+        qRound(pageSettings.mmPageFullSize.width() * 25.4 * pageSettings.resolution),
+        qRound(pageSettings.mmPageFullSize.height() * 25.4 * pageSettings.resolution)
         );
 
     // 여백을 픽셀로 변환
-    settings.marginPixels = qRound(settings.marginsInMM.left() * MM_TO_INCH * settings.resolution);
+    pageSettings.pxMargins = qRound(pageSettings.mmMargins.left() * 25.4 * pageSettings.resolution);
 
     // 내용 영역 크기 계산 (여백 제외)
-    settings.contentSize = QSize(
-        settings.imageSize.width() - (2 * settings.marginPixels),
-        settings.imageSize.height() - (2 * settings.marginPixels)
+    pageSettings.pxContentSize = QSize(
+        pageSettings.pxImageSize.width() - (2 * pageSettings.pxMargins),
+        pageSettings.pxImageSize.height() - (2 * pageSettings.pxMargins)
         );
-
-    return settings;
-}
-
-QImage PdfExporter::createPdfSizedImage() const {
-    PreviewPageSettings settings = calculatePreviewPageSettings();
-
-    // PDF와 동일한 크기의 QImage 생성
-    QImage pageImage(settings.imageSize, QImage::Format_ARGB32);
-    pageImage.fill(Qt::white);
-
-    // DPI 정보 설정 (QPainter 스케일링 정확성을 위해)
-    double dotsPerMeter = settings.resolution * 39.3701; // 1인치 = 39.3701 dots/meter
-    pageImage.setDotsPerMeterX(qRound(dotsPerMeter));
-    pageImage.setDotsPerMeterY(qRound(dotsPerMeter));
-
-    return pageImage;
 }
