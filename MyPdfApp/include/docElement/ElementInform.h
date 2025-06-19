@@ -6,6 +6,7 @@
 #include <QSizeF>
 #include <QRectF>
 #include <QMarginsF>
+#include <QColor>
 
 namespace ElementInform{
 
@@ -64,6 +65,28 @@ struct RenderedElementInfo {
                         const QRectF& rect = QRectF(),
                         int page = 1)
         : elementId(id), boundingRect(rect), pageNumber(page) {}
+};
+
+// Table 을 구성하는 Cell 정보
+struct CellData {
+    QString cellId;
+    int startRow, startCol;
+    int rowSpan, colSpan;
+    QString cellText;
+    QColor bgColor;
+    bool isBold;
+    int fontSize;
+    QString alignPosition;
+    bool isVerticalDir;
+
+
+    CellData(QString id, int r, int c, int rs, int cs, const QString& text,
+             const QColor& bg, bool bold, int fSize, const QString& align, bool isVDir) :
+        cellId(id),
+        startRow(r), startCol(c), rowSpan(rs), colSpan(cs),
+        cellText(text), bgColor(bg),
+        isBold(bold), fontSize(fSize), alignPosition(align),
+        isVerticalDir(isVDir) {}
 };
 }
 

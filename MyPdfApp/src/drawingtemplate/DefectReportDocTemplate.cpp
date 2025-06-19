@@ -4,16 +4,23 @@
 #include "include/docElement/ImageElement.h"
 #include <QPixmap>
 
-DefectReportDocTemplate::DefectReportDocTemplate() : DocumentTemplate("DefectReport") {
+DefectReportDocTemplate::DefectReportDocTemplate() : DocumentTemplate("DefectReport", "불량발견 보고서") {
 
 }
 
-void DefectReportDocTemplate::setupTemplate() {
-    // 제목
-    auto title = std::make_unique<TextElement>("Template B - 대시보드",
-                                               QFont("Arial", 16, QFont::Bold));
-    title->setElementId("title");
-    addElement(std::move(title));
+void DefectReportDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) {
+    if (templateTitle != "") {
+        QFont font;
+        font.setPointSize(20);
+        font.setBold(true);
+
+        // 제목
+        auto title = std::make_unique<TextElement>(templateTitle,
+                                                   font,
+                                                   Qt::AlignHCenter);
+        title->setElementId("title");
+        addElement(std::move(title));
+    }
 
     // 세 개의 표를 같은 행에 배치
     auto table1 = std::make_unique<TableElement>(generateTableData(0));

@@ -3,48 +3,100 @@
 #include "include/docElement/TableElement.h"
 #include <QPixmap>
 
-MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material") {
+MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material", "자재구매 확인서") {
 
 }
 
-void MaterialDocTemplate::setupTemplate() {
-    // 제목 (첫 번째 요소 - 기본 위치)
-    auto title = std::make_unique<TextElement>("Template A - 보고서",
-                                               QFont("Arial", 18, QFont::Bold),
-                                               Qt::AlignCenter);
-    title->setElementId("title");
-    addElement(std::move(title));
+void MaterialDocTemplate::initInformTableData(const QList<QPair<QString, QStringList>> &dbDatas) {
+    for (auto &dbData : dbDatas) {
+        const QString id = dbData.first;
+        const QString value = dbData.second[0];
 
-    // 부제목 (제목 아래에 배치)
-    auto subtitle = std::make_unique<TextElement>("월간 분석 리포트",
-                                                  QFont("Arial", 12));
-    subtitle->setElementId("subtitle");
-    addElementBelow(std::move(subtitle), "title", 15);
+        for (auto &innerDataRow : informTableInnerDatas) {
+            bool isFound = false;
+            for (auto &innerData : innerDataRow) {
+                if (innerData.cellId == id) {
+                    innerData.cellText = value;
+                    isFound = true;
+                    break;
+                }
+            }
+            if (isFound)
+                break;
+        }
+    }
+}
 
-    // 첫 번째 표 (부제목 아래에 배치)
-    auto table1 = std::make_unique<TableElement>(generateTableData(0));
-    table1->setElementId("table_1");
-    addElementBelow(std::move(table1), "subtitle", 20);
+void MaterialDocTemplate::initHistoryTableData(const QList<QPair<QString, QStringList>> &dbDatas) {
+    for (auto &dbData : dbDatas) {
+        const QString id = dbData.first;
+        const QStringList values = dbData.second;
 
-    // 두 번째 표 (첫 번째 표 아래에 배치)
-    auto table2 = std::make_unique<TableElement>(generateTableData(1));
-    table2->setElementId("table_2");
-    addElementBelow(std::move(table2), "table_1", 15);
+        if (id == "rowData") {
+            QVector<CellData> newRowCellDatas = defaultHistoryInnerDatas;
+            int newRowNum = historyInnerDatas.size();
 
-    // 세 번째와 네 번째 표 (같은 행에 배치)
-    auto table3 = std::make_unique<TableElement>(generateTableData(2));
-    table3->setElementId("table_3");
-    addElementBelow(std::move(table3), "table_2", 20);
+            for (int cellIndex = 0; cellIndex < newRowCellDatas.size(); cellIndex++) {
+                const QString foundDbValue = newRowCellDatas[cellIndex].cellId + ":";
+                newRowCellDatas[cellIndex].startRow = newRowNum;
 
-    auto table4 = std::make_unique<TableElement>(generateTableData(3));
-    table4->setElementId("table_4");
-    addElementRightOf(std::move(table4), "table_3", 10);
+                for (auto &cellValue : values) {
+                    if (cellValue.startsWith(foundDbValue)) {
+                        newRowCellDatas[cellIndex].cellText = cellValue.mid(foundDbValue.length());
+                        break;
+                    }
+                }
+            }
+            historyInnerDatas.push_back(newRowCellDatas);
+        } else {  // "rowData" 가 아닐 경우 모두 footer 값이라고 판단.
+            for (auto &cellData : historyFooterDatas) {
+                if (cellData.cellId != "" ) {
+                    const QString foundDbValue = cellData.cellId + ":";
+                    for (auto &cellValue : values) {
+                        if (cellValue.startsWith(foundDbValue)) {
+                            cellData.cellText = cellValue.mid(foundDbValue.length());
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
-    // 다섯 번째 표 (새 페이지에 배치)
-    auto table5 = std::make_unique<TableElement>(generateTableData(4));
-    table5->setElementId("table_5");
-    table5->setPositionReference(PositionReference::nextPage());
-    addElement(std::move(table5));
+void MaterialDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) {
+    if (templateTitle != "") {
+        //////// 제목 (첫 번째 요소 - 기본 위치)
+        QFont font;
+        font.setPointSize(20);
+        font.setBold(true);
+
+        auto title = std::make_unique<TextElement>(templateTitle,
+                                                   font,
+                                                   Qt::AlignHCenter);
+        title->setElementId("title");
+        addElement(std::move(title));
+    }
+
+    //////// 첫 번째 표 (제목 아래에 배치)
+    initInformTableData(elementDatas[materialComponentNames[0]]);
+
+    auto table1 = std::make_unique<TableElement>("", QVector<CellData>(), informTableInnerDatas, QVector<CellData>(),informTableWidthRatio);
+    table1->setElementId(materialComponentNames[0]);
+    addElementBelow(std::move(table1), "title", 5);
+    ////////
+
+
+    //////// 두 번째 표 (첫 번째 표 아래에 배치)
+    initHistoryTableData(elementDatas[materialComponentNames[1]]);
+
+    auto table2 = std::make_unique<TableElement>(historyTableTitle, historyHeaderDatas, historyInnerDatas, historyFooterDatas, historyWidthRatio);
+    table2->setElementId(materialComponentNames[1]);
+    addElementBelow(std::move(table2), materialComponentNames[0], 5);
+    ////////
+
+
+
+
 
     ////////
     // // 큰 테이블 - 행별 분할 허용
@@ -60,19 +112,4 @@ void MaterialDocTemplate::setupTemplate() {
     // smallTable->setPageBreakPolicy(TableElement::PageBreakPolicy::MoveToNewPage);
     // addElementBelow(std::move(smallTable), "large_table", 15);
     ////////
-}
-
-QVector<QVector<QString>> MaterialDocTemplate::generateTableData(int tableIndex) {
-    QVector<QVector<QString>> data;
-    // 헤더
-    // data.append({"항목", "값", "비고"});
-    data.push_back({"항목", "값", "비고"});
-
-    // 데이터 행들
-    for (int i = 0; i < 5; ++i) {
-        data.append({QString("항목 %1-%2").arg(tableIndex + 1).arg(i + 1),
-                     QString("값 %1").arg(i + 1),
-                     QString("비고 %1").arg(i + 1)});
-    }
-    return data;
 }

@@ -6,7 +6,10 @@
 // 표 요소
 class TableElement : public IRenderElement {
 public:
-    TableElement(const QVector<QVector<QString>>& tableData,
+    TableElement(const QString &title,
+                 const QVector<CellData> &headerDatas,
+                 const QVector<QVector<CellData>>& innerDatas,
+                 const QVector<CellData> &footerDatas,
                  const QVector<qreal>& colWidths = QVector<qreal>());
 
     QRectF render(QPainter& painter, const QPointF& startPos,
@@ -19,7 +22,11 @@ private:
     void renderTableRow(QPainter& painter, const QVector<QString>& rowData,
                         const QPointF& startPos, bool isHeader);
 
-    QVector<QVector<QString>> data;
+    const QString title;
+    QVector<CellData> headerDatas;
+    QVector<QVector<CellData>> innerDatas;
+    QVector<CellData> footerDatas;
+
     QVector<qreal> columnWidths;
     QFont headerFont;
     QFont cellFont;

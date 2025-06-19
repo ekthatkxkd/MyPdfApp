@@ -1,11 +1,11 @@
 #include "include/drawingtemplate/DocumentTemplate.h"
 #include <QFontMetrics>
 
-DocumentTemplate::DocumentTemplate(const QString& name, const QSizeF& size)
-    : templateName(name), pageSize(size), pageMargins(20, 20, 20, 20) {}
+DocumentTemplate::DocumentTemplate(const QString& name, const QString &title, const QSizeF& size)
+    : templateName(name), templateTitle(title), pageSize(size), pageMargins(20, 20, 20, 20) {}
 
-void DocumentTemplate::renderDocument(QPainter& painter) {
-    setupTemplate();
+void DocumentTemplate::renderDocument(QPainter& painter, const QQuickItem *rootItem) {
+    setupTemplate(rootItem);
 
     painter.begin(painter.device());
 

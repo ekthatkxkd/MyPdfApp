@@ -7,14 +7,20 @@
 #include <vector>
 #include <memory>
 #include <QPainter>
+#include <QQuickItem>
+#include <QMap>
 
 class DocumentTemplate {
 public:
-    DocumentTemplate(const QString& name, const QSizeF& size = QSizeF(595, 842));
+    DocumentTemplate(const QString& name, const QString &title = "", const QSizeF& size = QSizeF(595, 842));
     virtual ~DocumentTemplate() = default;
 
-    void renderDocument(QPainter& painter);
-    virtual void setupTemplate() = 0;
+    void renderDocument(QPainter& painter, const QQuickItem *rootItem);
+
+    // virtual void setupTemplate(const QQuickItem *rootItem) = 0;
+    //////// [LLDDSS] ex) QMap<"informTable", QList<QPair<"company", QList("TIMATEC")>>>
+    ///                   QMap<"history", QList<QPair<"row", QList("250101","Deco","1,232","its my items")>>>
+    virtual void setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) = 0;
 
     // 요소 추가 메서드들
     void addElement(std::unique_ptr<IRenderElement> element);
@@ -25,17 +31,21 @@ public:
     void addElementSameRow(std::unique_ptr<IRenderElement> element,
                            const QString& referenceId, qreal spacing = 10);
 
+    const QList<QString> materialComponentNames = {"informTable", "history"};
+
 protected:
     virtual void renderHeader(QPainter& painter, int pageNumber) {}
     virtual void renderFooter(QPainter& painter, int pageNumber) {}
 
     QRectF getContentRect() const;
 
+    QHash<QString, QQuickItem*> templateQuickItems;
 
     std::vector<std::unique_ptr<IRenderElement>> elements;
     QSizeF pageSize;
     QMarginsF pageMargins;
     QString templateName;
+    const QString templateTitle;
 };
 
 #endif // DOCUMENTTEMPLATE_H

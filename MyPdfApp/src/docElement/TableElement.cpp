@@ -1,9 +1,13 @@
 #include "include/docElement/TableElement.h"
 
-TableElement::TableElement(const QVector<QVector<QString>>& tableData,
+TableElement::TableElement(const QString &title,
+                           const QVector<CellData> &headerDatas,
+                           const QVector<QVector<CellData>>& innerDatas,
+                           const QVector<CellData> &footerDatas,
                            const QVector<qreal>& colWidths)
-    : data(tableData), columnWidths(colWidths) {
-
+    : title(title),
+    headerDatas(headerDatas), innerDatas(innerDatas), footerDatas(footerDatas),
+    columnWidths(colWidths) {
 }
 
 QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
