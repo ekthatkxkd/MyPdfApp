@@ -11,7 +11,8 @@ TableElement::TableElement(const QString &title,
 }
 
 QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
-                            const QRectF& availableRect, int& currentPage) {
+                            const QRectF& availableRect, int& currentPage,
+                            std::function<void()> newPageCallback) {
     return QRectF();
 }
 

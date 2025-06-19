@@ -6,7 +6,8 @@ TextElement::TextElement(const QString& text, const QFont& font,
 }
 
 QRectF TextElement::render(QPainter& painter, const QPointF& startPos,
-                           const QRectF& availableRect, int& currentPage) {
+                           const QRectF& availableRect, int& currentPage,
+                           std::function<void()> newPageCallback) {
 
     return QRectF();
 }

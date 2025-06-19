@@ -15,6 +15,7 @@ SOURCES += \
         src/pdfExporter/renderTarget/DocumentRenderer.cpp \
         src/pdfExporter/renderTarget/ImageRenderTarget.cpp \
         src/pdfExporter/renderTarget/PdfRenderTarget.cpp \
+        src/pdfExporter/renderTarget/RenderTarget.cpp \
         src/pdfExporter/renderTarget/RenderTargetFactory.cpp
 
 resources.files = main.qml 

@@ -2,11 +2,11 @@
 #include "include/pdfExporter/renderTarget/PdfRenderTarget.h"
 #include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
 
-std::unique_ptr<IRenderTarget> RenderTargetFactory::createPdfTarget(const QString& filename,
+std::unique_ptr<RenderTarget> RenderTargetFactory::createPdfTarget(const QString& filename,
                                                                     const QSizeF& pageSize) {
     return std::make_unique<PdfRenderTarget>(filename, pageSize);
 }
 
-std::unique_ptr<IRenderTarget> RenderTargetFactory::createImageTarget(const QSizeF& pageSize) {
+std::unique_ptr<RenderTarget> RenderTargetFactory::createImageTarget(const QSizeF& pageSize) {
     return std::make_unique<ImageRenderTarget>(pageSize);
 }

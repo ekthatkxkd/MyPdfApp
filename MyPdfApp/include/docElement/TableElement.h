@@ -13,7 +13,8 @@ public:
                  const QVector<qreal>& colWidths = QVector<qreal>());
 
     QRectF render(QPainter& painter, const QPointF& startPos,
-                  const QRectF& availableRect, int& currentPage) override;
+                  const QRectF& availableRect, int& currentPage,
+                  std::function<void()> newPageCallback = nullptr) override;
     QSizeF calculateSize(const QFontMetrics& fontMetrics,
                          const QRectF& availableRect) override;
     bool needsNewPage(const QRectF& availableRect, const QSizeF& elementSize) override;

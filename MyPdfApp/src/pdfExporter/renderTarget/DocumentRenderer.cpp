@@ -1,6 +1,6 @@
 #include "include/pdfExporter/renderTarget/DocumentRenderer.h"
 
-DocumentRenderer::DocumentRenderer(std::unique_ptr<IRenderTarget> target)
+DocumentRenderer::DocumentRenderer(std::unique_ptr<RenderTarget> target)
     : renderTarget(std::move(target)) {}
 
 void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate) {
@@ -13,13 +13,18 @@ void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTempl
         return;
     }
 
+    // ★ 콜백으로 newPage 전달
+    auto newPageCallback = [this]() {
+        this->renderTarget->newPage();
+    };
+
     // 템플릿 렌더링 실행
-    docTemplate->renderDocument(*painter);
+    docTemplate->renderDocument(*painter, newPageCallback);
 
     // 렌더링 완료
     renderTarget->finalize();
 }
 
-void DocumentRenderer::setRenderTarget(std::unique_ptr<IRenderTarget> target) {
+void DocumentRenderer::setRenderTarget(std::unique_ptr<RenderTarget> target) {
     renderTarget = std::move(target);
 }

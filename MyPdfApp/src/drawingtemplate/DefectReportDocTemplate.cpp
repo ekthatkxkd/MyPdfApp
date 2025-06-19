@@ -22,26 +22,26 @@ void DefectReportDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QStr
         addElement(std::move(title));
     }
 
-    // 세 개의 표를 같은 행에 배치
-    auto table1 = std::make_unique<TableElement>(generateTableData(0));
-    table1->setElementId("dashboard_table_1");
-    addElementBelow(std::move(table1), "title", 20);
+    // // 세 개의 표를 같은 행에 배치
+    // auto table1 = std::make_unique<TableElement>(generateTableData(0));
+    // table1->setElementId("dashboard_table_1");
+    // addElementBelow(std::move(table1), "title", 20);
 
-    auto table2 = std::make_unique<TableElement>(generateTableData(1));
-    table2->setElementId("dashboard_table_2");
-    addElementRightOf(std::move(table2), "dashboard_table_1", 10);
+    // auto table2 = std::make_unique<TableElement>(generateTableData(1));
+    // table2->setElementId("dashboard_table_2");
+    // addElementRightOf(std::move(table2), "dashboard_table_1", 10);
 
-    auto table3 = std::make_unique<TableElement>(generateTableData(2));
-    table3->setElementId("dashboard_table_3");
-    addElementRightOf(std::move(table3), "dashboard_table_2", 10);
+    // auto table3 = std::make_unique<TableElement>(generateTableData(2));
+    // table3->setElementId("dashboard_table_3");
+    // addElementRightOf(std::move(table3), "dashboard_table_2", 10);
 
-    // 이미지 (표들 아래에 배치)
-    QPixmap image(":/images/sample.png");
-    if (!image.isNull()) {
-        auto imageElement = std::make_unique<ImageElement>(image, QSizeF(200, 150));
-        imageElement->setElementId("main_image");
-        addElementBelow(std::move(imageElement), "dashboard_table_1", 25);
-    }
+    // // 이미지 (표들 아래에 배치)
+    // QPixmap image(":/images/sample.png");
+    // if (!image.isNull()) {
+    //     auto imageElement = std::make_unique<ImageElement>(image, QSizeF(200, 150));
+    //     imageElement->setElementId("main_image");
+    //     addElementBelow(std::move(imageElement), "dashboard_table_1", 25);
+    // }
 }
 
 QVector<QVector<QString>> DefectReportDocTemplate::generateTableData(int tableIndex) {

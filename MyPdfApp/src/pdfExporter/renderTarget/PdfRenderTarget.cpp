@@ -2,12 +2,10 @@
 #include <QDebug>
 
 // PdfRenderTarget 구현
-PdfRenderTarget::PdfRenderTarget(const QString& filename, const QSizeF& pageSize) {
-    pdfWriter = std::make_unique<QPdfWriter>(filename);
-    pdfWriter->setPageSize(QPageSize(pageSize, QPageSize::Point));
-    pdfWriter->setPageMargins(QMarginsF(0, 0, 0, 0));
+PdfRenderTarget::PdfRenderTarget(const QString& filename, const QSizeF& pageSize) : RenderTarget() {
+    initDefaultPdf(filename);
 
-    painter = std::make_unique<QPainter>();
+    painter = std::make_unique<QPainter>(pdfWriter.get());
 }
 
 PdfRenderTarget::~PdfRenderTarget() {
@@ -16,10 +14,17 @@ PdfRenderTarget::~PdfRenderTarget() {
     }
 }
 
+void PdfRenderTarget::initDefaultPdf(const QString& filename) {
+    pdfWriter = std::make_unique<QPdfWriter>(filename);
+    // pdfWriter->setPageSize(QPageSize(pageSize, QPageSize::Point));
+    pdfWriter->setPageSize(QPageSize(QPageSize::A4));
+    pdfWriter->setPageMargins(pageSettings.mmMargins, QPageLayout::Millimeter);
+    pdfWriter->setResolution(pageSettings.resolution);
+}
+
 void PdfRenderTarget::newPage() {
-    if (painter && painter->isActive()) {
-        //////// [LLDDSS] ORIGIN IS TO ALIVE
-        // painter->newPage();
+    if (pdfWriter) {
+        pdfWriter->newPage();
     }
 }
 
@@ -28,4 +33,3 @@ void PdfRenderTarget::finalize() {
         painter->end();
     }
 }
-

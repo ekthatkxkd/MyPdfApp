@@ -4,10 +4,10 @@
 DocumentTemplate::DocumentTemplate(const QString& name, const QString &title, const QSizeF& size)
     : templateName(name), templateTitle(title), pageSize(size), pageMargins(20, 20, 20, 20) {}
 
-void DocumentTemplate::renderDocument(QPainter& painter, const QQuickItem *rootItem) {
+void DocumentTemplate::renderDocument(QPainter& painter, std::function<void()> newPageCb) {
     setupTemplate(rootItem);
 
-    painter.begin(painter.device());
+    newPageCallback = newPageCb;
 
     RelativePositionManager positionManager(getContentRect());
     int currentPage = 1;
@@ -17,11 +17,12 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QQuickItem *rootI
     for (auto& element : elements) {
         // 위치 참조가 새 페이지를 요구하는 경우
         if (element->getPositionReference().position == RelativePosition::NextPage) {
-            //////// [LLDDSS] ORIGIN IS TO ALIVE
-            // painter.newPage();
-            // currentPage++;
-            // positionManager.resetForNewPage();
-            // renderHeader(painter, currentPage);
+            if (newPageCallback) {
+                newPageCallback();
+            }
+            currentPage++;
+            positionManager.resetForNewPage();
+            renderHeader(painter, currentPage);
         }
 
         // 시작 위치 계산
@@ -41,12 +42,13 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QQuickItem *rootI
                                         getContentRect().bottom() - startPos.y()));
 
             if (element->needsNewPage(availableRect, elementSize)) {
-                //////// [LLDDSS] ORIGIN IS TO ALIVE
-                // painter.newPage();
-                // currentPage++;
-                // positionManager.resetForNewPage();
-                // renderHeader(painter, currentPage);
-                // startPos = QPointF(getContentRect().left(), getContentRect().top());
+                if (newPageCallback) {
+                    newPageCallback();
+                }
+                currentPage++;
+                positionManager.resetForNewPage();
+                renderHeader(painter, currentPage);
+                startPos = QPointF(getContentRect().left(), getContentRect().top());
             }
         }
 
@@ -61,7 +63,7 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QQuickItem *rootI
         // QRectF elementRect(startPos, actualSize);
         // RenderedElementInfo renderedInfo(element->getElementId(), elementRect, currentPage);
         //////// [LLDDSS] MY ADDED SOURCE
-        QRectF actualSize = element->render(painter, startPos, availableRect, currentPage);
+        QRectF actualSize = element->render(painter, startPos, availableRect, currentPage, newPageCb);
         RenderedElementInfo renderedInfo(element->getElementId(), actualSize, currentPage);
         ////////
 

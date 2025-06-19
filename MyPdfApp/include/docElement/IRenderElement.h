@@ -14,7 +14,8 @@ public:
 
     // 렌더링 (시작 위치와 사용 가능한 영역 제공)
     virtual QRectF render(QPainter& painter, const QPointF& startPos,
-                          const QRectF& availableRect, int& currentPage) = 0;
+                          const QRectF& availableRect, int& currentPage,
+                          std::function<void()> newPageCallback = nullptr) = 0;
 
     // 크기 계산
     virtual QSizeF calculateSize(const QFontMetrics& fontMetrics,

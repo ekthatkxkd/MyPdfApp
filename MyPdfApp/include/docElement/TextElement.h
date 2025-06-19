@@ -10,7 +10,8 @@ public:
                 Qt::Alignment align = Qt::AlignLeft);
 
     QRectF render(QPainter& painter, const QPointF& startPos,
-                  const QRectF& availableRect, int& currentPage) override;
+                  const QRectF& availableRect, int& currentPage,
+                  std::function<void()> newPageCallback = nullptr) override;
 
     QSizeF calculateSize(const QFontMetrics& fontMetrics,
                          const QRectF& availableRect) override;

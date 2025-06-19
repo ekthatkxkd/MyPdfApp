@@ -1,7 +1,7 @@
 #include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
 
 ImageRenderTarget::ImageRenderTarget(const QSizeF& pageSize, QImage::Format format)
-    : pageSize(pageSize) {
+    : RenderTarget(), pageSize(pageSize) {
     int width = static_cast<int>(pageSize.width());
     int height = static_cast<int>(pageSize.height());
 

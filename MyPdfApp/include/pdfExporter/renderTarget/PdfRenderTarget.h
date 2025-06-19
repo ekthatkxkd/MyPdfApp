@@ -4,7 +4,7 @@
 #include "include/pdfExporter/renderTarget/RenderTarget.h"
 #include <QPdfWriter>
 
-class PdfRenderTarget : public IRenderTarget {
+class PdfRenderTarget : public RenderTarget {
 public:
     PdfRenderTarget(const QString& filename, const QSizeF& pageSize);
     ~PdfRenderTarget();
@@ -14,8 +14,12 @@ public:
     void finalize() override;
 
 private:
+    void initDefaultPdf(const QString& filename);
+
     std::unique_ptr<QPdfWriter> pdfWriter;
     std::unique_ptr<QPainter> painter;
+
+    PageSettings pageSettings;
 };
 
 #endif // PDFRENDERTARGET_H

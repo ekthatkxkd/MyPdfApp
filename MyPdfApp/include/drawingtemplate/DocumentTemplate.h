@@ -15,7 +15,7 @@ public:
     DocumentTemplate(const QString& name, const QString &title = "", const QSizeF& size = QSizeF(595, 842));
     virtual ~DocumentTemplate() = default;
 
-    void renderDocument(QPainter& painter, const QQuickItem *rootItem);
+    void renderDocument(QPainter& painter, std::function<void()> newPageCb);
 
     // virtual void setupTemplate(const QQuickItem *rootItem) = 0;
     //////// [LLDDSS] ex) QMap<"informTable", QList<QPair<"company", QList("TIMATEC")>>>
@@ -46,6 +46,7 @@ protected:
     QMarginsF pageMargins;
     QString templateName;
     const QString templateTitle;
+    std::function<void()> newPageCallback;
 };
 
 #endif // DOCUMENTTEMPLATE_H

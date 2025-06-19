@@ -4,7 +4,7 @@
 #include "include/pdfExporter/renderTarget/RenderTarget.h"
 #include <QImage>
 
-class ImageRenderTarget : public IRenderTarget {
+class ImageRenderTarget : public RenderTarget {
 public:
     ImageRenderTarget(const QSizeF& pageSize, QImage::Format format = QImage::Format_ARGB32);
     ~ImageRenderTarget();
