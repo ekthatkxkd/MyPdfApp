@@ -6,6 +6,9 @@
 #include <QResource>
 #include <QPixmap>
 
+#include "include/drawingtemplate/TemplateFactory.h"
+#include "include/pdfExporter/renderTarget/RenderTargetFactory.h"
+#include "include/pdfExporter/renderTarget/DocumentRenderer.h"
 #include <QDebug>
 
 PreviewImageProvider::PreviewImageProvider()
@@ -265,312 +268,320 @@ QRectF PdfExporter::drawTemplateTitle(QPainter &painter, QQuickItem *textItem) {
 }
 
 QRectF PdfExporter::drawTemplateTable(QPainter &painter, QQuickItem *tableItem, QPointF &cursorPoint, const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio, const bool &isPdf) {
-    QRectF tableArea(QPointF(0, 0), QSizeF(0, 0));
-
-    const int titleTableMargin = 5;
-
-    QPointF tableCursorPoint = cursorPoint;
-
-    QString tableTitle = tableItem->property("tableTextValue").toString();
-
-    QVector<QVector<CellData>> headerDatas = getCellDatas(tableItem, "headerRowRep");
-    QVector<QVector<CellData>> innerDatas = getCellDatas(tableItem, "innerRowRep");
-    QVector<QVector<CellData>> footerDatas = getCellDatas(tableItem, "footerRowRep");
-
-    int tableColCount = tableItem->property("dividedColCount").toInt();
-    int innerTableColCount = innerDatas.size();
-
-    std::vector<double> pxCellWidths(tableColCount, 0);
-    std::vector<double> pxCellHeights(innerTableColCount, 0);
-
-
-    //////// innerTableCell height 값 초기화
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
     ///
     ///
-    initTableCellSizes(painter, pxCellWidths, pxCellHeights, innerDatas, pxTableFullWidthSize, tableWidthRatio);
+    // QRectF tableArea(QPointF(0, 0), QSizeF(0, 0));
+
+    // const int titleTableMargin = 5;
+
+    // QPointF tableCursorPoint = cursorPoint;
+
+    // QString tableTitle = tableItem->property("tableTextValue").toString();
+
+    // QVector<QVector<CellData>> headerDatas = getCellDatas(tableItem, "headerRowRep");
+    // QVector<QVector<CellData>> innerDatas = getCellDatas(tableItem, "innerRowRep");
+    // QVector<QVector<CellData>> footerDatas = getCellDatas(tableItem, "footerRowRep");
+
+    // int tableColCount = tableItem->property("dividedColCount").toInt();
+    // int innerTableColCount = innerDatas.size();
+
+    // std::vector<double> pxCellWidths(tableColCount, 0);
+    // std::vector<double> pxCellHeights(innerTableColCount, 0);
+
+
+    // //////// innerTableCell height 값 초기화
+    // ///
+    // ///
+    // initTableCellSizes(painter, pxCellWidths, pxCellHeights, innerDatas, pxTableFullWidthSize, tableWidthRatio);
+    // ///
+    // ///
+    // ////////
+
+    // double pxSumTableWidths = 0;
+    // for (const auto &pxCellWidth : pxCellWidths) {
+    //     pxSumTableWidths += pxCellWidth;
+    // }
+
+    // //////// table title 그리기
+    // ///
+    // ///
+    // if (tableTitle != "") {
+    //     setFont(painter, 10, true);
+
+    //     QFontMetrics metrics(painter.font());
+    //     QRectF boundingBox(tableCursorPoint, QSizeF(pxTableFullWidthSize, metrics.height()));
+
+    //     Qt::AlignmentFlag align = Qt::AlignLeft;
+
+    //     painter.drawText(boundingBox, align, tableTitle);
+
+    //     tableCursorPoint = QPointF(cursorPoint.x(), tableCursorPoint.y() + boundingBox.height() + titleTableMargin);
+    // }
+    // ///
+    // ///
+    // ////////
+
+
+    // //////// header list 그리기
+    // ///
+    // ///
+    // // header list 는 오직 하나의 열만 가지고 있고 text 는 오직 한 줄인 것으로 가정.
+    // if (headerDatas.size() != 0) {
+    //     setFont(painter, 8, true);
+
+    //     QPointF headerCursorPoint = tableCursorPoint;
+
+    //     std::vector<double> pxHeaderCellWidths(tableColCount, 0);
+    //     std::vector<double> pxHeaderCellHeights(1, 0);
+
+    //     initTableCellSizes(painter, pxHeaderCellWidths, pxHeaderCellHeights, headerDatas,
+    //                        pxTableFullWidthSize, tableWidthRatio);
+
+    //     for (const auto &headerData : headerDatas) {
+    //         for (int colIndex = 0; colIndex < headerData.size(); colIndex++) {
+    //             QString cellText = headerData[colIndex].cellText;
+    //             int cellStartCol = headerData[colIndex].startCol;
+    //             int cellColSpan = headerData[colIndex].colSpan;
+    //             QColor cellBgColor = headerData[colIndex].bgColor;
+    //             QString cellAlign = headerData[colIndex].alignPosition;
+
+    //             qreal actualWidth = 0;
+
+    //             for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
+    //                 actualWidth += pxCellWidths[widthIndex];
+    //             }
+
+    //             QRectF boundingBox(headerCursorPoint, QSizeF(actualWidth, pxHeaderCellHeights[0]));
+
+    //             painter.setPen(QPen(Qt::black, 1.0));
+    //             painter.fillRect(boundingBox,
+    //                              QColor(cellBgColor));
+    //             painter.drawRect(boundingBox);
+
+    //             QTextOption textOption;
+    //             Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+    //             if (cellAlign == "center") {
+    //                 align |= Qt::AlignmentFlag::AlignHCenter;
+    //             } else if (cellAlign == "right") {
+    //                 align |= Qt::AlignmentFlag::AlignRight;
+    //             } else {
+    //                 align |= Qt::AlignmentFlag::AlignLeft;
+    //             }
+
+    //             textOption.setAlignment(align);
+    //             textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+    //             QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+    //             painter.drawText(adjustedTextRect, cellText, textOption);
+
+    //             headerCursorPoint = QPointF(headerCursorPoint.x() + actualWidth,
+    //                                         headerCursorPoint.y());
+    //         }
+    //     }
+
+    //     tableCursorPoint = QPointF(tableCursorPoint.x(),
+    //                                tableCursorPoint.y() + pxHeaderCellHeights[0]);
+    // }
+    // ///
+    // ///
+    // ////////
+
+
+    // //////// innerTable 그리기
+    // ///
+    // ///
+    // if (innerDatas.size() != 0) {
+    //     QPointF innerCursorPoint = tableCursorPoint;
+
+    //     qreal cellRectYPos = innerCursorPoint.y();
+
+    //     for (int rowIndex = 0; rowIndex < innerDatas.size(); rowIndex++) {
+
+    //         if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
+    //             // pdfWriter.newPage();
+    //             createNewPage(painter, isPdf);
+
+    //             cursorPoint = QPointF(0, 0);
+    //             tableCursorPoint = cursorPoint;
+    //             innerCursorPoint = tableCursorPoint;
+    //             cellRectYPos = 0;
+    //         }
+
+    //         for (int colIndex = 0; colIndex < innerDatas[rowIndex].size(); colIndex++) {
+    //             QString cellText = innerDatas[rowIndex][colIndex].cellText;
+
+    //             int cellStartCol = innerDatas[rowIndex][colIndex].startCol;
+    //             int cellColSpan = innerDatas[rowIndex][colIndex].colSpan;
+    //             int cellStartRow = innerDatas[rowIndex][colIndex].startRow;
+    //             int cellRowSpan = innerDatas[rowIndex][colIndex].rowSpan;
+
+    //             qreal cellRectXPos = tableCursorPoint.x();
+
+    //             for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
+    //                 cellRectXPos += pxCellWidths[widthIndex];
+    //             }
+
+    //             qreal cellRectWidth = 0;
+    //             qreal cellRectHeight = 0;
+
+    //             for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
+    //                 cellRectWidth += pxCellWidths[widthIndex];
+    //             }
+
+    //             for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
+    //                 cellRectHeight += pxCellHeights[heightIndex];
+    //             }
+
+    //             QColor cellRectBgColor = innerDatas[rowIndex][colIndex].bgColor;
+
+    //             QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
+    //                                QSizeF(cellRectWidth, cellRectHeight));
+
+    //             painter.setPen(QPen(Qt::black, 1.0));
+    //             painter.fillRect(boundingBox,
+    //                              QColor(cellRectBgColor));
+    //             painter.drawRect(boundingBox);
+
+    //             QString cellTextAlign = innerDatas[rowIndex][colIndex].alignPosition;
+    //             bool cellTextBold = innerDatas[rowIndex][colIndex].isBold;
+
+    //             setFont(painter, 8, cellTextBold);
+
+    //             QTextOption textOption;
+    //             Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+    //             if (cellTextAlign == "center") {
+    //                 align |= Qt::AlignmentFlag::AlignHCenter;
+    //             } else if (cellTextAlign == "right") {
+    //                 align |= Qt::AlignmentFlag::AlignRight;
+    //             } else {
+    //                 align |= Qt::AlignmentFlag::AlignLeft;
+    //             }
+
+    //             textOption.setAlignment(align);
+    //             textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+    //             QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+    //             painter.drawText(adjustedTextRect, cellText, textOption);
+    //         }
+
+    //         innerCursorPoint = QPointF(innerCursorPoint.x(),
+    //                                    innerCursorPoint.y() + pxCellHeights[rowIndex]);
+
+    //         cellRectYPos += pxCellHeights[rowIndex];
+    //     }
+
+    //     tableCursorPoint = QPointF(tableCursorPoint.x(),
+    //                                innerCursorPoint.y());
+    // }
+    // ///
+    // ///
+    // ////////
+
+    // //////// footer 그리기
+    // ///
+    // ///
+    // if (footerDatas.size() != 0) {
+    //     QPointF innerCursorPoint = tableCursorPoint;
+
+    //     qreal cellRectYPos = innerCursorPoint.y();
+
+    //     for (int rowIndex = 0; rowIndex < footerDatas.size(); rowIndex++) {
+
+    //         if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
+    //             // pdfWriter.newPage();
+    //             createNewPage(painter, isPdf);
+
+    //             cursorPoint = QPointF(0, 0);
+    //             tableCursorPoint = cursorPoint;
+    //             innerCursorPoint = tableCursorPoint;
+    //             cellRectYPos = 0;
+    //         }
+
+    //         for (int colIndex = 0; colIndex < footerDatas[rowIndex].size(); colIndex++) {
+    //             QString cellText = footerDatas[rowIndex][colIndex].cellText;
+
+    //             int cellStartCol = footerDatas[rowIndex][colIndex].startCol;
+    //             int cellColSpan = footerDatas[rowIndex][colIndex].colSpan;
+    //             int cellStartRow = footerDatas[rowIndex][colIndex].startRow;
+    //             int cellRowSpan = footerDatas[rowIndex][colIndex].rowSpan;
+
+    //             qreal cellRectXPos = tableCursorPoint.x();
+
+    //             for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
+    //                 cellRectXPos += pxCellWidths[widthIndex];
+    //             }
+
+    //             qreal cellRectWidth = 0;
+    //             qreal cellRectHeight = 0;
+
+    //             for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
+    //                 cellRectWidth += pxCellWidths[widthIndex];
+    //             }
+
+    //             for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
+    //                 cellRectHeight += pxCellHeights[heightIndex];
+    //             }
+
+    //             QColor cellRectBgColor = footerDatas[rowIndex][colIndex].bgColor;
+
+    //             QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
+    //                                QSizeF(cellRectWidth, cellRectHeight));
+
+    //             painter.setPen(QPen(Qt::black, 1.0));
+    //             painter.fillRect(boundingBox,
+    //                              QColor(cellRectBgColor));
+    //             painter.drawRect(boundingBox);
+
+    //             QString cellTextAlign = footerDatas[rowIndex][colIndex].alignPosition;
+    //             bool cellTextBold = footerDatas[rowIndex][colIndex].isBold;
+
+    //             setFont(painter, 8, cellTextBold);
+
+    //             QTextOption textOption;
+    //             Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+
+    //             if (cellTextAlign == "center") {
+    //                 align |= Qt::AlignmentFlag::AlignHCenter;
+    //             } else if (cellTextAlign == "right") {
+    //                 align |= Qt::AlignmentFlag::AlignRight;
+    //             } else {
+    //                 align |= Qt::AlignmentFlag::AlignLeft;
+    //             }
+
+    //             textOption.setAlignment(align);
+    //             textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+    //             QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+    //             painter.drawText(adjustedTextRect, cellText, textOption);
+    //         }
+
+    //         innerCursorPoint = QPointF(innerCursorPoint.x(),
+    //                                    innerCursorPoint.y() + pxCellHeights[rowIndex]);
+
+    //         cellRectYPos += pxCellHeights[rowIndex];
+    //     }
+
+    //     tableCursorPoint = QPointF(tableCursorPoint.x(),
+    //                                innerCursorPoint.y());
+    // }
+    // ///
+    // ///
+    // ////////
+
+    // tableArea = QRectF(cursorPoint, QSizeF(pxSumTableWidths, tableCursorPoint.y() - cursorPoint.y()));
+
+    // return tableArea;
     ///
     ///
     ////////
 
-    double pxSumTableWidths = 0;
-    for (const auto &pxCellWidth : pxCellWidths) {
-        pxSumTableWidths += pxCellWidth;
-    }
-
-    //////// table title 그리기
-    ///
-    ///
-    if (tableTitle != "") {
-        setFont(painter, 10, true);
-
-        QFontMetrics metrics(painter.font());
-        QRectF boundingBox(tableCursorPoint, QSizeF(pxTableFullWidthSize, metrics.height()));
-
-        Qt::AlignmentFlag align = Qt::AlignLeft;
-
-        painter.drawText(boundingBox, align, tableTitle);
-
-        tableCursorPoint = QPointF(cursorPoint.x(), tableCursorPoint.y() + boundingBox.height() + titleTableMargin);
-    }
-    ///
-    ///
-    ////////
-
-
-    //////// header list 그리기
-    ///
-    ///
-    // header list 는 오직 하나의 열만 가지고 있고 text 는 오직 한 줄인 것으로 가정.
-    if (headerDatas.size() != 0) {
-        setFont(painter, 8, true);
-
-        QPointF headerCursorPoint = tableCursorPoint;
-
-        std::vector<double> pxHeaderCellWidths(tableColCount, 0);
-        std::vector<double> pxHeaderCellHeights(1, 0);
-
-        initTableCellSizes(painter, pxHeaderCellWidths, pxHeaderCellHeights, headerDatas,
-                           pxTableFullWidthSize, tableWidthRatio);
-
-        for (const auto &headerData : headerDatas) {
-            for (int colIndex = 0; colIndex < headerData.size(); colIndex++) {
-                QString cellText = headerData[colIndex].cellText;
-                int cellStartCol = headerData[colIndex].startCol;
-                int cellColSpan = headerData[colIndex].colSpan;
-                QColor cellBgColor = headerData[colIndex].bgColor;
-                QString cellAlign = headerData[colIndex].alignPosition;
-
-                qreal actualWidth = 0;
-
-                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
-                    actualWidth += pxCellWidths[widthIndex];
-                }
-
-                QRectF boundingBox(headerCursorPoint, QSizeF(actualWidth, pxHeaderCellHeights[0]));
-
-                painter.setPen(QPen(Qt::black, 1.0));
-                painter.fillRect(boundingBox,
-                                 QColor(cellBgColor));
-                painter.drawRect(boundingBox);
-
-                QTextOption textOption;
-                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
-
-                if (cellAlign == "center") {
-                    align |= Qt::AlignmentFlag::AlignHCenter;
-                } else if (cellAlign == "right") {
-                    align |= Qt::AlignmentFlag::AlignRight;
-                } else {
-                    align |= Qt::AlignmentFlag::AlignLeft;
-                }
-
-                textOption.setAlignment(align);
-                textOption.setWrapMode(QTextOption::WrapAnywhere);
-
-                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
-
-                painter.drawText(adjustedTextRect, cellText, textOption);
-
-                headerCursorPoint = QPointF(headerCursorPoint.x() + actualWidth,
-                                            headerCursorPoint.y());
-            }
-        }
-
-        tableCursorPoint = QPointF(tableCursorPoint.x(),
-                                   tableCursorPoint.y() + pxHeaderCellHeights[0]);
-    }
-    ///
-    ///
-    ////////
-
-
-    //////// innerTable 그리기
-    ///
-    ///
-    if (innerDatas.size() != 0) {
-        QPointF innerCursorPoint = tableCursorPoint;
-
-        qreal cellRectYPos = innerCursorPoint.y();
-
-        for (int rowIndex = 0; rowIndex < innerDatas.size(); rowIndex++) {
-
-            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
-                // pdfWriter.newPage();
-                createNewPage(painter, isPdf);
-
-                cursorPoint = QPointF(0, 0);
-                tableCursorPoint = cursorPoint;
-                innerCursorPoint = tableCursorPoint;
-                cellRectYPos = 0;
-            }
-
-            for (int colIndex = 0; colIndex < innerDatas[rowIndex].size(); colIndex++) {
-                QString cellText = innerDatas[rowIndex][colIndex].cellText;
-
-                int cellStartCol = innerDatas[rowIndex][colIndex].startCol;
-                int cellColSpan = innerDatas[rowIndex][colIndex].colSpan;
-                int cellStartRow = innerDatas[rowIndex][colIndex].startRow;
-                int cellRowSpan = innerDatas[rowIndex][colIndex].rowSpan;
-
-                qreal cellRectXPos = tableCursorPoint.x();
-
-                for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
-                    cellRectXPos += pxCellWidths[widthIndex];
-                }
-
-                qreal cellRectWidth = 0;
-                qreal cellRectHeight = 0;
-
-                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
-                    cellRectWidth += pxCellWidths[widthIndex];
-                }
-
-                for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
-                    cellRectHeight += pxCellHeights[heightIndex];
-                }
-
-                QColor cellRectBgColor = innerDatas[rowIndex][colIndex].bgColor;
-
-                QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
-                                   QSizeF(cellRectWidth, cellRectHeight));
-
-                painter.setPen(QPen(Qt::black, 1.0));
-                painter.fillRect(boundingBox,
-                                 QColor(cellRectBgColor));
-                painter.drawRect(boundingBox);
-
-                QString cellTextAlign = innerDatas[rowIndex][colIndex].alignPosition;
-                bool cellTextBold = innerDatas[rowIndex][colIndex].isBold;
-
-                setFont(painter, 8, cellTextBold);
-
-                QTextOption textOption;
-                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
-
-                if (cellTextAlign == "center") {
-                    align |= Qt::AlignmentFlag::AlignHCenter;
-                } else if (cellTextAlign == "right") {
-                    align |= Qt::AlignmentFlag::AlignRight;
-                } else {
-                    align |= Qt::AlignmentFlag::AlignLeft;
-                }
-
-                textOption.setAlignment(align);
-                textOption.setWrapMode(QTextOption::WrapAnywhere);
-
-                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
-
-                painter.drawText(adjustedTextRect, cellText, textOption);
-            }
-
-            innerCursorPoint = QPointF(innerCursorPoint.x(),
-                                       innerCursorPoint.y() + pxCellHeights[rowIndex]);
-
-            cellRectYPos += pxCellHeights[rowIndex];
-        }
-
-        tableCursorPoint = QPointF(tableCursorPoint.x(),
-                                   innerCursorPoint.y());
-    }
-    ///
-    ///
-    ////////
-
-    //////// footer 그리기
-    ///
-    ///
-    if (footerDatas.size() != 0) {
-        QPointF innerCursorPoint = tableCursorPoint;
-
-        qreal cellRectYPos = innerCursorPoint.y();
-
-        for (int rowIndex = 0; rowIndex < footerDatas.size(); rowIndex++) {
-
-            if (innerCursorPoint.y() + pxCellHeights[rowIndex] > pageSettings.pxContentSize.height()) {
-                // pdfWriter.newPage();
-                createNewPage(painter, isPdf);
-
-                cursorPoint = QPointF(0, 0);
-                tableCursorPoint = cursorPoint;
-                innerCursorPoint = tableCursorPoint;
-                cellRectYPos = 0;
-            }
-
-            for (int colIndex = 0; colIndex < footerDatas[rowIndex].size(); colIndex++) {
-                QString cellText = footerDatas[rowIndex][colIndex].cellText;
-
-                int cellStartCol = footerDatas[rowIndex][colIndex].startCol;
-                int cellColSpan = footerDatas[rowIndex][colIndex].colSpan;
-                int cellStartRow = footerDatas[rowIndex][colIndex].startRow;
-                int cellRowSpan = footerDatas[rowIndex][colIndex].rowSpan;
-
-                qreal cellRectXPos = tableCursorPoint.x();
-
-                for (int widthIndex = 0; widthIndex < cellStartCol; widthIndex++) {
-                    cellRectXPos += pxCellWidths[widthIndex];
-                }
-
-                qreal cellRectWidth = 0;
-                qreal cellRectHeight = 0;
-
-                for (int widthIndex = cellStartCol; widthIndex < (cellStartCol + cellColSpan); widthIndex++) {
-                    cellRectWidth += pxCellWidths[widthIndex];
-                }
-
-                for (int heightIndex = cellStartRow; heightIndex < (cellStartRow + cellRowSpan); heightIndex++) {
-                    cellRectHeight += pxCellHeights[heightIndex];
-                }
-
-                QColor cellRectBgColor = footerDatas[rowIndex][colIndex].bgColor;
-
-                QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos),
-                                   QSizeF(cellRectWidth, cellRectHeight));
-
-                painter.setPen(QPen(Qt::black, 1.0));
-                painter.fillRect(boundingBox,
-                                 QColor(cellRectBgColor));
-                painter.drawRect(boundingBox);
-
-                QString cellTextAlign = footerDatas[rowIndex][colIndex].alignPosition;
-                bool cellTextBold = footerDatas[rowIndex][colIndex].isBold;
-
-                setFont(painter, 8, cellTextBold);
-
-                QTextOption textOption;
-                Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
-
-                if (cellTextAlign == "center") {
-                    align |= Qt::AlignmentFlag::AlignHCenter;
-                } else if (cellTextAlign == "right") {
-                    align |= Qt::AlignmentFlag::AlignRight;
-                } else {
-                    align |= Qt::AlignmentFlag::AlignLeft;
-                }
-
-                textOption.setAlignment(align);
-                textOption.setWrapMode(QTextOption::WrapAnywhere);
-
-                QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
-
-                painter.drawText(adjustedTextRect, cellText, textOption);
-            }
-
-            innerCursorPoint = QPointF(innerCursorPoint.x(),
-                                       innerCursorPoint.y() + pxCellHeights[rowIndex]);
-
-            cellRectYPos += pxCellHeights[rowIndex];
-        }
-
-        tableCursorPoint = QPointF(tableCursorPoint.x(),
-                                   innerCursorPoint.y());
-    }
-    ///
-    ///
-    ////////
-
-    tableArea = QRectF(cursorPoint, QSizeF(pxSumTableWidths, tableCursorPoint.y() - cursorPoint.y()));
-
-    return tableArea;
+    return QRectF();
 }
 
 QRectF PdfExporter::drawTemplateImage(QPainter &painter, QQuickItem *imageItem, QPointF &cursorPoint, const bool &isPdf, const int settingPxImageWidth, const bool isHCenter) {
@@ -1005,30 +1016,49 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
 bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     qDebug() << "exportToPdf, start";
 
-    initDefaultPdf(filePath);
+    // template 생성. - element 들을 그리는 기능들을 함.
+    auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
 
-    QPainter painter;
+    // PDF or 이미지 렌더 타겟 생성. - pdfwriter, qimage, painter 객체 생성.
+    auto pdfTarget = RenderTargetFactory::createPdfTarget(filePath, QSizeF(595, 842));
 
-    if (!painter.begin(pdfWriter.get())) {
-        qDebug() << "exportToPdf, Failed to initialize QPainter...";
-        return false;
-    }
-
-    setFont(painter);
-
-    if (rootItem->objectName() == templateObjNames[0]) {
-        drawMaterialTemplate(painter, rootItem, true);
-    } else if (rootItem->objectName() == templateObjNames[1]) {
-        defectReportTemplate(painter, rootItem, true);
-    } else if (rootItem->objectName() == templateObjNames[2]) {
-        orderFormTemplate(painter, rootItem, true);
-    } else if (rootItem->objectName() == templateObjNames[3]) {
-        drawReceiptVoucherTemplate(painter, rootItem, true);
-    }
-
-    painter.end();
+    // 렌더러 생성. - 렌더 타겟 내의 painter property 를 template 에 전달과 동시에 element 그리기 요청.
+    DocumentRenderer renderer(std::move(pdfTarget));
+    // 렌더링 실행.
+    renderer.renderTemplate(std::move(materialDocTemplate));
 
     return true;
+
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    ///
+    ///
+    // initDefaultPdf(filePath);
+
+    // QPainter painter;
+
+    // if (!painter.begin(pdfWriter.get())) {
+    //     qDebug() << "exportToPdf, Failed to initialize QPainter...";
+    //     return false;
+    // }
+
+    // setFont(painter);
+
+    // if (rootItem->objectName() == templateObjNames[0]) {
+    //     drawMaterialTemplate(painter, rootItem, true);
+    // } else if (rootItem->objectName() == templateObjNames[1]) {
+    //     defectReportTemplate(painter, rootItem, true);
+    // } else if (rootItem->objectName() == templateObjNames[2]) {
+    //     orderFormTemplate(painter, rootItem, true);
+    // } else if (rootItem->objectName() == templateObjNames[3]) {
+    //     drawReceiptVoucherTemplate(painter, rootItem, true);
+    // }
+
+    // painter.end();
+
+    // return true;
+    ///
+    ///
+    ////////
 }
 
 bool PdfExporter::generatePreview(QQuickItem *rootItem) {
@@ -1079,56 +1109,62 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
     return true;
 }
 
-QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
-    QVector<QVector<CellData>> m_processedTableData;
+//////// [LLDDSS] ORIGIN IS TO ALIVE
+///
+///
+// QVector<QVector<CellData>> PdfExporter::getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName) {
+//     QVector<QVector<CellData>> m_processedTableData;
 
-    QQuickItem * innerRepQuickItem = getChildItem(tableItem, repeaterObjName, true);
+//     QQuickItem * innerRepQuickItem = getChildItem(tableItem, repeaterObjName, true);
 
-    if (innerRepQuickItem) {
-        QVariant modelProperty = innerRepQuickItem->property("model");
-        QObject* modelObject = modelProperty.value<QObject*>();
+//     if (innerRepQuickItem) {
+//         QVariant modelProperty = innerRepQuickItem->property("model");
+//         QObject* modelObject = modelProperty.value<QObject*>();
 
-        if (modelObject) {
-            TableModel* tableModel = qobject_cast<TableModel*>(modelObject);
+//         if (modelObject) {
+//             TableModel* tableModel = qobject_cast<TableModel*>(modelObject);
 
-            if (tableModel) {
-                QVariantList allData = tableModel->getAllTableData();
+//             if (tableModel) {
+//                 QVariantList allData = tableModel->getAllTableData();
 
-                for (int i = 0; i < allData.size(); ++i) {
-                    QVariantList rowData = allData[i].toList();
-                    QVector<CellData> processedRow;
+//                 for (int i = 0; i < allData.size(); ++i) {
+//                     QVariantList rowData = allData[i].toList();
+//                     QVector<CellData> processedRow;
 
-                    for (int j = 0; j < rowData.size(); ++j) {
-                        QVariantMap cellMap = rowData[j].toMap();
-                        CellData cellData = CellData::fromVariantMap(cellMap);
+//                     for (int j = 0; j < rowData.size(); ++j) {
+//                         QVariantMap cellMap = rowData[j].toMap();
+//                         CellData cellData = CellData::fromVariantMap(cellMap);
 
-                        // vertical text 일 경우 개행문자 추가.
-                        if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
-                            cellData.cellText = cellData.cellText.split("").join("\n");
+//                         // vertical text 일 경우 개행문자 추가.
+//                         if (cellData.isVerticalDir && !cellData.cellText.contains("\n")) {
+//                             cellData.cellText = cellData.cellText.split("").join("\n");
 
-                            // 앞뒤 개행문자 제거
-                            if (cellData.cellText.startsWith("\n")) {
-                                cellData.cellText = cellData.cellText.mid(1);
-                            }
+//                             // 앞뒤 개행문자 제거
+//                             if (cellData.cellText.startsWith("\n")) {
+//                                 cellData.cellText = cellData.cellText.mid(1);
+//                             }
 
-                            if (cellData.cellText.endsWith("\n")) {
-                                cellData.cellText.chop(1);
-                            }
-                            //
-                        }
-                        //
+//                             if (cellData.cellText.endsWith("\n")) {
+//                                 cellData.cellText.chop(1);
+//                             }
+//                             //
+//                         }
+//                         //
 
-                        processedRow.append(cellData);
-                    }
+//                         processedRow.append(cellData);
+//                     }
 
-                    m_processedTableData.append(processedRow);
-                }
-            }
-        }
-    }
+//                     m_processedTableData.append(processedRow);
+//                 }
+//             }
+//         }
+//     }
 
-    return m_processedTableData;
-}
+//     return m_processedTableData;
+// }
+///
+///
+////////
 
 void PdfExporter::createNewPage(QPainter &painter, const bool &isPdf) {
     if (isPdf) {

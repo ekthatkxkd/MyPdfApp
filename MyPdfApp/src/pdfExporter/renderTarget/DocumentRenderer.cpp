@@ -1,7 +1,9 @@
 #include "include/pdfExporter/renderTarget/DocumentRenderer.h"
 
 DocumentRenderer::DocumentRenderer(std::unique_ptr<RenderTarget> target)
-    : renderTarget(std::move(target)) {}
+    : renderTarget(std::move(target)) {
+
+}
 
 void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate) {
     if (!renderTarget || !docTemplate) {

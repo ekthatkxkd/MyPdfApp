@@ -110,7 +110,7 @@ private :
                             const qreal &pxTableFullWidthSize, const std::vector<qreal> &tableWidthRatio);
 
     // table 을 구성하고 있는 모든 cell 각각의 정보들을 저장.
-    QVector<QVector<CellData>> getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName);
+    // QVector<QVector<CellData>> getCellDatas(QQuickItem *tableItem, const QString &repeaterObjName);
 
     // cell 내부의 존재하는 text 영역 계산.
     QSizeF getCalculatedCellTextArea(const QString &text, const QFont &font, const bool isVertical = false, const QTextOption::WrapMode &wrapMode = QTextOption::NoWrap, qreal fixedWidth = 0);
