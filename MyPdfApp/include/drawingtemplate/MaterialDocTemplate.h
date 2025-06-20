@@ -2,6 +2,7 @@
 #define MATERIALDOCTEMPLATE_H
 
 #include "include/drawingtemplate/DocumentTemplate.h"
+#include "include/drawingtemplate/dataProvider/SqliteDataProvider.h"
 
 // 구체적인 템플릿 클래스들
 class MaterialDocTemplate : public DocumentTemplate {
@@ -15,6 +16,8 @@ private:
     void initHistoryTableData(const QList<QPair<QString, QStringList>> &dbDatas);
 
     const QString historyTableTitle = "▶자재구매 내역";
+
+    std::shared_ptr<IDataProvider> dataProvider;
 
     QVector<qreal> informTableWidthRatio{0.15, 0.3, 0.05, 0.1, 0.4};
     QVector<QVector<CellData>> informTableInnerDatas {

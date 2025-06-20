@@ -4,7 +4,20 @@
 #include <QPixmap>
 
 MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material", "자재구매 확인서") {
+    // 데이터베이스 연결 설정
+    dataProvider = std::make_shared<SqliteDataProvider>("database.db", "template_a_conn");
 
+    if (dataProvider->connect()) {
+        // 미리 정의된 쿼리들 등록
+        dataProvider->registerTableQuery("sales_summary",
+                                         "SELECT product_name, quantity, price, total FROM sales_summary ORDER BY total DESC");
+
+        dataProvider->registerTableQuery("monthly_report",
+                                         "SELECT month, revenue, expenses, profit FROM monthly_report WHERE year = 2024");
+
+        dataProvider->registerTableQuery("top_customers",
+                                         "SELECT customer_name, total_orders, total_amount FROM customers ORDER BY total_amount DESC LIMIT 10");
+    }
 }
 
 void MaterialDocTemplate::initInformTableData(const QList<QPair<QString, QStringList>> &dbDatas) {
@@ -77,23 +90,53 @@ void MaterialDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString,
         addElement(std::move(title));
     }
 
-    //////// 첫 번째 표 (제목 아래에 배치)
-    initInformTableData(elementDatas[materialComponentNames[0]]);
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    ///
+    ///
+    // // 첫 번째 표 (제목 아래에 배치)
+    // initInformTableData(elementDatas[materialComponentNames[0]]);
 
-    auto table1 = std::make_unique<TableElement>("", QVector<CellData>(), informTableInnerDatas, QVector<CellData>(),informTableWidthRatio);
-    table1->setElementId(materialComponentNames[0]);
-    addElementBelow(std::move(table1), "title", 5);
+    // auto table1 = std::make_unique<TableElement>("", QVector<QString>(), informTableInnerDatas, QVector<QString>(),informTableWidthRatio);
+    // table1->setElementId(materialComponentNames[0]);
+    // addElementBelow(std::move(table1), "title", 5);
     ////////
 
 
-    //////// 두 번째 표 (첫 번째 표 아래에 배치)
-    initHistoryTableData(elementDatas[materialComponentNames[1]]);
+    // // 두 번째 표 (첫 번째 표 아래에 배치)
+    // initHistoryTableData(elementDatas[materialComponentNames[1]]);
 
-    auto table2 = std::make_unique<TableElement>(historyTableTitle, historyHeaderDatas, historyInnerDatas, historyFooterDatas, historyWidthRatio);
-    table2->setElementId(materialComponentNames[1]);
-    addElementBelow(std::move(table2), materialComponentNames[0], 5);
+    // auto table2 = std::make_unique<TableElement>(historyTableTitle, historyHeaderDatas, historyInnerDatas, historyFooterDatas, historyWidthRatio);
+    // table2->setElementId(materialComponentNames[1]);
+    // addElementBelow(std::move(table2), materialComponentNames[0], 5);
+    ///
+    ///
     ////////
 
+    //////// db 에서 data 가져오기.
+    ///
+    ///
+    if (dataProvider && dataProvider->isConnected()) {
+        // 첫 번째 표 - 데이터베이스 테이블 ID용 생성자
+        std::unique_ptr<TableElement> informTable = std::make_unique<TableElement>("", dataProvider, "material_inform");
+        informTable->setElementId("inform_table");
+        addElementBelow(std::move(informTable), "title", 5);
+
+        // 두 번째 표 - 커스텀 쿼리 테이블
+        QString customQuery = "SELECT p.product_name, c.category_name, SUM(s.quantity) as total_sold "
+                              "FROM sales s "
+                              "JOIN products p ON s.product_id = p.id "
+                              "JOIN categories c ON p.category_id = c.id "
+                              "GROUP BY p.product_name, c.category_name "
+                              "ORDER BY total_sold DESC LIMIT 20";
+        std::unique_ptr<TableElement> materialListTable = std::make_unique<TableElement>("", dataProvider, customQuery, true);
+        materialListTable->setElementId("list_table");
+        addElementBelow(std::move(materialListTable), "inform_table", 5);
+    } else {
+
+    }
+    ///
+    ///
+    ////////
 
 
 

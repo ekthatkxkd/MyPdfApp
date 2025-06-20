@@ -1,4 +1,4 @@
-QT += quick widgets printsupport core qml gui
+QT += quick widgets printsupport core qml gui sql
 
 SOURCES += \
         main.cpp \
@@ -10,6 +10,7 @@ SOURCES += \
         src/drawingtemplate/MaterialDocTemplate.cpp \
         src/drawingtemplate/RelativePositionManager.cpp \
         src/drawingtemplate/TemplateFactory.cpp \
+        src/drawingtemplate/dataProvider/SqliteDataProvider.cpp \
         src/model/listmodel/TableModel.cpp \
         src/pdfExporter/PdfExporter.cpp \
         src/pdfExporter/renderTarget/DocumentRenderer.cpp \
@@ -47,6 +48,8 @@ HEADERS += \
     include/drawingtemplate/MaterialDocTemplate.h \
     include/drawingtemplate/RelativePositionManager.h \
     include/drawingtemplate/TemplateFactory.h \
+    include/drawingtemplate/dataProvider/DataProvider.h \
+    include/drawingtemplate/dataProvider/SqliteDataProvider.h \
     include/model/listmodel/CellData.h \
     include/model/listmodel/TableModel.h \
     include/pdfExporter/PdfExporter.h \
