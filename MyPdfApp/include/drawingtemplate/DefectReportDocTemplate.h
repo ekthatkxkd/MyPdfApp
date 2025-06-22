@@ -8,7 +8,7 @@ class DefectReportDocTemplate : public DocumentTemplate {
 public:
     DefectReportDocTemplate();
 
-    virtual void setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) override;
+    virtual void setupTemplate(const QSizeF &pxContentSize) override;
 
 private:
     QVector<QVector<QString>> generateTableData(int tableIndex);

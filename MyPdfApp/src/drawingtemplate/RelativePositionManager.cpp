@@ -11,58 +11,66 @@ void RelativePositionManager::registerRenderedElement(const RenderedElementInfo&
 }
 
 QPointF RelativePositionManager::calculatePosition(const PositionReference& positionRef) {
-    if (positionRef.position == RelativePosition::None ||
-        positionRef.referenceElementId.isEmpty()) {
-        return defaultStartPosition + positionRef.offset;
-    }
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    ///
+    ///
+    // if (positionRef.position == RelativePosition::None ||
+    //     positionRef.referenceElementId.isEmpty()) {
+    //     return defaultStartPosition + positionRef.offset;
+    // }
 
-    // 참조 요소 찾기
-    auto it = renderedElements.find(positionRef.referenceElementId);
-    if (it == renderedElements.end()) {
-        qWarning() << "Reference element not found:" << positionRef.referenceElementId;
-        return defaultStartPosition + positionRef.offset;
-    }
+    // // 참조 요소 찾기
+    // auto it = renderedElements.find(positionRef.referenceElementId);
+    // if (it == renderedElements.end()) {
+    //     qWarning() << "Reference element not found:" << positionRef.referenceElementId;
+    //     return defaultStartPosition + positionRef.offset;
+    // }
 
-    const RenderedElementInfo& refElement = it.value();
-    QPointF calculatedPos;
+    // const RenderedElementInfo& refElement = it.value();
+    // QPointF calculatedPos;
 
-    switch (positionRef.position) {
-    case RelativePosition::Below:
-        calculatedPos = QPointF(refElement.boundingRect.left(),
-                                refElement.boundingRect.bottom());
-        break;
+    // switch (positionRef.position) {
+    // case RelativePosition::Below:
+    //     calculatedPos = QPointF(refElement.boundingRect.left(),
+    //                             refElement.boundingRect.bottom());
+    //     break;
 
-    case RelativePosition::RightOf:
-        calculatedPos = QPointF(refElement.boundingRect.right(),
-                                refElement.boundingRect.top());
-        break;
+    // case RelativePosition::RightOf:
+    //     calculatedPos = QPointF(refElement.boundingRect.right(),
+    //                             refElement.boundingRect.top());
+    //     break;
 
-    case RelativePosition::Above:
-        calculatedPos = QPointF(refElement.boundingRect.left(),
-                                refElement.boundingRect.top());
-        break;
+    // case RelativePosition::Above:
+    //     calculatedPos = QPointF(refElement.boundingRect.left(),
+    //                             refElement.boundingRect.top());
+    //     break;
 
-    case RelativePosition::LeftOf:
-        calculatedPos = QPointF(refElement.boundingRect.left(),
-                                refElement.boundingRect.top());
-        break;
+    // case RelativePosition::LeftOf:
+    //     calculatedPos = QPointF(refElement.boundingRect.left(),
+    //                             refElement.boundingRect.top());
+    //     break;
 
-    case RelativePosition::SameRow:
-        calculatedPos = QPointF(refElement.boundingRect.right(),
-                                refElement.boundingRect.top());
-        break;
+    // case RelativePosition::SameRow:
+    //     calculatedPos = QPointF(refElement.boundingRect.right(),
+    //                             refElement.boundingRect.top());
+    //     break;
 
-    default:
-        calculatedPos = defaultStartPosition;
-        break;
-    }
+    // default:
+    //     calculatedPos = defaultStartPosition;
+    //     break;
+    // }
 
-    // 오프셋 및 여백 적용
-    calculatedPos += positionRef.offset;
-    calculatedPos.setX(calculatedPos.x() + positionRef.margins.left());
-    calculatedPos.setY(calculatedPos.y() + positionRef.margins.top());
+    // // 오프셋 및 여백 적용
+    // calculatedPos += positionRef.offset;
+    // calculatedPos.setX(calculatedPos.x() + positionRef.margins.left());
+    // calculatedPos.setY(calculatedPos.y() + positionRef.margins.top());
 
-    return calculatedPos;
+    // return calculatedPos;
+    ///
+    ///
+    ////////
+
+    return QPointF();
 }
 
 QPointF RelativePositionManager::adjustPositionToContentArea(const QPointF& position,

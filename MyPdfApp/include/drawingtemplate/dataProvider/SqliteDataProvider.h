@@ -3,6 +3,7 @@
 
 #include "include/drawingtemplate/dataProvider/DataProvider.h"
 #include <QSqlDatabase>
+#include <QSqlRecord>
 #include <QMap>
 
 class SqliteDataProvider : public IDataProvider {
@@ -17,14 +18,14 @@ public:
     void registerTableQuery(const QString& tableId, const QString& query) override;
 
     // IDataProvider 인터페이스 구현
-    TableData getTableData(const QString& tableId) override;
-    TableData executeQuery(const QString& query) override;
+    QSqlQuery getTableData(const QString& tableId) override;
+    QSqlQuery executeQuery(const QString& query) override;
     bool isConnected() const override;
     void disconnect() override;
 
 private:
-    TableData processQueryResult(QSqlQuery& query);
-    QVector<qreal> calculateColumnWidths(const TableData& data, int totalWidth = 500);
+    // TableData processQueryResult(QSqlQuery& query);
+    // QVector<qreal> calculateColumnWidths(const TableData& data, int totalWidth = 500);
 
     QSqlDatabase database;
     QString connectionName;

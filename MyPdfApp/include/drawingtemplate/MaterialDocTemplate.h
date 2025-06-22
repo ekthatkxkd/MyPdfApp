@@ -9,7 +9,9 @@ class MaterialDocTemplate : public DocumentTemplate {
 public:
     MaterialDocTemplate();
 
-    virtual void setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) override;
+    const QVector<QString> elementIds{"title", "informTable", "history"};
+
+    virtual void setupTemplate(const QSizeF &pxContentSize) override;
 
 private:
     void initInformTableData(const QList<QPair<QString, QStringList>> &dbDatas);

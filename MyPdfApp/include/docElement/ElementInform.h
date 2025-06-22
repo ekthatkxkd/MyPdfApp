@@ -23,35 +23,35 @@ enum class RelativePosition {
 
 // 위치 참조 정보
 struct PositionReference {
-    QString referenceElementId;     // 참조할 요소의 ID
+    QVector<QString> referenceElementId;     // 참조할 요소의 ID
     RelativePosition position;      // 상대적 위치
     QPointF offset;                // 추가 오프셋 (x, y)
     QMarginsF margins;             // 여백
 
-    PositionReference(const QString& refId = QString(),
+    PositionReference(const QVector<QString>& refId = QVector<QString>(),
                       RelativePosition pos = RelativePosition::None,
                       const QPointF& off = QPointF(0, 0),
                       const QMarginsF& mg = QMarginsF(0, 0, 0, 0))
         : referenceElementId(refId), position(pos), offset(off), margins(mg) {}
 
     // 편의 생성자들
-    static PositionReference below(const QString& refId, qreal spacing = 10) {
-        return PositionReference(refId, RelativePosition::Below, QPointF(0, spacing));
+    static PositionReference below(const QVector<QString>& refIds, qreal spacing = 10) {
+        return PositionReference(refIds, RelativePosition::Below, QPointF(0, spacing));
     }
-    static PositionReference rightOf(const QString& refId, qreal spacing = 10) {
+    static PositionReference rightOf(const QVector<QString>& refId, qreal spacing = 10) {
         return PositionReference(refId, RelativePosition::RightOf, QPointF(spacing, 0));
     }
-    static PositionReference sameRow(const QString& refId, qreal spacing = 10) {
+    static PositionReference sameRow(const QVector<QString>& refId, qreal spacing = 10) {
         return PositionReference(refId, RelativePosition::SameRow, QPointF(spacing, 0));
     }
-    static PositionReference above(const QString& refId, qreal spacing = 10) {
+    static PositionReference above(const QVector<QString>& refId, qreal spacing = 10) {
         return PositionReference(refId, RelativePosition::Above, QPointF(0, -spacing));
     }
-    static PositionReference leftOf(const QString& refId, qreal spacing = 10) {
+    static PositionReference leftOf(const QVector<QString>& refId, qreal spacing = 10) {
         return PositionReference(refId, RelativePosition::LeftOf, QPointF(-spacing, 0));
     }
     static PositionReference nextPage() {
-        return PositionReference(QString(), RelativePosition::NextPage);
+        return PositionReference(QVector<QString>(), RelativePosition::NextPage);
     }
 };
 
@@ -87,6 +87,19 @@ struct CellData {
         cellText(text), bgColor(bg),
         isBold(bold), fontSize(fSize), alignPosition(align),
         isVerticalDir(isVDir) {}
+};
+
+// 테이블 데이터 구조체
+struct TableData {
+    QString title;                              // 테이블 제목 (옵션)
+    QVector<CellData> headerDatas;                    // 컬럼 헤더
+    QVector<QVector<CellData>> innerDatas;             // 데이터 행들
+    QVector<CellData> footerDatas;                    // 푸터
+    // QVector<qreal> columnWidths;                // 컬럼 너비 (옵션)
+
+    TableData() = default;
+    TableData(const QVector<CellData>& hdrs, const QVector<QVector<CellData>>& inner, QVector<CellData>& footer)
+        : headerDatas(hdrs), innerDatas(inner), footerDatas(footer) {}
 };
 }
 

@@ -9,7 +9,7 @@ ImageElement::ImageElement(const QPixmap& img, const QSizeF& maxSz,
 }
 
 QRectF ImageElement::render(QPainter& painter, const QPointF& startPos,
-                            const QRectF& availableRect, int& currentPage,
+                            const QSizeF &pxContentSize,
                             std::function<void()> newPageCallback) {
     return QRectF();
 }

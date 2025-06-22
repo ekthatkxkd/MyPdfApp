@@ -9,14 +9,14 @@ MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material", "자�
 
     if (dataProvider->connect()) {
         // 미리 정의된 쿼리들 등록
-        dataProvider->registerTableQuery("sales_summary",
+        dataProvider->registerTableQuery("inform_table",
                                          "SELECT product_name, quantity, price, total FROM sales_summary ORDER BY total DESC");
 
-        dataProvider->registerTableQuery("monthly_report",
-                                         "SELECT month, revenue, expenses, profit FROM monthly_report WHERE year = 2024");
+        // dataProvider->registerTableQuery("monthly_report",
+        //                                  "SELECT month, revenue, expenses, profit FROM monthly_report WHERE year = 2024");
 
-        dataProvider->registerTableQuery("top_customers",
-                                         "SELECT customer_name, total_orders, total_amount FROM customers ORDER BY total_amount DESC LIMIT 10");
+        // dataProvider->registerTableQuery("top_customers",
+        //                                  "SELECT customer_name, total_orders, total_amount FROM customers ORDER BY total_amount DESC LIMIT 10");
     }
 }
 
@@ -76,7 +76,7 @@ void MaterialDocTemplate::initHistoryTableData(const QList<QPair<QString, QStrin
     }
 }
 
-void MaterialDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) {
+void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     if (templateTitle != "") {
         //////// 제목 (첫 번째 요소 - 기본 위치)
         QFont font;
@@ -86,7 +86,7 @@ void MaterialDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString,
         auto title = std::make_unique<TextElement>(templateTitle,
                                                    font,
                                                    Qt::AlignHCenter);
-        title->setElementId("title");
+        title->setElementId(elementIds[0]);
         addElement(std::move(title));
     }
 
@@ -116,21 +116,84 @@ void MaterialDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString,
     ///
     ///
     if (dataProvider && dataProvider->isConnected()) {
-        // 첫 번째 표 - 데이터베이스 테이블 ID용 생성자
-        std::unique_ptr<TableElement> informTable = std::make_unique<TableElement>("", dataProvider, "material_inform");
-        informTable->setElementId("inform_table");
-        addElementBelow(std::move(informTable), "title", 5);
 
-        // 두 번째 표 - 커스텀 쿼리 테이블
-        QString customQuery = "SELECT p.product_name, c.category_name, SUM(s.quantity) as total_sold "
-                              "FROM sales s "
-                              "JOIN products p ON s.product_id = p.id "
-                              "JOIN categories c ON p.category_id = c.id "
-                              "GROUP BY p.product_name, c.category_name "
-                              "ORDER BY total_sold DESC LIMIT 20";
-        std::unique_ptr<TableElement> materialListTable = std::make_unique<TableElement>("", dataProvider, customQuery, true);
-        materialListTable->setElementId("list_table");
-        addElementBelow(std::move(materialListTable), "inform_table", 5);
+        {
+            TableData informTableData;
+
+            informTableData.headerDatas = QVector<CellData>();
+            informTableData.innerDatas = informTableInnerDatas;
+            informTableData.footerDatas = QVector<CellData>();
+
+            QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
+
+            QSqlRecord record = tableQuery.record();
+            // // 헤더 추출
+            // for (int i = 0; i < record.count(); ++i) {
+            //     informTableData.headers.append(record.fieldName(i));
+            // }
+
+            //////// 데이터 행 추출
+            // while (tableQuery.next()) {
+            //     QVector<CellData> row;
+            //     for (int i = 0; i < record.count(); ++i) {
+            //         CellData cellData;
+            //         row.append(tableQuery.value(i).toString());
+            //     }
+            //     informTableData.rowDatas.append(row);
+            // }
+            //////// [LLDDSS] 테스트 코드.
+            ///
+            ///
+            QList<QPair<QString, QString>> readDataFromDB;
+            readDataFromDB.push_back(QPair<QString, QString>("number", "2025/03/13 - 8"));
+            readDataFromDB.push_back(QPair<QString, QString>("company", "(주) 테스트"));
+            readDataFromDB.push_back(QPair<QString, QString>("storage", "수입검사(IQC)"));
+            readDataFromDB.push_back(QPair<QString, QString>("address", "경기도 부천시 OO구 OO로 000번길 00 (내동)"));
+            readDataFromDB.push_back(QPair<QString, QString>("manager", "홍길동"));
+            readDataFromDB.push_back(QPair<QString, QString>("tel", "032-000-0000"));
+
+            int count = 0;
+            while ((count++) < readDataFromDB.size()) {
+                QPair<QString, QString> readData = readDataFromDB[count];
+
+                for (auto &rowDatas : informTableData.innerDatas) {
+                    bool isFound = false;
+                    for (auto &cellData : rowDatas) {
+                        if (cellData.cellId == readData.first) {
+                            cellData.cellText = readData.second;
+
+                            isFound = true;
+                            break;
+                        }
+                    }
+                    if (isFound)
+                        break;
+                }
+            }
+
+
+
+            qreal tableFullWidth = (pxContentSize.width() - sideSpacing) / 2;
+
+            auto informTable = std::make_unique<TableElement>("", informTableData, tableFullWidth, informTableWidthRatio, Qt::AlignLeft);
+            informTable->setElementId(elementIds[1]);
+            addElementBelow(std::move(informTable), QVector<QString>{elementIds[0]}, 5);
+
+            ///
+            ///
+            ////////
+        }
+
+        // // 두 번째 표 - 커스텀 쿼리 테이블
+        // QString customQuery = "SELECT p.product_name, c.category_name, SUM(s.quantity) as total_sold "
+        //                       "FROM sales s "
+        //                       "JOIN products p ON s.product_id = p.id "
+        //                       "JOIN categories c ON p.category_id = c.id "
+        //                       "GROUP BY p.product_name, c.category_name "
+        //                       "ORDER BY total_sold DESC LIMIT 20";
+        // std::unique_ptr<TableElement> materialListTable = std::make_unique<TableElement>("", dataProvider, customQuery, true);
+        // materialListTable->setElementId("list_table");
+        // addElementBelow(std::move(materialListTable), "inform_table", 5);
     } else {
 
     }

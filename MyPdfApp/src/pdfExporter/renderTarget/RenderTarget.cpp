@@ -29,3 +29,7 @@ void RenderTarget::initPageSettings() {
         pageSettings.pxImageSize.height() - (2 * pageSettings.pxMargins)
         );
 }
+
+QSizeF RenderTarget::getPxContentSize() {
+    return pageSettings.pxContentSize;
+}

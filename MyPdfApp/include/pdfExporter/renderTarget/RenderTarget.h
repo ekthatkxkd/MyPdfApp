@@ -12,8 +12,8 @@ public:
         QSizeF mmPageFullSize;      // 페이지 크기 (밀리미터)
         QMarginsF mmMargins;    // 여백 (밀리미터)
         int resolution;           // DPI
-        QSize pxImageSize;          // 전체 이미지 크기 (픽셀)
-        QSize pxContentSize;        // 여백 제외한 내용 영역 크기 (픽셀)
+        QSizeF pxImageSize;          // 전체 이미지 크기 (픽셀)
+        QSizeF pxContentSize;        // 여백 제외한 내용 영역 크기 (픽셀)
         int pxMargins;         // 여백 픽셀 크기
     };
 
@@ -22,6 +22,8 @@ public:
     virtual QPainter* getPainter() = 0;
     virtual void newPage() = 0;
     virtual void finalize() = 0;
+
+    QSizeF getPxContentSize();
 
 protected :
     PageSettings pageSettings;

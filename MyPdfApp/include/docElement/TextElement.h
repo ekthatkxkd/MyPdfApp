@@ -10,13 +10,15 @@ public:
                 Qt::Alignment align = Qt::AlignLeft);
 
     QRectF render(QPainter& painter, const QPointF& startPos,
-                  const QRectF& availableRect, int& currentPage,
+                  const QSizeF &pxContentSize,
                   std::function<void()> newPageCallback = nullptr) override;
 
     QSizeF calculateSize(const QFontMetrics& fontMetrics,
                          const QRectF& availableRect) override;
 
     bool needsNewPage(const QRectF& availableRect, const QSizeF& elementSize) override;
+
+    Qt::Alignment getAlign() override;
 
 private:
     QString text;

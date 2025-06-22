@@ -15,13 +15,15 @@ void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTempl
         return;
     }
 
+    QSizeF pxContentSize = renderTarget->getPxContentSize();
+
     // ★ 콜백으로 newPage 전달
     auto newPageCallback = [this]() {
         this->renderTarget->newPage();
     };
 
     // 템플릿 렌더링 실행
-    docTemplate->renderDocument(*painter, newPageCallback);
+    docTemplate->renderDocument(*painter, pxContentSize, newPageCallback);
 
     // 렌더링 완료
     renderTarget->finalize();

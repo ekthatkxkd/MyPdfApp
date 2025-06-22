@@ -8,7 +8,7 @@ DefectReportDocTemplate::DefectReportDocTemplate() : DocumentTemplate("DefectRep
 
 }
 
-void DefectReportDocTemplate::setupTemplate(const QMap<QString, QList<QPair<QString, QStringList>>> &elementDatas) {
+void DefectReportDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     if (templateTitle != "") {
         QFont font;
         font.setPointSize(20);
