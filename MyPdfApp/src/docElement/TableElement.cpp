@@ -40,20 +40,75 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
         painter.setPen(QPen(Qt::black, 1));
 
         QFontMetrics metrics(painter.font());
-        QRectF boundingBox(cursorPoint, QSizeF(pxContentSize.width(), metrics.height()));
+        // QRectF boundingBox(cursorPoint, QSizeF(pxContentSize.width(), metrics.height()));
+        QRectF boundingBox(cursorPoint, QSizeF(metrics.horizontalAdvance(title), metrics.height()));
 
         Qt::AlignmentFlag align = Qt::AlignLeft;
 
         painter.drawText(boundingBox, align, title);
 
-        cursorPoint = QPointF(cursorPoint.x(), cursorPoint.y() + boundingBox.height() + titleTableMargin);
+        cursorPoint = QPointF(startPos.x(), cursorPoint.y() + boundingBox.height() + titleTableMargin);
     }
 
     //////// table header 그리기
     ///
     ///
     if (tableData.headerDatas.size() != 0) {
+        QPointF headerCursorPoint = cursorPoint;
         qreal rowHeight = calculateOneRowHeight(tableData.headerDatas);
+
+        for (auto &cellData : tableData.headerDatas) {
+            //////// rectangle 그리기
+            ///
+            ///
+            qreal cellWidth = 0;
+            for (int colIndex = cellData.startCol; colIndex < (cellData.startCol + cellData.colSpan); colIndex++) {
+                cellWidth += cellWidths[colIndex];
+            }
+
+            QRectF boundingBox(headerCursorPoint, QSizeF(cellWidth, rowHeight));
+            painter.setPen(QPen(Qt::black, 1.0));
+            painter.fillRect(boundingBox, cellData.bgColor);
+            painter.drawRect(boundingBox);
+            ///
+            ///
+            ////////
+
+            //////// text 그리기
+            ///
+            ///
+            QString cellText = cellData.cellText;
+            QFont font = painter.font();
+            font.setPointSize(cellData.fontSize);
+            font.setBold(cellData.isBold);
+            painter.setFont(font);
+
+            QString cellAlign = cellData.alignPosition;
+
+            Qt::Alignment align = Qt::AlignmentFlag::AlignVCenter;
+            if (cellAlign == "center") {
+                align |= Qt::AlignmentFlag::AlignHCenter;
+            } else if (cellAlign == "right") {
+                align |= Qt::AlignmentFlag::AlignRight;
+            } else {
+                align |= Qt::AlignmentFlag::AlignLeft;
+            }
+
+            QTextOption textOption;
+            textOption.setAlignment(align);
+            textOption.setWrapMode(QTextOption::WrapAnywhere);
+
+            QRectF adjustedTextRect = boundingBox.adjusted(cellTextMargins, cellTextMargins, -cellTextMargins, -cellTextMargins);
+
+            painter.drawText(adjustedTextRect, cellText, textOption);
+            ///
+            ///
+            ////////
+
+            headerCursorPoint = QPointF(boundingBox.right(), headerCursorPoint.y());
+        }
+
+        cursorPoint = QPointF(startPos.x(), cursorPoint.y() + rowHeight);
     }
     ///
     ///
@@ -62,11 +117,20 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
     //////// table inner 그리기
     ///
     ///
+    if (tableData.innerDatas.size() != 0) {
 
+    }
     ///
     ///
     ////////
 
+    //////// footer 그리기
+    ///
+    ///
+
+    ///
+    ///
+    ////////
 
 
     return QRectF();
