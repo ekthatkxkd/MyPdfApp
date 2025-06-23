@@ -18,8 +18,6 @@ private:
 
     std::unique_ptr<QPdfWriter> pdfWriter;
     std::unique_ptr<QPainter> painter;
-
-    PageSettings pageSettings;
 };
 
 #endif // PDFRENDERTARGET_H

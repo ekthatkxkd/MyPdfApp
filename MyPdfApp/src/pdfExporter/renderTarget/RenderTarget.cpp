@@ -16,12 +16,12 @@ void RenderTarget::initPageSettings() {
 
     // A4 SIZE 전체 크기 mm 을 pixel 단위로 변환.
     pageSettings.pxImageSize = QSize(
-        qRound(pageSettings.mmPageFullSize.width() / 25.4 * pageSettings.resolution),
-        qRound(pageSettings.mmPageFullSize.height() / 25.4 * pageSettings.resolution)
+        qRound((pageSettings.mmPageFullSize.width() / 25.4) * pageSettings.resolution),
+        qRound((pageSettings.mmPageFullSize.height() / 25.4) * pageSettings.resolution)
         );
 
     // 여백을 픽셀로 변환
-    pageSettings.pxMargins = qRound(pageSettings.mmMargins.left() / 25.4 * pageSettings.resolution);
+    pageSettings.pxMargins = qRound((pageSettings.mmMargins.left() / 25.4) * pageSettings.resolution);
 
     // 내용 영역 크기 계산 (여백 제외)
     pageSettings.pxContentSize = QSize(

@@ -128,11 +128,11 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QSizeF &pxContent
 
     //     positionManager.registerRenderedElement(renderedInfo);
     // }
+    // renderFooter(painter, currentPage);
     ///
     ///
     ////////
 
-    renderFooter(painter, currentPage);
     painter.end();
 }
 

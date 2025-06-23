@@ -112,6 +112,7 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     ///
     ////////
 
+    ///*
     //////// db 에서 data 가져오기.
     ///
     ///
@@ -153,7 +154,7 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
             readDataFromDB.push_back(QPair<QString, QString>("tel", "032-000-0000"));
 
             int count = 0;
-            while ((count++) < readDataFromDB.size()) {
+            while (count < readDataFromDB.size()) {
                 QPair<QString, QString> readData = readDataFromDB[count];
 
                 for (auto &rowDatas : informTableData.innerDatas) {
@@ -169,11 +170,13 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
                     if (isFound)
                         break;
                 }
+
+                count++;
             }
 
 
 
-            qreal tableFullWidth = (pxContentSize.width() - sideSpacing) / 2;
+            qreal tableFullWidth = pxContentSize.width();
 
             auto informTable = std::make_unique<TableElement>("", informTableData, tableFullWidth, informTableWidthRatio, Qt::AlignLeft);
             informTable->setElementId(elementIds[1]);
@@ -200,7 +203,7 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     ///
     ///
     ////////
-
+    //*/
 
 
 

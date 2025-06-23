@@ -57,7 +57,7 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
     ///
     if (tableData.headerDatas.size() != 0) {
         QPointF headerCursorPoint = cursorPoint;
-        qreal rowHeight = calculateOneRowHeight(tableData.headerDatas);
+        qreal rowHeight = calculateOneRowHeight(painter, tableData.headerDatas);
 
         if ((headerCursorPoint.y() + rowHeight) > pxContentSize.height()) {
             newPageCallback();
@@ -129,7 +129,9 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
     ///
     if (tableData.innerDatas.size() != 0) {
         QPointF innerCursorPoint = cursorPoint;
-        QVector<qreal> rowHeights = calculateRowHeights(tableData.innerDatas);
+        QVector<qreal> rowHeights = calculateRowHeights(painter, tableData.innerDatas);
+
+        qreal cellRectYPos = innerCursorPoint.y();
 
         for (int rowIndex = 0; rowIndex < tableData.innerDatas.size(); rowIndex++) {
             QVector<CellData> rowDatas = tableData.innerDatas[rowIndex];
@@ -140,6 +142,7 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
                 tableStartPos = QPointF(startPos.x(), 0);
                 cursorPoint = tableStartPos;
                 innerCursorPoint = tableStartPos;
+                cellRectYPos = 0;
             }
 
             for (int colIndex = 0; colIndex < rowDatas.size(); colIndex++) {
@@ -147,8 +150,16 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
                 //////// rectangle 그리기
                 ///
                 ///
-                qreal cellWidth = 0;
 
+                qreal cellRectXPos = cursorPoint.x();
+
+                // qreal cellRectXPos = tableCursorPoint.x();
+
+                for (int widthIndex = 0; widthIndex < cellData.startCol; widthIndex++) {
+                    cellRectXPos += cellWidths[widthIndex];
+                }
+
+                qreal cellWidth = 0;
                 for (int widthIndex = cellData.startCol; widthIndex < (cellData.startCol + cellData.colSpan); widthIndex++) {
                     cellWidth += cellWidths[widthIndex];
                 }
@@ -159,7 +170,8 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
                     cellHeight += rowHeights[heightIndex];
                 }
 
-                QRectF boundingBox(innerCursorPoint, QSizeF(cellWidth, cellHeight));
+                // QRectF boundingBox(innerCursorPoint, QSizeF(cellWidth, cellHeight));
+                QRectF boundingBox(QPointF(cellRectXPos, cellRectYPos), QSizeF(cellWidth, cellHeight));
                 painter.setPen(QPen(Qt::black, 1.0));
                 painter.fillRect(boundingBox, cellData.bgColor);
                 painter.drawRect(boundingBox);
@@ -198,10 +210,11 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
                 ///
                 ////////
 
-                innerCursorPoint = QPointF(boundingBox.right(), innerCursorPoint.y());
+                // innerCursorPoint = QPointF(boundingBox.right(), innerCursorPoint.y());
             }
 
             innerCursorPoint = QPointF(cursorPoint.x(), innerCursorPoint.y() + rowHeights[rowIndex]);
+            cellRectYPos += rowHeights[rowIndex];
         }
 
         cursorPoint = innerCursorPoint;
@@ -215,7 +228,7 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
     ///
     if (tableData.footerDatas.size() != 0) {
         QPointF footerCursorPoint = cursorPoint;
-        qreal rowHeight = calculateOneRowHeight(tableData.footerDatas);
+        qreal rowHeight = calculateOneRowHeight(painter, tableData.footerDatas);
 
         if ((footerCursorPoint.y() + rowHeight) > pxContentSize.height()) {
             newPageCallback();
@@ -285,22 +298,25 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
     return QRectF(tableStartPos, QSizeF(tableFullWidth, cursorPoint.y()));
 }
 
-qreal TableElement::calculateOneRowHeight(QVector<CellData> &rowDatas) {
+qreal TableElement::calculateOneRowHeight(QPainter& painter, QVector<CellData> &rowDatas) {
     qreal rowHeight = (cellTextMargins * 2);
 
     for (int colIndex = 0; colIndex < rowDatas.size(); colIndex++) {
         CellData cellData = rowDatas[colIndex];
         QString text = cellData.cellText;
+
+        qreal cellWidth = 0;
+        for (int widthIndex = cellData.startCol; widthIndex < (cellData.startCol + cellData.colSpan); widthIndex++) {
+            cellWidth += cellWidths[widthIndex];
+        }
+
         QFont font;
         font.setPointSize(cellData.fontSize);
         font.setBold(cellData.isBold);
 
-        qreal cellWidth = 0;
-        for (int widthIndex = cellData.startCol; widthIndex < cellData.colSpan; widthIndex++) {
-            cellWidth += cellWidths[widthIndex];
-        }
+        painter.setFont(font);
 
-        QSizeF textSize = calculatedCellTextArea(text, font, false, QTextOption::WrapAnywhere, (cellWidth - (cellTextMargins * 2)));
+        QSizeF textSize = calculatedCellTextArea(text, painter.font(), false, QTextOption::WrapAnywhere, (cellWidth - (cellTextMargins * 2)));
         int actualCellHeight = (textSize.height() + (cellTextMargins * 2));
 
         if (actualCellHeight > rowHeight) {
@@ -311,14 +327,12 @@ qreal TableElement::calculateOneRowHeight(QVector<CellData> &rowDatas) {
     return rowHeight;
 }
 
-QVector<qreal> TableElement::calculateRowHeights(const QVector<QVector<CellData>> &datas) {
+QVector<qreal> TableElement::calculateRowHeights(QPainter& painter, const QVector<QVector<CellData>> &datas) {
     QVector<qreal> rowHeights(datas.size(), cellTextMargins * 2);  // row 개수만큼 상하 마진이 반영된 값으로 초기화.
 
     QVector<QPair<int, int>> catchedVerticalCells;
 
     for (int rowIndex = 0; rowIndex < datas.size(); rowIndex++) {
-        qreal maxHeight = 0;
-
         for (int colIndex = 0; colIndex < datas[rowIndex].size(); colIndex++) {
             CellData cellData = datas[rowIndex][colIndex];
             QString text = cellData.cellText;
@@ -326,16 +340,18 @@ QVector<qreal> TableElement::calculateRowHeights(const QVector<QVector<CellData>
             if (cellData.isVerticalDir) {
                 catchedVerticalCells.push_back(QPair<int, int>(rowIndex, colIndex));
             } else {
+                qreal cellWidth = 0;
+                for (int widthIndex = cellData.startCol; widthIndex < (cellData.startCol + cellData.colSpan); widthIndex++) {
+                    cellWidth += cellWidths[widthIndex];
+                }
+
                 QFont font;
                 font.setPointSize(cellData.fontSize);
                 font.setBold(cellData.isBold);
 
-                qreal cellWidth = 0;
-                for (int widthIndex = cellData.startCol; widthIndex < cellData.colSpan; widthIndex++) {
-                    cellWidth += cellWidths[widthIndex];
-                }
+                painter.setFont(font);
 
-                QSizeF textSize = calculatedCellTextArea(text, font, false, QTextOption::WrapAnywhere, (cellWidth - (cellTextMargins * 2)));
+                QSizeF textSize = calculatedCellTextArea(text, painter.font(), false, QTextOption::WrapAnywhere, (cellWidth - (cellTextMargins * 2)));
                 int actualCellHeight = (textSize.height() + (cellTextMargins * 2));
 
                 if (actualCellHeight > rowHeights[rowIndex]) {
@@ -350,21 +366,33 @@ QVector<qreal> TableElement::calculateRowHeights(const QVector<QVector<CellData>
             CellData cellData = datas[cellPos.first][cellPos.second];
 
             QString text = cellData.cellText;
-            QFont font;
-            font.setPointSize(cellData.fontSize);
-            font.setBold(cellData.isBold);
 
             if (!text.contains("\n")) {
                 cellData.cellText = text.split("").join("\n");  // 개행문자 추가 안되어 있을 경우 대비.
-            }
 
+                // 앞뒤 개행문자 제거
+                if (cellData.cellText.startsWith("\n")) {
+                    cellData.cellText = cellData.cellText.mid(1);
+                }
+                if (cellData.cellText.endsWith("\n")) {
+                    cellData.cellText.chop(1);
+                }
+
+                text = cellData.cellText;
+            }
 
             int sumCellHeight = 0;
             for (int cellStartRow = cellData.startRow; cellStartRow < (cellData.startRow + cellData.rowSpan); cellStartRow++) {
                 sumCellHeight += rowHeights[cellStartRow];
             }
 
-            QSizeF textSize = calculatedCellTextArea(text, font, true, QTextOption::NoWrap, 0);
+            QFont font;
+            font.setPointSize(cellData.fontSize);
+            font.setBold(cellData.isBold);
+
+            painter.setFont(font);
+
+            QSizeF textSize = calculatedCellTextArea(text, painter.font(), true, QTextOption::NoWrap, 0);
             int actualCellHeight = (textSize.height() + (cellTextMargins * 2));
 
             if (actualCellHeight > sumCellHeight) {

@@ -38,8 +38,8 @@ public:
 
     Qt::Alignment getAlign() override;
 
-    qreal calculateOneRowHeight(QVector<CellData> &rowDatas);
-    QVector<qreal> calculateRowHeights(const QVector<QVector<CellData>> &datas);
+    qreal calculateOneRowHeight(QPainter& painter, QVector<CellData> &rowDatas);
+    QVector<qreal> calculateRowHeights(QPainter& painter, const QVector<QVector<CellData>> &datas);
 
     QSizeF calculatedCellTextArea(const QString &text, const QFont &font,
                                   const bool isVertical, const QTextOption::WrapMode &wrapMode, qreal fixedWidth);

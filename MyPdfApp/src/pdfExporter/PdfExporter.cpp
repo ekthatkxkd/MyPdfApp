@@ -1016,6 +1016,10 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
 bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     qDebug() << "exportToPdf, start";
 
+    ///*
+    //////// [LLDDSS] MY MODIFIED
+    ///
+    ///
     // template 생성. - element 들을 그리는 기능들을 함.
     auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
 
@@ -1028,37 +1032,43 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     renderer.renderTemplate(std::move(materialDocTemplate));
 
     return true;
-
-    //////// [LLDDSS] ORIGIN IS TO ALIVE
-    ///
-    ///
-    // initDefaultPdf(filePath);
-
-    // QPainter painter;
-
-    // if (!painter.begin(pdfWriter.get())) {
-    //     qDebug() << "exportToPdf, Failed to initialize QPainter...";
-    //     return false;
-    // }
-
-    // setFont(painter);
-
-    // if (rootItem->objectName() == templateObjNames[0]) {
-    //     drawMaterialTemplate(painter, rootItem, true);
-    // } else if (rootItem->objectName() == templateObjNames[1]) {
-    //     defectReportTemplate(painter, rootItem, true);
-    // } else if (rootItem->objectName() == templateObjNames[2]) {
-    //     orderFormTemplate(painter, rootItem, true);
-    // } else if (rootItem->objectName() == templateObjNames[3]) {
-    //     drawReceiptVoucherTemplate(painter, rootItem, true);
-    // }
-
-    // painter.end();
-
-    // return true;
     ///
     ///
     ////////
+    //*/
+
+    /*
+    //////// [LLDDSS] ORIGIN IS TO ALIVE
+    ///
+    ///
+    initDefaultPdf(filePath);
+
+    QPainter painter;
+
+    if (!painter.begin(pdfWriter.get())) {
+        qDebug() << "exportToPdf, Failed to initialize QPainter...";
+        return false;
+    }
+
+    setFont(painter);
+
+    if (rootItem->objectName() == templateObjNames[0]) {
+        drawMaterialTemplate(painter, rootItem, true);
+    } else if (rootItem->objectName() == templateObjNames[1]) {
+        defectReportTemplate(painter, rootItem, true);
+    } else if (rootItem->objectName() == templateObjNames[2]) {
+        orderFormTemplate(painter, rootItem, true);
+    } else if (rootItem->objectName() == templateObjNames[3]) {
+        drawReceiptVoucherTemplate(painter, rootItem, true);
+    }
+
+    painter.end();
+
+    return true;
+    ///
+    ///
+    ////////
+    //*/
 }
 
 bool PdfExporter::generatePreview(QQuickItem *rootItem) {

@@ -37,7 +37,7 @@ private:
             CellData("address",1,4,1,1,"",Qt::white,false,12,"left",false)
         },
         {
-            CellData("",2,0,1,1,"담당자",Qt::lightGray,true,12,"center",false),
+            CellData("",2,0,1,1,"구매담당자",Qt::lightGray,true,12,"center",false),
             CellData("manager",2,1,1,1,"",Qt::white,false,12,"left",false),
             CellData("",2,3,1,1,"TEL",Qt::lightGray,true,12,"center",false),
             CellData("tel",2,4,1,1,"",Qt::white,false,12,"left",false)
