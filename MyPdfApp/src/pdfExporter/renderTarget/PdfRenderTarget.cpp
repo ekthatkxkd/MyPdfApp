@@ -2,7 +2,7 @@
 #include <QDebug>
 
 // PdfRenderTarget 구현
-PdfRenderTarget::PdfRenderTarget(const QString& filename, const QSizeF& pageSize) : RenderTarget() {
+PdfRenderTarget::PdfRenderTarget(const QString& filename) : RenderTarget() {
     initDefaultPdf(filename);
 
     painter = std::make_unique<QPainter>(pdfWriter.get());

@@ -1,14 +1,10 @@
 #include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
 
-ImageRenderTarget::ImageRenderTarget(const QSizeF& pageSize, QImage::Format format)
-    : RenderTarget(), pageSize(pageSize) {
-    int width = static_cast<int>(pageSize.width());
-    int height = static_cast<int>(pageSize.height());
+ImageRenderTarget::ImageRenderTarget(QImage::Format format)
+    : RenderTarget() {
+    initDefaultImage(format);
 
-    image = std::make_unique<QImage>(width, height, format);
-    image->fill(Qt::white);
-
-    painter = std::make_unique<QPainter>(image.get());
+    initPainter();
 }
 
 ImageRenderTarget::~ImageRenderTarget() {
@@ -17,7 +13,44 @@ ImageRenderTarget::~ImageRenderTarget() {
     }
 }
 
+void ImageRenderTarget::initDefaultImage(QImage::Format format) {
+    image = std::make_shared<QImage>(pageSettings.pxImageSize, format);
+    image->fill(Qt::white);
+
+    // DPI 정보 설정 (QPainter 스케일링 정확성을 위해)
+    double dotsPerMeter = pageSettings.resolution * 39.3701; // 1인치 = 39.3701 dots/meter
+    image->setDotsPerMeterX(qRound(dotsPerMeter));
+    image->setDotsPerMeterY(qRound(dotsPerMeter));
+
+    previewImages.append(image);
+}
+
+void ImageRenderTarget::initPainter() {
+    if (image != nullptr) {
+        if (painter != nullptr) {
+            painter->begin(image.get());
+        } else {
+            painter = std::make_unique<QPainter>(image.get());
+        }
+
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->translate(pageSettings.pxMargins, pageSettings.pxMargins);
+    }
+}
+
+void ImageRenderTarget::newPage() {
+    QFont font = painter->font();
+
+    painter->end();
+
+    initDefaultImage();
+
+    initPainter();
+}
+
 void ImageRenderTarget::finalize() {
+    previewImages.clear();
+
     if (painter && painter->isActive()) {
         painter->end();
     }

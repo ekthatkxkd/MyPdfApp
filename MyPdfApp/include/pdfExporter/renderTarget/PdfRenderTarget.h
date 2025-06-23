@@ -6,7 +6,7 @@
 
 class PdfRenderTarget : public RenderTarget {
 public:
-    PdfRenderTarget(const QString& filename, const QSizeF& pageSize);
+    PdfRenderTarget(const QString& filename);
     ~PdfRenderTarget();
 
     QPainter* getPainter() override { return painter.get(); }

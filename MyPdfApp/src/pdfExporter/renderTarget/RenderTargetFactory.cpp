@@ -4,9 +4,9 @@
 
 std::unique_ptr<RenderTarget> RenderTargetFactory::createPdfTarget(const QString& filename,
                                                                     const QSizeF& pageSize) {
-    return std::make_unique<PdfRenderTarget>(filename, pageSize);
+    return std::make_unique<PdfRenderTarget>(filename);
 }
 
 std::unique_ptr<RenderTarget> RenderTargetFactory::createImageTarget(const QSizeF& pageSize) {
-    return std::make_unique<ImageRenderTarget>(pageSize);
+    return std::make_unique<ImageRenderTarget>();
 }

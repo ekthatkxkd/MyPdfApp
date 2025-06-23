@@ -6,20 +6,23 @@
 
 class ImageRenderTarget : public RenderTarget {
 public:
-    ImageRenderTarget(const QSizeF& pageSize, QImage::Format format = QImage::Format_ARGB32);
+    ImageRenderTarget(QImage::Format format = QImage::Format_ARGB32);
     ~ImageRenderTarget();
 
     QPainter* getPainter() override { return painter.get(); }
-    void newPage() override {} // 이미지는 단일 페이지
+    void newPage() override; // 이미지는 단일 페이지
     void finalize() override;
 
-    QImage getImage() const { return *image; }
+    // QImage getImage() const { return *image; }
     bool saveImage(const QString& filename, const char* format = nullptr);
 
 private:
-    std::unique_ptr<QImage> image;
+    void initDefaultImage(QImage::Format format = QImage::Format_ARGB32);
+    void initPainter();
+
+    std::shared_ptr<QImage> image;
     std::unique_ptr<QPainter> painter;
-    QSizeF pageSize;
+    QList<std::shared_ptr<QImage>> previewImages;
 };
 
 #endif // IMAGERENDERTARGET_H
