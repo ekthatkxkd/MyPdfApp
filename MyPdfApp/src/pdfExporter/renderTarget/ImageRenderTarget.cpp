@@ -1,4 +1,5 @@
 #include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
+#include <QDebug>
 
 ImageRenderTarget::ImageRenderTarget(QImage::Format format)
     : RenderTarget() {
@@ -49,7 +50,7 @@ void ImageRenderTarget::newPage() {
 }
 
 void ImageRenderTarget::finalize() {
-    previewImages.clear();
+    // previewImages.clear();
 
     if (painter && painter->isActive()) {
         painter->end();

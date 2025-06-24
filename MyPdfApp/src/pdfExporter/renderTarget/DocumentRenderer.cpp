@@ -1,18 +1,18 @@
 #include "include/pdfExporter/renderTarget/DocumentRenderer.h"
 
-DocumentRenderer::DocumentRenderer(std::unique_ptr<RenderTarget> target)
-    : renderTarget(std::move(target)) {
+DocumentRenderer::DocumentRenderer(std::shared_ptr<RenderTarget> target)
+    : renderTarget(target) {
 
 }
 
-void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate) {
+bool DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate) {
     if (!renderTarget || !docTemplate) {
-        return;
+        return false;
     }
 
     QPainter* painter = renderTarget->getPainter();
     if (!painter) {
-        return;
+        return false;
     }
 
     QSizeF pxContentSize = renderTarget->getPxContentSize();
@@ -27,6 +27,8 @@ void DocumentRenderer::renderTemplate(std::unique_ptr<DocumentTemplate> docTempl
 
     // 렌더링 완료
     renderTarget->finalize();
+
+    return true;
 }
 
 void DocumentRenderer::setRenderTarget(std::unique_ptr<RenderTarget> target) {

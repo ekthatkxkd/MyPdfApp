@@ -16,13 +16,14 @@ public:
     // QImage getImage() const { return *image; }
     bool saveImage(const QString& filename, const char* format = nullptr);
 
+    QList<std::shared_ptr<QImage>> previewImages;
+
 private:
     void initDefaultImage(QImage::Format format = QImage::Format_ARGB32);
     void initPainter();
 
     std::shared_ptr<QImage> image;
     std::unique_ptr<QPainter> painter;
-    QList<std::shared_ptr<QImage>> previewImages;
 };
 
 #endif // IMAGERENDERTARGET_H

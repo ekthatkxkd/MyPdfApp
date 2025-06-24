@@ -8,13 +8,13 @@
 // 문서 렌더러 (Context)
 class DocumentRenderer {
 public:
-    DocumentRenderer(std::unique_ptr<RenderTarget> target);
+    DocumentRenderer(std::shared_ptr<RenderTarget> target);
 
-    void renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate);
+    bool renderTemplate(std::unique_ptr<DocumentTemplate> docTemplate);
     void setRenderTarget(std::unique_ptr<RenderTarget> target);
 
 private:
-    std::unique_ptr<RenderTarget> renderTarget;
+    std::shared_ptr<RenderTarget> renderTarget;
 };
 
 #endif // DOCUMENTRENDERER_H

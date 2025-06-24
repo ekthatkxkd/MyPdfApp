@@ -10,6 +10,7 @@
 #include "include/pdfExporter/renderTarget/RenderTargetFactory.h"
 #include "include/pdfExporter/renderTarget/DocumentRenderer.h"
 #include <QDebug>
+#include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
 
 PreviewImageProvider::PreviewImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Image) {
@@ -1024,10 +1025,10 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
 
     // PDF or 이미지 렌더 타겟 생성. - pdfwriter, qimage, painter 객체 생성.
-    auto pdfTarget = RenderTargetFactory::createPdfTarget(filePath, QSizeF(595, 842));
+    auto pdfTarget = RenderTargetFactory::createPdfTarget(filePath);
 
     // 렌더러 생성. - 렌더 타겟 내의 painter property 를 template 에 전달과 동시에 element 그리기 요청.
-    DocumentRenderer renderer(std::move(pdfTarget));
+    DocumentRenderer renderer(pdfTarget);
     // 렌더링 실행.
     renderer.renderTemplate(std::move(materialDocTemplate));
 
@@ -1072,6 +1073,54 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
 }
 
 bool PdfExporter::generatePreview(QQuickItem *rootItem) {
+    //////// [LLDDSS] MY MODIFIED
+    ///
+    ///
+
+    qDebug() << "generatePreview, start";
+
+    m_hasPreview = false;
+    emit hasPreviewChanged();
+
+    m_pageCount = 0;
+    previewPages.clear();
+    QList<std::shared_ptr<QImage>> previewImages;
+
+    auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+    auto imageTarget = RenderTargetFactory::createImageTarget();
+
+    DocumentRenderer renderer(imageTarget);
+
+    bool isSucceededRender = renderer.renderTemplate(std::move(materialDocTemplate));
+
+    if (isSucceededRender) {
+        std::shared_ptr<ImageRenderTarget> imagePtr = std::dynamic_pointer_cast<ImageRenderTarget>(imageTarget);
+        previewImages = imagePtr->previewImages;
+
+        m_pageCount = previewImages.size();
+    } else {
+        m_pageCount = 0;
+    }
+
+    emit pageCountChanged();
+
+    m_imageProvider->updatePreviewImages(previewImages);
+
+    m_hasPreview = true;
+    emit hasPreviewChanged();
+    emit previewUpdated();
+
+    return true;
+
+    ///
+    ///
+    ////////
+
+
+    /*
+    ////////// [LLDDSS] ORIGIN IS TO ALIVE
+    ///
+    ///
     qDebug() << "generatePreview, start";
 
     m_hasPreview = false;
@@ -1117,6 +1166,10 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
     emit previewUpdated();
 
     return true;
+    ///
+    ///
+    ////////
+    //*/
 }
 
 //////// [LLDDSS] ORIGIN IS TO ALIVE

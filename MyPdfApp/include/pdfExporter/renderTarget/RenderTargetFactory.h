@@ -6,10 +6,9 @@
 
 class RenderTargetFactory {
 public:
-    static std::unique_ptr<RenderTarget> createPdfTarget(const QString& filename,
-                                                          const QSizeF& pageSize);
+    static std::shared_ptr<RenderTarget> createPdfTarget(const QString& filename);
 
-    static std::unique_ptr<RenderTarget> createImageTarget(const QSizeF& pageSize);
+    static std::shared_ptr<RenderTarget> createImageTarget();
 };
 
 #endif // RENDERTARGETFACTORY_H
