@@ -23,62 +23,6 @@ MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material", "자�
     }
 }
 
-void MaterialDocTemplate::initInformTableData(const QList<QPair<QString, QStringList>> &dbDatas) {
-    for (auto &dbData : dbDatas) {
-        const QString id = dbData.first;
-        const QString value = dbData.second[0];
-
-        for (auto &innerDataRow : informTableInnerDatas) {
-            bool isFound = false;
-            for (auto &innerData : innerDataRow) {
-                if (innerData.cellId == id) {
-                    innerData.cellText = value;
-                    isFound = true;
-                    break;
-                }
-            }
-            if (isFound)
-                break;
-        }
-    }
-}
-
-void MaterialDocTemplate::initHistoryTableData(const QList<QPair<QString, QStringList>> &dbDatas) {
-    for (auto &dbData : dbDatas) {
-        const QString id = dbData.first;
-        const QStringList values = dbData.second;
-
-        if (id == "rowData") {
-            QVector<CellData> newRowCellDatas = defaultHistoryInnerDatas;
-            int newRowNum = historyInnerDatas.size();
-
-            for (int cellIndex = 0; cellIndex < newRowCellDatas.size(); cellIndex++) {
-                const QString foundDbValue = newRowCellDatas[cellIndex].cellId + ":";
-                newRowCellDatas[cellIndex].startRow = newRowNum;
-
-                for (auto &cellValue : values) {
-                    if (cellValue.startsWith(foundDbValue)) {
-                        newRowCellDatas[cellIndex].cellText = cellValue.mid(foundDbValue.length());
-                        break;
-                    }
-                }
-            }
-            historyInnerDatas.push_back(newRowCellDatas);
-        } else {  // "rowData" 가 아닐 경우 모두 footer 값이라고 판단.
-            for (auto &cellData : historyFooterDatas) {
-                if (cellData.cellId != "" ) {
-                    const QString foundDbValue = cellData.cellId + ":";
-                    for (auto &cellValue : values) {
-                        if (cellValue.startsWith(foundDbValue)) {
-                            cellData.cellText = cellValue.mid(foundDbValue.length());
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     if (templateTitle != "") {
         //////// 제목 (첫 번째 요소 - 기본 위치)
@@ -134,10 +78,6 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
             QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
 
             QSqlRecord record = tableQuery.record();
-            // // 헤더 추출
-            // for (int i = 0; i < record.count(); ++i) {
-            //     informTableData.headers.append(record.fieldName(i));
-            // }
 
             //////// 데이터 행 추출
             // while (tableQuery.next()) {
@@ -220,7 +160,7 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
             int dataRowIndex = historyTableData.innerDatas.size();
             double quantitySum = 0.0;
             for (auto &item : readDataFromDB) {
-                QVector<CellData> rowDatas = defaultHistoryInnerDatas;
+                QVector<CellData> rowDatas = defaultHistoryInnerRowDatas;
 
                 for (int informIndex = 0; informIndex < rowDatas.size(); informIndex++) {
                     rowDatas[informIndex].startRow = dataRowIndex;

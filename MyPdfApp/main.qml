@@ -37,14 +37,15 @@ Window {
         if (clickedIndex === 0) {
             saveDialog.open()
         } else if (clickedIndex === 1) {
-            pdfExporter.generatePreview(templateFormLoader.item.templateItemArea)
+            // pdfExporter.generatePreview(templateFormLoader.item.templateItemArea)
+            pdfExporter.generatePreview(templateFormLoader.item.objectName)
         }
     }
 
-    function callExportToPdf(templateItemArea, path) {
+    function callExportToPdf(formObjectName, path) {
         console.log("[LLDDSS] callExportToPdf")
         // pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
-        pdfExporter.exportToPdf(templateItemArea, path)
+        pdfExporter.exportToPdf(formObjectName, path)
     }
 
 
@@ -112,8 +113,8 @@ Window {
         onAccepted: {
             var test = selectedFile.toString()
             var path = selectedFile.toString().replace("file:///", "")
-            // exportToPdfWithPath(path)
-            callExportToPdf(templateFormLoader.item.templateItemArea, path)
+            // callExportToPdf(templateFormLoader.item.templateItemArea, path)
+            callExportToPdf(templateFormLoader.item.objectName, path)
         }
     }
 

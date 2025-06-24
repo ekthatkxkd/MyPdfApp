@@ -67,7 +67,7 @@ struct CellData {
 
 
     CellData(QString id, int r, int c, int rs, int cs, const QString& text,
-             const QColor& bg, bool bold, int fSize, const QString& align, bool isVDir) :
+             const QColor& bg, bool bold, int fSize, const QString& align, bool isVDir = false) :
         cellId(id),
         startRow(r), startCol(c), rowSpan(rs), colSpan(cs),
         cellText(text), bgColor(bg),
@@ -83,9 +83,12 @@ struct TableData {
     QVector<CellData> footerDatas;                    // 푸터
     // QVector<qreal> columnWidths;                // 컬럼 너비 (옵션)
 
-    TableData() = default;
-    TableData(const QVector<CellData>& hdrs, const QVector<QVector<CellData>>& inner, QVector<CellData>& footer)
-        : headerDatas(hdrs), innerDatas(inner), footerDatas(footer) {}
+    TableData()
+        : title(""),
+        headerDatas(QVector<CellData>()), innerDatas(QVector<QVector<CellData>>()), footerDatas(QVector<CellData>()) {}
+
+    // TableData(const QVector<CellData>& hdrs, const QVector<QVector<CellData>>& inner, QVector<CellData>& footer)
+    //     : headerDatas(hdrs), innerDatas(inner), footerDatas(footer) {}
 };
 }
 

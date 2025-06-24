@@ -9,8 +9,9 @@ class TemplateFactory {
 public:
     enum TemplateType {
         MATERIAL,
-        DEFECTREPORT
-        // 필요에 따라 추가
+        DEFECTREPORT,
+        ORDER,
+        RECEIPTVOUCHER
     };
 
     static std::unique_ptr<DocumentTemplate> createTemplate(TemplateType type);

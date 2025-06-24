@@ -5,7 +5,14 @@
 #include <QPixmap>
 
 DefectReportDocTemplate::DefectReportDocTemplate() : DocumentTemplate("DefectReport", "불량발견 보고서") {
+    // 데이터베이스 연결 설정
+    dataProvider = std::make_shared<SqliteDataProvider>("database.db", "template_a_conn");
 
+    if (dataProvider->connect()) {
+        // 미리 정의된 쿼리들 등록
+        dataProvider->registerTableQuery("inform_table",
+                                         "SELECT product_name, quantity, price, total FROM sales_summary ORDER BY total DESC");
+    }
 }
 
 void DefectReportDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
@@ -14,44 +21,208 @@ void DefectReportDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
         font.setPointSize(20);
         font.setBold(true);
 
-        // 제목
         auto title = std::make_unique<TextElement>(templateTitle,
                                                    font,
                                                    Qt::AlignHCenter);
-        title->setElementId("title");
+        title->setElementId(elementIds[0]);
         addElement(std::move(title));
     }
 
-    // // 세 개의 표를 같은 행에 배치
-    // auto table1 = std::make_unique<TableElement>(generateTableData(0));
-    // table1->setElementId("dashboard_table_1");
-    // addElementBelow(std::move(table1), "title", 20);
+    if (dataProvider && dataProvider->isConnected()) {
+        {
+            //////// numberTable
+            ///
+            ///
+            TableData numberTableData;
 
-    // auto table2 = std::make_unique<TableElement>(generateTableData(1));
-    // table2->setElementId("dashboard_table_2");
-    // addElementRightOf(std::move(table2), "dashboard_table_1", 10);
+            numberTableData.innerDatas = numberTableInnerDatas;
 
-    // auto table3 = std::make_unique<TableElement>(generateTableData(2));
-    // table3->setElementId("dashboard_table_3");
-    // addElementRightOf(std::move(table3), "dashboard_table_2", 10);
+            qreal tableFullWidth = (pxContentSize.width() - 10) / 2;  // 10 : 오른쪽에 배치될 table 과의 margin
 
-    // // 이미지 (표들 아래에 배치)
-    // QPixmap image(":/images/sample.png");
-    // if (!image.isNull()) {
-    //     auto imageElement = std::make_unique<ImageElement>(image, QSizeF(200, 150));
-    //     imageElement->setElementId("main_image");
-    //     addElementBelow(std::move(imageElement), "dashboard_table_1", 25);
-    // }
-}
+            QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
+            QSqlRecord record = tableQuery.record();
 
-QVector<QVector<QString>> DefectReportDocTemplate::generateTableData(int tableIndex) {
-    QVector<QVector<QString>> data;
-    // data.append({"메트릭", "값"});
-    data.push_back({"메트릭", "값"});
+            //////// [LLDDSS] 테스트 코드.
+            QList<QPair<QString, QString>> readDataFromDB;
+            readDataFromDB.push_back(QPair<QString, QString>("dateNumber", "2025/03/25 - 7"));
+            readDataFromDB.push_back(QPair<QString, QString>("processing", "품목대체"));
+            ////////
 
-    for (int i = 0; i < 3; ++i) {
-        data.append({QString("지표 %1-%2").arg(tableIndex + 1).arg(i + 1),
-                     QString("%1").arg((tableIndex + 1) * 10 + i)});
+            int dataCount = 0;
+            while (dataCount < readDataFromDB.size()) {
+                QPair<QString, QString> readData = readDataFromDB[dataCount];
+
+                for (auto &rowDatas : numberTableData.innerDatas) {
+                    bool isFound = false;
+                    for (auto &cellData : rowDatas) {
+                        if (cellData.cellId == readData.first) {
+                            cellData.cellText = readData.second;
+
+                            isFound = true;
+                            break;
+                        }
+                    }
+                    if (isFound)
+                        break;
+                }
+
+                dataCount++;
+            }
+
+            auto numberTable = std::make_unique<TableElement>("", numberTableData, tableFullWidth, numberTableWidthRatio, Qt::AlignLeft);
+            numberTable->setElementId(elementIds[1]);
+            addElementBelow(std::move(numberTable), QVector<QString>{elementIds[0]}, 10);
+            ///
+            ///
+            ////////
+        }
+
+        {
+            //////// factoryTable
+            ///
+            ///
+            TableData factoryTableData;
+
+            factoryTableData.innerDatas = factoryTableInnerDatas;
+            qreal tableFullWidth = (pxContentSize.width() - 10) / 2;  // 10 : 왼쪽에 배치된 table 과의 margin
+
+            QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
+            QSqlRecord record = tableQuery.record();
+
+            //////// [LLDDSS] 테스트 코드.
+            QList<QPair<QString, QString>> readDataFromDB;
+            readDataFromDB.push_back(QPair<QString, QString>("manager", "()"));
+            readDataFromDB.push_back(QPair<QString, QString>("factory", "Rework창고(00186)"));
+            ////////
+
+            int dataCount = 0;
+            while (dataCount < readDataFromDB.size()) {
+                QPair<QString, QString> readData = readDataFromDB[dataCount];
+
+                for (auto &rowDatas : factoryTableData.innerDatas) {
+                    bool isFound = false;
+                    for (auto &cellData : rowDatas) {
+                        if (cellData.cellId == readData.first) {
+                            cellData.cellText = readData.second;
+
+                            isFound = true;
+                            break;
+                        }
+                    }
+                    if (isFound)
+                        break;
+                }
+
+                dataCount++;
+            }
+
+            auto factoryTable = std::make_unique<TableElement>("", factoryTableData, tableFullWidth, factoryTableWidthRatio, Qt::AlignLeft);
+            factoryTable->setElementId(elementIds[2]);
+            addElementRightOf(std::move(factoryTable), QVector<QString>{elementIds[1]}, 10);
+            ///
+            ///
+            ////////
+        }
+
+
+        double reduceTotal = 0.0;
+        double increseTotal = 0.0;
+
+        {
+            //////// product list table
+            ///
+            ///
+            TableData productListTableData;
+
+            productListTableData.headerDatas = productListHeaderDatas;
+
+            qreal tableFullWidth = pxContentSize.width();
+
+            QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
+            QSqlRecord record = tableQuery.record();
+
+            //////// [LLDDSS] 테스트 코드.
+            QList<QVector<QString>> readDataFromDB;
+            readDataFromDB.push_back(QVector<QString>{"", "P001-0162", "[EFFECT_V2_WHITE_GRAY_SKY] PRODUCT", "102.00", "", "테스트 코드 테스트 코드 테스트 코드"});
+            readDataFromDB.push_back(QVector<QString>{"", "E002-0002", "TPS61088 [TI, SMD,VQFN-20, 4.5Vto12.6V, 11.4A, Reel250]", "", "102.00", ""});
+            readDataFromDB.push_back(QVector<QString>{"", "E002-0003", "STM32F030CC_LQFP48 [ST, SMD, LQFP-48, 2.4Vto3.6V, 메모리 크기: 256kB, RAM크기:32kB, Reel 2K4]", "", "102.00", ""});
+            readDataFromDB.push_back(QVector<QString>{"", "E002-0004", "TPS55340RTE [TI, SMD, WQFN-16, 2.9Vto32V, 2.9Vto38V, 6.6A, Reel3K]", "", "102.00", ""});
+            readDataFromDB.push_back(QVector<QString>{"", "E002-0006", "SN74AHC4066RGYR((VQFN) [TI, SMD, VQFN-14, 4 Switch, 2Vto5.5V, Reel 3K])", "", "102.00", ""});
+            ////////
+
+            int dataRowIndex = productListTableData.innerDatas.size();
+
+            for (auto &item : readDataFromDB) {
+                QVector<CellData> rowDatas = defaultProductListInnerRowDatas;
+
+                for (int index = 0; index < rowDatas.size(); index++) {
+                    rowDatas[index].startRow = dataRowIndex;
+
+                    if (rowDatas[index].cellId == "number") {
+                        rowDatas[index].cellText = QString::number(dataRowIndex + 1);
+                    } else {
+                        rowDatas[index].cellText = item[index];
+
+                        if (rowDatas[index].cellId == "reducedQuantity" && item[index] != "") {
+                            QString cleanedStr = item[index];
+                            cleanedStr.remove(',');
+
+                            reduceTotal += cleanedStr.toDouble();
+                        } else if (rowDatas[index].cellId == "increaseQuantity" && item[index] != "") {
+                            QString cleanedStr = item[index];
+                            cleanedStr.remove(',');
+
+                            increseTotal += cleanedStr.toDouble();
+                        }
+                    }
+                }
+                productListTableData.innerDatas.push_back(rowDatas);
+                dataRowIndex++;
+            }
+
+            auto productListTable = std::make_unique<TableElement>("", productListTableData, tableFullWidth, productListWidthRatio, Qt::AlignLeft);
+            productListTable->setElementId(elementIds[3]);
+            addElementBelow(std::move(productListTable), QVector<QString>{elementIds[1], elementIds[2]}, 10);
+            ///
+            ///
+            ////////
+        }
+
+
+        int sumInteger = (int)(reduceTotal);
+        int sumDecimal = (reduceTotal - sumInteger) * 100;
+        QLocale locale(QLocale::Korean, QLocale::SouthKorea);
+        QString formattedSumInteger = locale.toString(sumInteger);
+        QString reduceTotalString = formattedSumInteger + "." + QString::number(sumDecimal);
+
+        sumInteger = (int)(increseTotal);
+        sumDecimal = (increseTotal - sumInteger) * 100;
+        formattedSumInteger = locale.toString(sumInteger);
+        QString increseTotalString = formattedSumInteger + "." + QString::number(sumDecimal);
+
+        {
+            //////// sum table
+            ///
+            ///
+            TableData sumTableData;
+
+            sumTableData.innerDatas = sumTableInnerDatas;
+            qreal tableFullWidth = pxContentSize.width();
+
+            for (auto &cellData : sumTableData.innerDatas[0]) {
+                if (cellData.cellId == "reduceTotal") {
+                    cellData.cellText = reduceTotalString;
+                } else if (cellData.cellId == "increaseTotal") {
+                    cellData.cellText = increseTotalString;
+                }
+            }
+
+            auto sumTable = std::make_unique<TableElement>("", sumTableData, tableFullWidth, sumTableWidthRatio, Qt::AlignLeft);
+            sumTable->setElementId(elementIds[4]);
+            addElementBelow(std::move(sumTable), QVector<QString>{elementIds[3]}, 10);
+            ///
+            ///
+            ////////
+        }
     }
-    return data;
 }

@@ -3,6 +3,7 @@
 
 #include "include/docElement/IRenderElement.h"
 #include "include/drawingtemplate/RelativePositionManager.h"
+#include "include/drawingtemplate/dataProvider/SqliteDataProvider.h"
 // #include <QVector>
 #include <vector>
 #include <memory>

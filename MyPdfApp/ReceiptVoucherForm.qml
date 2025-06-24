@@ -4,6 +4,7 @@ import "qrc:/templateItems"
 
 Item {
     id : rootArea
+    objectName : "ReceiptVoucherForm"
 
     property alias templateItemArea : templateItemArea
 

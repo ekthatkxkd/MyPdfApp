@@ -1014,7 +1014,7 @@ void PdfExporter::drawReceiptVoucherTemplate(QPainter &painter, QQuickItem *root
     ////////
 }
 
-bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
+bool PdfExporter::exportToPdf(QString formObjectName, const QString &filePath) {
     qDebug() << "exportToPdf, start";
 
     ///*
@@ -1022,7 +1022,18 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     ///
     ///
     // template 생성. - element 들을 그리는 기능들을 함.
-    auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+
+    std::unique_ptr<DocumentTemplate> docTemplate;
+
+    if (formObjectName == "MaterialForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+    } else if (formObjectName == "DefectReportForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::DEFECTREPORT);
+    } else if (formObjectName == "OrderForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::ORDER);
+    } else if (formObjectName == "ReceiptVoucherForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::RECEIPTVOUCHER);
+    }
 
     // PDF or 이미지 렌더 타겟 생성. - pdfwriter, qimage, painter 객체 생성.
     auto pdfTarget = RenderTargetFactory::createPdfTarget(filePath);
@@ -1030,7 +1041,7 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     // 렌더러 생성. - 렌더 타겟 내의 painter property 를 template 에 전달과 동시에 element 그리기 요청.
     DocumentRenderer renderer(pdfTarget);
     // 렌더링 실행.
-    renderer.renderTemplate(std::move(materialDocTemplate));
+    renderer.renderTemplate(std::move(docTemplate));
 
     return true;
     ///
@@ -1072,7 +1083,7 @@ bool PdfExporter::exportToPdf(QQuickItem *rootItem, const QString &filePath) {
     //*/
 }
 
-bool PdfExporter::generatePreview(QQuickItem *rootItem) {
+bool PdfExporter::generatePreview(QString formObjectName) {
     //////// [LLDDSS] MY MODIFIED
     ///
     ///
@@ -1086,12 +1097,23 @@ bool PdfExporter::generatePreview(QQuickItem *rootItem) {
     previewPages.clear();
     QList<std::shared_ptr<QImage>> previewImages;
 
-    auto materialDocTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+    std::unique_ptr<DocumentTemplate> docTemplate;
+
+    if (formObjectName == "MaterialForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+    } else if (formObjectName == "DefectReportForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::DEFECTREPORT);
+    } else if (formObjectName == "OrderForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::ORDER);
+    } else if (formObjectName == "ReceiptVoucherForm") {
+        docTemplate = TemplateFactory::createTemplate(TemplateFactory::RECEIPTVOUCHER);
+    }
+
     auto imageTarget = RenderTargetFactory::createImageTarget();
 
     DocumentRenderer renderer(imageTarget);
 
-    bool isSucceededRender = renderer.renderTemplate(std::move(materialDocTemplate));
+    bool isSucceededRender = renderer.renderTemplate(std::move(docTemplate));
 
     if (isSucceededRender) {
         std::shared_ptr<ImageRenderTarget> imagePtr = std::dynamic_pointer_cast<ImageRenderTarget>(imageTarget);

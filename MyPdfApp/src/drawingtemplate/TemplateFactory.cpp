@@ -8,6 +8,8 @@ std::unique_ptr<DocumentTemplate> TemplateFactory::createTemplate(TemplateType t
         return std::make_unique<MaterialDocTemplate>();
     case DEFECTREPORT:
         return std::make_unique<DefectReportDocTemplate>();
+    case ORDER:
+    case RECEIPTVOUCHER:
     default:
         return nullptr;
     }

@@ -4,6 +4,7 @@ import "qrc:/templateItems"
 
 Item {
     id : rootArea
+    objectName : "OrderForm"
 
     property alias templateItemArea : templateItemArea
 

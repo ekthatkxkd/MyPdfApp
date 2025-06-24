@@ -63,8 +63,8 @@ public :
     bool hasPreview() const;
     int pageCount() const;
 
-    Q_INVOKABLE bool exportToPdf(QQuickItem *rootItem, const QString &filePath);
-    Q_INVOKABLE bool generatePreview(QQuickItem *rootItem);
+    Q_INVOKABLE bool exportToPdf(QString formObjectName, const QString &filePath);
+    Q_INVOKABLE bool generatePreview(QString formObjectName);
 
     // 현재 qml 로 구현된 template 종류.
     const QList<QString> templateObjNames = {"materialItemArea", "defectReportItemArea", "orderFormItemArea", "receiptVoucherItemArea"};
