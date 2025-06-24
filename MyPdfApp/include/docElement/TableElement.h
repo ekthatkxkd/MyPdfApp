@@ -39,7 +39,7 @@ public:
     Qt::Alignment getAlign() override;
 
     qreal calculateOneRowHeight(QPainter& painter, QVector<CellData> &rowDatas);
-    QVector<qreal> calculateRowHeights(QPainter& painter, const QVector<QVector<CellData>> &datas);
+    QVector<qreal> calculateRowHeights(QPainter& painter, QVector<QVector<CellData>> &datas);
 
     QSizeF calculatedCellTextArea(const QString &text, const QFont &font,
                                   const bool isVertical, const QTextOption::WrapMode &wrapMode, qreal fixedWidth);
@@ -51,7 +51,7 @@ private:
                         const QPointF& startPos, bool isHeader);
 
     const QString title;
-    const int cellTextMargins = 5;
+    const int cellTextMargins = 10;
 
     TableData tableData;
 

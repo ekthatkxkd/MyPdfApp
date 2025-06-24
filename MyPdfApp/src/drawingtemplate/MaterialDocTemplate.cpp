@@ -2,6 +2,9 @@
 #include "include/docElement/TextElement.h"
 #include "include/docElement/TableElement.h"
 #include <QPixmap>
+#include <QDate>
+#include <algorithm>
+#include <QLocale>
 
 MaterialDocTemplate::MaterialDocTemplate() : DocumentTemplate("Material", "자재구매 확인서") {
     // 데이터베이스 연결 설정
@@ -121,9 +124,12 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
         {
             TableData informTableData;
 
+            informTableData.title = "";
             informTableData.headerDatas = QVector<CellData>();
             informTableData.innerDatas = informTableInnerDatas;
             informTableData.footerDatas = QVector<CellData>();
+
+            qreal tableFullWidth = pxContentSize.width();
 
             QSqlQuery tableQuery = dataProvider->getTableData("inform_table");
 
@@ -174,19 +180,84 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
                 count++;
             }
 
-
-
-            qreal tableFullWidth = pxContentSize.width();
-
             auto informTable = std::make_unique<TableElement>("", informTableData, tableFullWidth, informTableWidthRatio, Qt::AlignLeft);
             informTable->setElementId(elementIds[1]);
-            addElementBelow(std::move(informTable), QVector<QString>{elementIds[0]}, 5);
+            addElementBelow(std::move(informTable), QVector<QString>{elementIds[0]}, 10);
 
             ///
             ///
             ////////
         }
 
+        {
+            TableData historyTableData;
+
+            // historyTableData.title = historyTableTitle;
+            historyTableData.headerDatas = historyHeaderDatas;
+            historyTableData.innerDatas = QVector<QVector<CellData>>();
+            historyTableData.footerDatas = historyFooterDatas;
+
+            qreal tableFullWidth = pxContentSize.width();
+
+            QSqlQuery tableQuery = dataProvider->getTableData("history_table");
+            QSqlRecord record = tableQuery.record();
+
+            //////// [LLDDSS] 테스트 코드.
+            ///
+            ///
+            QList<QVector<QString>> readDataFromDB;
+            readDataFromDB.push_back(QVector<QString>{"25/03/13", "[EFFECT_V2_SKY] FRONT BUTTON DECO]", "1,232.00", "가나다라 마바사 아자차카 타파하. abcdefg hijklmn opqrstu vwxyz."});
+            readDataFromDB.push_back(QVector<QString>{"25/06/20", "[EFFECT_V2_SKY] FRONT BUTTON DECO] [EFFECT_V2_SKY] FRONT BUTTON DECO]", "99.20", ""});
+            readDataFromDB.push_back(QVector<QString>{"25/05/20", "[테스트 제품명]", "3,000.33", "테스트 목적으로 임의의 문자열을 나열함. 해당 문자열이 허용된 최대 width 값을 벗어날 경우 다음 줄로 넘어가야 함. 또한 cell 의 height 값도 변경되어야 함."});
+            readDataFromDB.push_back(QVector<QString>{"25/05/01", "[테스트 제품명] [테스트 제품명] [테스트 제품명]", "100,000.00", ""});
+            readDataFromDB.push_back(QVector<QString>{"25/04/01", "[테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명] [테스트 제품명]", "1.80", ""});
+            ///
+            ///
+            ////////
+
+            sortReadHistoryFromDB(readDataFromDB);
+
+            int dataRowIndex = historyTableData.innerDatas.size();
+            double quantitySum = 0.0;
+            for (auto &item : readDataFromDB) {
+                QVector<CellData> rowDatas = defaultHistoryInnerDatas;
+
+                for (int informIndex = 0; informIndex < rowDatas.size(); informIndex++) {
+                    rowDatas[informIndex].startRow = dataRowIndex;
+
+                    rowDatas[informIndex].cellText = item[informIndex];
+
+                    if (rowDatas[informIndex].cellId == "quantity") {
+                        QString cleanedStr = item[informIndex];
+                        cleanedStr.remove(',');
+
+                        quantitySum += cleanedStr.toDouble();
+                    }
+                }
+
+                historyTableData.innerDatas.push_back(rowDatas);
+                dataRowIndex++;
+            }
+
+            int sumInteger = (int)(quantitySum);
+            int sumDecimal = (quantitySum - sumInteger) * 100;
+
+            // 시스템 로케일을 기준으로 포맷 (예: 한국 로케일 사용)
+            QLocale locale(QLocale::Korean, QLocale::SouthKorea);
+            QString formattedSumInteger = locale.toString(sumInteger);
+
+            QString sumString = formattedSumInteger + "." + QString::number(sumDecimal);
+
+            for (auto &cellData : historyTableData.footerDatas) {
+                if (cellData.cellId == "sum") {
+                    cellData.cellText = sumString;
+                }
+            }
+
+            auto historyTable = std::make_unique<TableElement>(historyTableTitle, historyTableData, tableFullWidth, historyWidthRatio, Qt::AlignLeft);
+            historyTable->setElementId(elementIds[2]);
+            addElementBelow(std::move(historyTable), QVector<QString>{elementIds[1]}, 10);
+        }
         // // 두 번째 표 - 커스텀 쿼리 테이블
         // QString customQuery = "SELECT p.product_name, c.category_name, SUM(s.quantity) as total_sold "
         //                       "FROM sales s "
@@ -221,4 +292,18 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     // smallTable->setPageBreakPolicy(TableElement::PageBreakPolicy::MoveToNewPage);
     // addElementBelow(std::move(smallTable), "large_table", 15);
     ////////
+}
+
+void MaterialDocTemplate::sortReadHistoryFromDB(QList<QVector<QString>> &readDataFromDB) {
+    std::sort(readDataFromDB.begin(), readDataFromDB.end(),
+              [](const QVector<QString>& a, const QVector<QString>& b) {
+                  if (a.isEmpty() || b.isEmpty())
+                      return false;
+
+                  // "25/03/13" 포맷을 QDate로 변환
+                  QDate dateA = QDate::fromString(a[0], "yy/MM/dd");
+                  QDate dateB = QDate::fromString(b[0], "yy/MM/dd");
+
+                  return dateA < dateB;
+              });
 }

@@ -15,9 +15,6 @@ enum class RelativePosition {
     None,           // 위치 참조 없음 (첫 번째 요소나 절대 위치)
     Below,          // 참조 요소의 아래쪽
     RightOf,        // 참조 요소의 오른쪽
-    Above,          // 참조 요소의 위쪽
-    LeftOf,         // 참조 요소의 왼쪽
-    SameRow,        // 같은 행에 배치 (오른쪽으로)
     NextPage        // 새 페이지 시작
 };
 
@@ -25,30 +22,19 @@ enum class RelativePosition {
 struct PositionReference {
     QVector<QString> referenceElementId;     // 참조할 요소의 ID
     RelativePosition position;      // 상대적 위치
-    QPointF offset;                // 추가 오프셋 (x, y)
-    QMarginsF margins;             // 여백
+    qreal spacing;
 
     PositionReference(const QVector<QString>& refId = QVector<QString>(),
                       RelativePosition pos = RelativePosition::None,
-                      const QPointF& off = QPointF(0, 0),
-                      const QMarginsF& mg = QMarginsF(0, 0, 0, 0))
-        : referenceElementId(refId), position(pos), offset(off), margins(mg) {}
+                      const qreal spacing = 0)
+        : referenceElementId(refId), position(pos), spacing(spacing) {}
 
     // 편의 생성자들
-    static PositionReference below(const QVector<QString>& refIds, qreal spacing = 10) {
-        return PositionReference(refIds, RelativePosition::Below, QPointF(0, spacing));
+    static PositionReference below(const QVector<QString>& refIds, qreal spacing = 0) {
+        return PositionReference(refIds, RelativePosition::Below, spacing);
     }
-    static PositionReference rightOf(const QVector<QString>& refId, qreal spacing = 10) {
-        return PositionReference(refId, RelativePosition::RightOf, QPointF(spacing, 0));
-    }
-    static PositionReference sameRow(const QVector<QString>& refId, qreal spacing = 10) {
-        return PositionReference(refId, RelativePosition::SameRow, QPointF(spacing, 0));
-    }
-    static PositionReference above(const QVector<QString>& refId, qreal spacing = 10) {
-        return PositionReference(refId, RelativePosition::Above, QPointF(0, -spacing));
-    }
-    static PositionReference leftOf(const QVector<QString>& refId, qreal spacing = 10) {
-        return PositionReference(refId, RelativePosition::LeftOf, QPointF(-spacing, 0));
+    static PositionReference rightOf(const QVector<QString>& refId, qreal spacing = 0) {
+        return PositionReference(refId, RelativePosition::RightOf, spacing);
     }
     static PositionReference nextPage() {
         return PositionReference(QVector<QString>(), RelativePosition::NextPage);

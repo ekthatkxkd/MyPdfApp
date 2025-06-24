@@ -45,7 +45,7 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QSizeF &pxContent
                     }
                 }
 
-                startPos = QPointF(0, (maxElement.bottom() + posRef.margins.top()));
+                startPos = QPointF(0, (maxElement.bottom() + posRef.spacing));
             } else if (posRef.position == RelativePosition::RightOf) {
                 QRectF maxElement(QPointF(0, 0), QSizeF(0, 0));
                 qreal maxXPos = maxElement.right();
@@ -58,7 +58,7 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QSizeF &pxContent
                     }
                 }
 
-                startPos = QPointF((maxElement.right() + posRef.margins.left()), startPos.y());
+                startPos = QPointF((maxElement.right() + posRef.spacing), startPos.y());
             }
         }
         ///
@@ -149,12 +149,6 @@ void DocumentTemplate::addElementBelow(std::unique_ptr<IRenderElement> element,
 void DocumentTemplate::addElementRightOf(std::unique_ptr<IRenderElement> element,
                                          const QVector<QString>& referenceId, qreal spacing) {
     element->setPositionReference(PositionReference::rightOf(referenceId, spacing));
-    elements.push_back(std::move(element));
-}
-
-void DocumentTemplate::addElementSameRow(std::unique_ptr<IRenderElement> element,
-                                         const QVector<QString>& referenceId, qreal spacing) {
-    element->setPositionReference(PositionReference::sameRow(referenceId, spacing));
     elements.push_back(std::move(element));
 }
 
