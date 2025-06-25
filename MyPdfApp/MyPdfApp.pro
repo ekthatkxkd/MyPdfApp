@@ -8,6 +8,7 @@ SOURCES += \
         src/drawingtemplate/DefectReportDocTemplate.cpp \
         src/drawingtemplate/DocumentTemplate.cpp \
         src/drawingtemplate/MaterialDocTemplate.cpp \
+        src/drawingtemplate/OrderDocTemplate.cpp \
         src/drawingtemplate/RelativePositionManager.cpp \
         src/drawingtemplate/TemplateFactory.cpp \
         src/drawingtemplate/dataProvider/SqliteDataProvider.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     include/drawingtemplate/DefectReportDocTemplate.h \
     include/drawingtemplate/DocumentTemplate.h \
     include/drawingtemplate/MaterialDocTemplate.h \
+    include/drawingtemplate/OrderDocTemplate.h \
     include/drawingtemplate/RelativePositionManager.h \
     include/drawingtemplate/TemplateFactory.h \
     include/drawingtemplate/dataProvider/DataProvider.h \

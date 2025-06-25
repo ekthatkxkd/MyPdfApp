@@ -24,7 +24,6 @@ void DocumentTemplate::renderDocument(QPainter& painter, const QSizeF &pxContent
                                   QRectF(QPointF(0, 0), QSizeF(0, 0)));
     }
 
-
     for (auto &element : elements) {
 
         //////// [LLDDSS] element 의 시작 position 계산
