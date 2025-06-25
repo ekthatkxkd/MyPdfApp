@@ -3,12 +3,10 @@
 
 #include "include/docElement/IRenderElement.h"
 
-// 이미지 요소
 class ImageElement : public IRenderElement {
 public:
-    ImageElement(const QPixmap& img, const QSizeF& maxSz = QSizeF(),
-                 Qt::AspectRatioMode mode = Qt::KeepAspectRatio,
-                 Qt::Alignment align = Qt::AlignCenter);
+    ImageElement(const QString &imgPath, const bool &isFillPageWidth = false,
+                 Qt::Alignment align = Qt::AlignHCenter);
 
     QRectF render(QPainter& painter, const QPointF& startPos,
                   const QSizeF &pxContentSize,
@@ -17,11 +15,16 @@ public:
                          const QRectF& availableRect) override;
     bool needsNewPage(const QRectF& availableRect, const QSizeF& elementSize) override;
 
+    void initPixMap();
+
 private:
-    QPixmap image;
-    QSizeF maxSize;
-    Qt::AspectRatioMode aspectRatioMode;
+    QString imgPath;
+    bool isFillPageWidth;
     Qt::Alignment alignment;
+    QPixmap image;
+
+    bool isImageLoaded = false;
+
 };
 
 #endif // IMAGEELEMENT_H

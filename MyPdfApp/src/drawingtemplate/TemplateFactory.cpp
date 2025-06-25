@@ -2,6 +2,7 @@
 #include "include/drawingtemplate/MaterialDocTemplate.h"
 #include "include/drawingtemplate/DefectReportDocTemplate.h"
 #include "include/drawingtemplate/OrderDocTemplate.h"
+#include "include/drawingtemplate/ReceiptVoucherDocTemplate.h"
 
 std::unique_ptr<DocumentTemplate> TemplateFactory::createTemplate(TemplateType type) {
     switch(type) {
@@ -12,6 +13,7 @@ std::unique_ptr<DocumentTemplate> TemplateFactory::createTemplate(TemplateType t
     case ORDER:
         return std::make_unique<OrderDocTemplate>();
     case RECEIPTVOUCHER:
+        return std::make_unique<ReceiptVoucherDocTemplate>();
     default:
         return nullptr;
     }

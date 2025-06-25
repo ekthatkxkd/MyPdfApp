@@ -245,7 +245,9 @@ void OrderDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
                                                                       : QString::number(allSumDecimal);
                 QString allSumString = formattedAllSumInteger + "." + formattedAllSumDecimal;
 
-                rowDatas[allSumIndex].cellText = allSumString;
+                if (allSumIndex != -1) {
+                    rowDatas[allSumIndex].cellText = allSumString;
+                }
                 ///
                 ///
                 ////////

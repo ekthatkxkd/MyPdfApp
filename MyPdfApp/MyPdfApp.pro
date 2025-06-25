@@ -9,6 +9,7 @@ SOURCES += \
         src/drawingtemplate/DocumentTemplate.cpp \
         src/drawingtemplate/MaterialDocTemplate.cpp \
         src/drawingtemplate/OrderDocTemplate.cpp \
+        src/drawingtemplate/ReceiptVoucherDocTemplate.cpp \
         src/drawingtemplate/RelativePositionManager.cpp \
         src/drawingtemplate/TemplateFactory.cpp \
         src/drawingtemplate/dataProvider/SqliteDataProvider.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
     include/drawingtemplate/DocumentTemplate.h \
     include/drawingtemplate/MaterialDocTemplate.h \
     include/drawingtemplate/OrderDocTemplate.h \
+    include/drawingtemplate/ReceiptVoucherDocTemplate.h \
     include/drawingtemplate/RelativePositionManager.h \
     include/drawingtemplate/TemplateFactory.h \
     include/drawingtemplate/dataProvider/DataProvider.h \

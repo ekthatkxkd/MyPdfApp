@@ -289,26 +289,7 @@ QRectF TableElement::render(QPainter& painter, const QPointF& startPos,
             footerCursorPoint = QPointF(boundingBox.right(), footerCursorPoint.y());
         }
 
-
-
-
-
-
-
-
-
-
         cursorPoint = QPointF(tableStartPos.x(), cursorPoint.y() + rowHeight);
-
-
-
-
-
-
-
-
-
-
     }
     ///
     ///
