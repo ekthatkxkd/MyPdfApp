@@ -180,13 +180,15 @@ void MaterialDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
             }
 
             int sumInteger = (int)(quantitySum);
-            int sumDecimal = (quantitySum - sumInteger) * 100;
+            int sumDecimal = (int)std::round((quantitySum - sumInteger) * 100);
 
             // 시스템 로케일을 기준으로 포맷 (예: 한국 로케일 사용)
             QLocale locale(QLocale::Korean, QLocale::SouthKorea);
             QString formattedSumInteger = locale.toString(sumInteger);
+            QString formattedSumDecimal = (sumDecimal < 10) ? ("0"+QString::number(sumDecimal))
+                                                            : QString::number(sumDecimal);
 
-            QString sumString = formattedSumInteger + "." + QString::number(sumDecimal);
+            QString sumString = formattedSumInteger + "." + formattedSumDecimal;
 
             for (auto &cellData : historyTableData.footerDatas) {
                 if (cellData.cellId == "sum") {

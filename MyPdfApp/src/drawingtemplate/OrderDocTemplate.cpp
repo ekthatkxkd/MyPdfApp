@@ -173,8 +173,8 @@ void OrderDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
             readDataFromDB.push_back(QVector<QString>{"", "L005-0061", "이태리 전시회 리플렛 [210X297, 아트지 150g, 양면인쇄]", "500.00", "320.00", "160,000.00", "16,000.00", "", "테스트 코드."});
             readDataFromDB.push_back(QVector<QString>{"", "L005-0071", "테스트 제품 [1]", "10,000.00", "1,000.00", "200.00", "30,000.00", "", ""});
             readDataFromDB.push_back(QVector<QString>{"", "L005-0081", "MSI GeForce RTX 3060 VENTUS 2X 12G OC 게이밍 그래픽 카드 12GB GDDR6 192 비트 HDMI DP PCI-E 4.0 8 핀 데스크탑 풀 뉴 비디", "200.00", "1,000.00", "5.00", "2,000.00", "", "테스트 코드"});
-            readDataFromDB.push_back(QVector<QString>{"", "L005-0091", "인텔 코어i5-14세대 14400F (랩터레이크 리프레시) (밸류팩 정품)", "1.00", "10,000.00", "5.00", "1,000.00", "", "참고 사항 테스트 코드. 가나다라마바사 아자차카 타파하. ABCDEFG HIJKLMN OPQRSTU VWXYZ."});
-            readDataFromDB.push_back(QVector<QString>{"", "L005-0101", "AMD 라이젠7-6세대 9700X (그래니트 릿지) (정품)", "10,000.00", "100,000.00", "20,000.00", "100.00", "", ""});
+            readDataFromDB.push_back(QVector<QString>{"", "L005-0091", "인텔 코어i5-14세대 14400F (랩터레이크 리프레시) (밸류팩 정품)", "1.10", "10,000.00", "5.00", "1,000.00", "", "참고 사항 테스트 코드. 가나다라마바사 아자차카 타파하. ABCDEFG HIJKLMN OPQRSTU VWXYZ."});
+            readDataFromDB.push_back(QVector<QString>{"", "L005-0101", "AMD 라이젠7-6세대 9700X (그래니트 릿지) (정품)", "10,000.09", "100,000.00", "20,000.00", "100.00", "", ""});
             ////////
 
             QVector<QVector<CellData>> innerDatas = orderDetailsTableInnerDatas;
@@ -237,12 +237,13 @@ void OrderDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
                 ///
                 ///
                 int allSumInteger = (int)(allSumSum);
-                int allSumDecimal = (allSumSum - allSumInteger) * 100;
+                int allSumDecimal = (int)std::round((allSumSum - allSumInteger) * 100);
 
                 QLocale locale(QLocale::Korean, QLocale::SouthKorea);
                 QString formattedAllSumInteger = locale.toString(allSumInteger);
-
-                QString allSumString = formattedAllSumInteger + "." + QString::number(allSumDecimal);
+                QString formattedAllSumDecimal = (allSumDecimal < 10) ? ("0"+QString::number(allSumDecimal))
+                                                                      : QString::number(allSumDecimal);
+                QString allSumString = formattedAllSumInteger + "." + formattedAllSumDecimal;
 
                 rowDatas[allSumIndex].cellText = allSumString;
                 ///
@@ -282,12 +283,14 @@ void OrderDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
                 }
 
                 int sumInteger = (int)(sumValue);
-                int sumDecimal = (sumValue - sumInteger) * 100;
+                int sumDecimal = (int)std::round((sumValue - sumInteger) * 100);
 
                 QLocale locale(QLocale::Korean, QLocale::SouthKorea);
                 QString formattedSumInteger = locale.toString(sumInteger);
+                QString formattedSumDecimal = (sumDecimal < 10) ? ("0"+QString::number(sumDecimal))
+                                                                : QString::number(sumDecimal);
 
-                QString sumString = formattedSumInteger + "." + QString::number(sumDecimal);
+                QString sumString = formattedSumInteger + "." + formattedSumDecimal;
 
                 cellData.cellText = sumString;
             }

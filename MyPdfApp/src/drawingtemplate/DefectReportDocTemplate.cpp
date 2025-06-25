@@ -190,15 +190,21 @@ void DefectReportDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
 
 
         int sumInteger = (int)(reduceTotal);
-        int sumDecimal = (reduceTotal - sumInteger) * 100;
+        int sumDecimal = (int)std::round((reduceTotal - sumInteger) * 100);
+
         QLocale locale(QLocale::Korean, QLocale::SouthKorea);
         QString formattedSumInteger = locale.toString(sumInteger);
-        QString reduceTotalString = formattedSumInteger + "." + QString::number(sumDecimal);
+        QString formattedSumDecimal = (sumDecimal < 10) ? ("0"+QString::number(sumDecimal))
+                                                              : QString::number(sumDecimal);
+        QString reduceTotalString = formattedSumInteger + "." + formattedSumDecimal;
 
         sumInteger = (int)(increseTotal);
-        sumDecimal = (increseTotal - sumInteger) * 100;
+        sumDecimal = (int)std::round((increseTotal - sumInteger) * 100);
+
         formattedSumInteger = locale.toString(sumInteger);
-        QString increseTotalString = formattedSumInteger + "." + QString::number(sumDecimal);
+        formattedSumDecimal = (sumDecimal < 10) ? ("0"+QString::number(sumDecimal))
+                                                : QString::number(sumDecimal);
+        QString increseTotalString = formattedSumInteger + "." + formattedSumDecimal;
 
         {
             //////// sum table
