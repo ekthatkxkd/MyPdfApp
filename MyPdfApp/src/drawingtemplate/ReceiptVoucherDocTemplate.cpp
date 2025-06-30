@@ -351,18 +351,11 @@ void ReceiptVoucherDocTemplate::setupTemplate(const QSizeF &pxContentSize) {
     ///
     ///
 
+    QString imagePath = ":/imageFiles/cfimages.jpg";  // 예시 이미지
 
-
-
-
-
-
-
-
-
-
-
-
+    auto logoImage = std::make_unique<ImageElement>(imagePath, true, Qt::AlignHCenter);
+    logoImage->setElementId(elementIds[6]);
+    addElementBelow(std::move(logoImage), QVector<QString>{elementIds[5]}, 10);
 
     ///
     ///

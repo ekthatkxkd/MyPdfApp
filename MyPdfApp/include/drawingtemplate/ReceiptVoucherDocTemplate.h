@@ -71,11 +71,11 @@ private :
     QVector<QVector<CellData>> sumTableInnerDatas {
         {
             CellData("", 0, 0, 1, 1, "생산수량", Qt::lightGray, true, 10, "center"),
-            CellData("productionQuantity", 0, 1, 1, 1, "", Qt::white, false, 10, "left"),
+            CellData("productionQuantity", 0, 1, 1, 1, "", Qt::white, false, 10, "right"),
             CellData("", 0, 2, 1, 1, "소모수량", Qt::lightGray, true, 10, "center"),
-            CellData("consumedQuantity", 0, 3, 1, 1, "", Qt::white, false, 10, "left"),
+            CellData("consumedQuantity", 0, 3, 1, 1, "", Qt::white, false, 10, "right"),
             CellData("", 0, 4, 1, 1, "인수", Qt::lightGray, true, 10, "center"),
-            CellData("", 0, 5, 1, 1, "인", Qt::white, false, 10, "left")
+            CellData("", 0, 5, 1, 1, "인", Qt::white, false, 10, "right")
         }
     };
 };

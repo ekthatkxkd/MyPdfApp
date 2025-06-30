@@ -17,6 +17,8 @@ public:
 
     void initPixMap();
 
+    Qt::Alignment getAlign() override;
+
 private:
     QString imgPath;
     bool isFillPageWidth;

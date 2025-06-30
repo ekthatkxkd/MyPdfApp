@@ -43,16 +43,14 @@ QRectF ImageElement::render(QPainter& painter, const QPointF& startPos,
 
     if (isImageLoaded) {
         if (isFillPageWidth) {
-            // Qt::KeepAspectRatio 옵션을 사용할 경우 Qt 가 자동으로 적절한 높이를 계산함.
-            resizedImage = image.scaled(pxContentSize.width(), 0, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            // 비율 계산
+            double ratio = static_cast<double>(pxContentSize.width()) / resizedImage.width();
+            int resizedHeight = static_cast<int>(resizedImage.height() * ratio);
 
-            if (resizedImage.height() > pxContentSize.height()) {
-                // 만약 변경된 height 값이 page 를 벗어났을 경우 page 의 height 값 만큼 다시 resize 진행.
-                resizedImage = image.scaled(0, pxContentSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            }
+            resizedImage = image.scaled(pxContentSize.width(), resizedHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         } else {
             if (image.width() > pxContentSize.width() || image.height() > pxContentSize.height()) {
-                resizedImage = image.scaled(pxContentSize.width(), pxContentSize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                resizedImage = image.scaled(pxContentSize.width(), pxContentSize.height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
             }
         }
 
@@ -63,7 +61,7 @@ QRectF ImageElement::render(QPainter& painter, const QPointF& startPos,
         }
 
         if (alignment == Qt::AlignHCenter) {
-            cursorPoint = QPointF((pxContentSize.width() - resizedImage.width() / 2),
+            cursorPoint = QPointF(((pxContentSize.width() - resizedImage.width()) / 2),
                                   cursorPoint.y());
         }
 
@@ -80,4 +78,8 @@ QSizeF ImageElement::calculateSize(const QFontMetrics& fontMetrics,
 
 bool ImageElement::needsNewPage(const QRectF& availableRect, const QSizeF& elementSize) {
     return false;
+}
+
+Qt::Alignment ImageElement::getAlign() {
+    return alignment;
 }
