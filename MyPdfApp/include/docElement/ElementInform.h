@@ -86,9 +86,6 @@ struct TableData {
     TableData()
         : title(""),
         headerDatas(QVector<CellData>()), innerDatas(QVector<QVector<CellData>>()), footerDatas(QVector<CellData>()) {}
-
-    // TableData(const QVector<CellData>& hdrs, const QVector<QVector<CellData>>& inner, QVector<CellData>& footer)
-    //     : headerDatas(hdrs), innerDatas(inner), footerDatas(footer) {}
 };
 }
 

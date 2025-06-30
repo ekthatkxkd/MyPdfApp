@@ -4,7 +4,6 @@
 #include "include/docTemplate/DocTemplate.h"
 #include <memory>
 
-// 템플릿 팩토리
 class DocTemplateFactory {
 public:
     enum DocTemplateType {

@@ -13,13 +13,6 @@ class PreviewImageProvider : public QQuickImageProvider {
 public:
     PreviewImageProvider();
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
-    // void updatePreviewImages(QList<std::shared_ptr<QImage>> &images);
-    // int getPageCount() const { return m_previewPages.size(); }
-
-private:
-    const int PREVIEW_PIXEL_WIDTH = 600;
-    const int PREVIEW_PIXEL_HEIGHT = 848;
-    // QList<std::shared_ptr<QImage>> m_previewPages;
 };
 
 /////////////////////////////////////////////////////////////////
@@ -30,6 +23,8 @@ class PdfExporter : public QObject {
     Q_PROPERTY(int pageCount READ pageCount NOTIFY pageCountChanged)
 
 public :
+    static PdfExporter *getInstance();
+
     explicit PdfExporter(QObject *parent = nullptr);
     ~PdfExporter();
 
@@ -39,8 +34,6 @@ public :
 
     Q_INVOKABLE bool exportToPdf(QString formObjectName, const QString &filePath);
     Q_INVOKABLE bool generatePreview(QString formObjectName);
-
-    static PdfExporter *getInstance();
 
 private :
     static PdfExporter *s_instance;

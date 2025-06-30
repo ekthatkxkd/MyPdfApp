@@ -11,34 +11,33 @@ PreviewImageProvider::PreviewImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Image) {}
 
 QImage PreviewImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize) {
+    QImage retImage(600, 848, QImage::Format_ARGB32);
+    retImage.fill(Qt::white);
+
     PdfExporter *pdfExporter = PdfExporter::getInstance();
 
-    if (!pdfExporter) {
-        qDebug() << "requestImage, pdfExporter is nullptr...";
-        return QImage();
-    }
+    if (pdfExporter) {
+        if (id.startsWith("page_")) {
+            bool isConverted = false;
+            int pageIndex = id.mid(5).toInt(&isConverted);
 
-    if (id.startsWith("page_")) {
-        bool isConverted = false;
-        int pageIndex = id.mid(5).toInt(&isConverted);
+            if (isConverted) {
+                std::shared_ptr<QImage> previewImage = pdfExporter->getPreviewImage(pageIndex);
+                if (size) {
+                    *size = previewImage->size();
+                }
 
-        if (isConverted) {
-            std::shared_ptr<QImage> retImage = pdfExporter->getPreviewImage(pageIndex);
-            if (size) {
-                *size = retImage->size();
+                // mm to pixel with dpi
+                retImage = previewImage->scaled(QSize((210*97)/25.4, (297*97)/25.4), Qt::KeepAspectRatio, Qt::SmoothTransformation);
             }
-
-            // mm to pixel with dpi
-            return retImage->scaled(QSize((210*97)/25.4, (297*97)/25.4), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        } else {
+            qDebug() << "requestImage, id does not start with page_";
         }
+    } else {
+        qDebug() << "requestImage, pdfExporter is nullptr...";
     }
 
-    QImage emptyPage(600,
-                     848,
-                     QImage::Format_ARGB32);
-    emptyPage.fill(Qt::white);
-
-    return emptyPage;
+    return retImage;
 }
 
 //////// START PdfExporter definition.
@@ -97,7 +96,6 @@ bool PdfExporter::generatePreview(QString formObjectName) {
     emit hasPreviewChanged();
 
     m_pageCount = 0;
-    // QList<std::shared_ptr<QImage>> previewImages;
     previewImages.clear();
 
     std::unique_ptr<DocTemplate> docTemplate;
@@ -129,10 +127,9 @@ bool PdfExporter::generatePreview(QString formObjectName) {
 
     emit pageCountChanged();
 
-    // m_imageProvider->updatePreviewImages(previewImages);
-
     m_hasPreview = true;
     emit hasPreviewChanged();
+
     emit previewUpdated();
 
     return true;
