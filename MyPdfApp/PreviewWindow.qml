@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import pdfExporter 1.0
 
 ApplicationWindow {
     id: root
@@ -9,6 +10,12 @@ ApplicationWindow {
     height: 900
     visible: true
     title: "PDF 미리 보기"
+
+    property PdfExporter pdfExporter
+
+    Component.onCompleted: {
+        console.log("[LLDDSS] PreviewWindow, onCompleted")
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -30,8 +37,8 @@ ApplicationWindow {
                 anchors.margins: 10
                 clip: true
 
-                contentHeight: previewColumn.height
-                contentWidth: previewColumn.width
+                // contentHeight: previewColumn.height
+                // contentWidth: previewColumn.width
 
                 Column {
                     id: previewColumn

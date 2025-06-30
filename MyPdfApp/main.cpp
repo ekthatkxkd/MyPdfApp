@@ -10,14 +10,16 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    qmlRegisterType<PdfExporter>("pdfExporter", 1, 0, "PdfExporter");
+    engine.addImageProvider("preview", new PreviewImageProvider);
 
     // 이미지 프로바이더 생성 및 등록
-    PreviewImageProvider* previewProvider = new PreviewImageProvider();
-    engine.addImageProvider("preview", previewProvider);
+    // PreviewImageProvider* previewProvider = new PreviewImageProvider();
+    // engine.addImageProvider("preview", previewProvider);
 
     //////// PdfExporter 객체 생성.
-    PdfExporter pdfExporter(previewProvider);
-    engine.rootContext()->setContextProperty("pdfExporter", &pdfExporter);
+    // PdfExporter pdfExporter(previewProvider);
+    // engine.rootContext()->setContextProperty("pdfExporter", &pdfExporter);
 
     // 명시적 QML 타입 등록
     qmlRegisterType<TableModel>("TableModel", 1, 0, "TableModel");

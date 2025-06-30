@@ -37,15 +37,12 @@ Window {
         if (clickedIndex === 0) {
             saveDialog.open()
         } else if (clickedIndex === 1) {
-            // pdfExporter.generatePreview(templateFormLoader.item.templateItemArea)
-            pdfExporter.generatePreview(templateFormLoader.item.objectName)
+            templateFormLoader.item.pdfExporter.generatePreview(templateFormLoader.item.objectName)
         }
     }
 
     function callExportToPdf(formObjectName, path) {
-        console.log("[LLDDSS] callExportToPdf")
-        // pdfExporter.exportToPdf(templateItemArea, "D:/savePdfResult.pdf")
-        pdfExporter.exportToPdf(formObjectName, path)
+        templateFormLoader.item.pdfExporter.exportToPdf(formObjectName, path)
     }
 
 
@@ -60,7 +57,9 @@ Window {
         // 새 미리보기 윈도우 생성
         var component = Qt.createComponent("qrc:/myComponents/PreviewWindow.qml")
         if (component.status === Component.Ready) {
-            previewWindowInstance = component.createObject(mainWindow)
+            previewWindowInstance = component.createObject(mainWindow, {
+                                                               pdfExporter:templateFormLoader.item.pdfExporter
+                                                           })
             if (previewWindowInstance) {
                 // 윈도우가 닫힐 때의 처리를 연결
                 previewWindowInstance.closing.connect(function() {
@@ -113,13 +112,13 @@ Window {
         onAccepted: {
             var test = selectedFile.toString()
             var path = selectedFile.toString().replace("file:///", "")
-            // callExportToPdf(templateFormLoader.item.templateItemArea, path)
             callExportToPdf(templateFormLoader.item.objectName, path)
         }
     }
 
     Connections {
-        target : pdfExporter
+        id : pdfExporterConn
+        target : templateFormLoader.status === Loader.Ready ? templateFormLoader.item.pdfExporter : null
 
         function onPreviewUpdated() {
             console.log("메인: 미리보기 업데이트됨 - 새 창 열기")
@@ -238,6 +237,18 @@ Window {
             id : templateFormLoader
 
             anchors.fill : parent
+
+            onItemChanged: {
+                if (status === Loader.Ready) {
+                    pdfExporterConn.target = item.pdfExporter
+                }
+            }
+
+            onStatusChanged: {
+                if (status === Loader.Ready) {
+                    pdfExporterConn.target = item.pdfExporter
+                }
+            }
         }
     }
 }

@@ -1,12 +1,18 @@
 import QtQuick
 import QtQuick.Controls
+import pdfExporter 1.0
 import "qrc:/templateItems"
 
 Item {
     id : rootArea
     objectName : "OrderForm"
 
+    property alias pdfExporter : pdfExporter
     property alias templateItemArea : templateItemArea
+
+    PdfExporter {
+        id : pdfExporter
+    }
 
     Rectangle {
         id : formTapArea
