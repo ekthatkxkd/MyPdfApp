@@ -1,8 +1,8 @@
 #include "include/pdfExporter/PdfExporter.h"
-#include "include/drawingtemplate/TemplateFactory.h"
-#include "include/pdfExporter/renderTarget/RenderTargetFactory.h"
-#include "include/pdfExporter/renderTarget/DocumentRenderer.h"
-#include "include/pdfExporter/renderTarget/ImageRenderTarget.h"
+#include "include/docTemplate/DocTemplateFactory.h"
+#include "include/docRender/renderTarget/RenderTargetFactory.h"
+#include "include/docRender/DocumentRenderer.h"
+#include "include/docRender/renderTarget/ImageRenderTarget.h"
 #include <QDebug>
 
 PdfExporter *PdfExporter::s_instance = nullptr;
@@ -63,16 +63,16 @@ bool PdfExporter::exportToPdf(QString formObjectName, const QString &filePath) {
 
     // template 생성. - element 들을 그리는 기능들을 함.
 
-    std::unique_ptr<DocumentTemplate> docTemplate;
+    std::unique_ptr<DocTemplate> docTemplate;
 
     if (formObjectName == "MaterialForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::MATERIAL);
     } else if (formObjectName == "DefectReportForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::DEFECTREPORT);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::DEFECTREPORT);
     } else if (formObjectName == "OrderForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::ORDER);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::ORDER);
     } else if (formObjectName == "ReceiptVoucherForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::RECEIPTVOUCHER);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::RECEIPTVOUCHER);
     }
 
     // PDF or 이미지 렌더 타겟 생성. - pdfwriter, qimage, painter 객체 생성.
@@ -100,16 +100,16 @@ bool PdfExporter::generatePreview(QString formObjectName) {
     // QList<std::shared_ptr<QImage>> previewImages;
     previewImages.clear();
 
-    std::unique_ptr<DocumentTemplate> docTemplate;
+    std::unique_ptr<DocTemplate> docTemplate;
 
     if (formObjectName == "MaterialForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::MATERIAL);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::MATERIAL);
     } else if (formObjectName == "DefectReportForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::DEFECTREPORT);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::DEFECTREPORT);
     } else if (formObjectName == "OrderForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::ORDER);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::ORDER);
     } else if (formObjectName == "ReceiptVoucherForm") {
-        docTemplate = TemplateFactory::createTemplate(TemplateFactory::RECEIPTVOUCHER);
+        docTemplate = DocTemplateFactory::createTemplate(DocTemplateFactory::RECEIPTVOUCHER);
     }
 
     auto imageTarget = RenderTargetFactory::createImageTarget();

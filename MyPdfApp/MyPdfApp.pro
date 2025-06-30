@@ -2,24 +2,23 @@ QT += quick widgets printsupport core qml gui sql
 
 SOURCES += \
         main.cpp \
+        src/dataProvider/SqliteDataProvider.cpp \
         src/docElement/ImageElement.cpp \
         src/docElement/TableElement.cpp \
         src/docElement/TextElement.cpp \
-        src/drawingtemplate/DefectReportDocTemplate.cpp \
-        src/drawingtemplate/DocumentTemplate.cpp \
-        src/drawingtemplate/MaterialDocTemplate.cpp \
-        src/drawingtemplate/OrderDocTemplate.cpp \
-        src/drawingtemplate/ReceiptVoucherDocTemplate.cpp \
-        src/drawingtemplate/RelativePositionManager.cpp \
-        src/drawingtemplate/TemplateFactory.cpp \
-        src/drawingtemplate/dataProvider/SqliteDataProvider.cpp \
+        src/docRender/renderTarget/ImageRenderTarget.cpp \
+        src/docRender/renderTarget/PdfRenderTarget.cpp \
+        src/docRender/renderTarget/RenderTarget.cpp \
+        src/docRender/renderTarget/RenderTargetFactory.cpp \
+        src/docTemplate/DefectReportDocTemplate.cpp \
+        src/docTemplate/DocTemplate.cpp \
+        src/docTemplate/DocTemplateFactory.cpp \
+        src/docTemplate/MaterialDocTemplate.cpp \
+        src/docTemplate/OrderDocTemplate.cpp \
+        src/docTemplate/ReceiptVoucherDocTemplate.cpp \
         src/model/listmodel/TableModel.cpp \
         src/pdfExporter/PdfExporter.cpp \
-        src/pdfExporter/renderTarget/DocumentRenderer.cpp \
-        src/pdfExporter/renderTarget/ImageRenderTarget.cpp \
-        src/pdfExporter/renderTarget/PdfRenderTarget.cpp \
-        src/pdfExporter/renderTarget/RenderTarget.cpp \
-        src/pdfExporter/renderTarget/RenderTargetFactory.cpp
+        src/docRender/DocumentRenderer.cpp
 
 resources.files = main.qml 
 resources.prefix = /$${TARGET}
@@ -40,25 +39,24 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES +=
 
 HEADERS += \
+    include/dataProvider/IDataProvider.h \
+    include/dataProvider/SqliteDataProvider.h \
     include/docElement/ElementInform.h \
     include/docElement/IRenderElement.h \
     include/docElement/ImageElement.h \
     include/docElement/TableElement.h \
     include/docElement/TextElement.h \
-    include/drawingtemplate/DefectReportDocTemplate.h \
-    include/drawingtemplate/DocumentTemplate.h \
-    include/drawingtemplate/MaterialDocTemplate.h \
-    include/drawingtemplate/OrderDocTemplate.h \
-    include/drawingtemplate/ReceiptVoucherDocTemplate.h \
-    include/drawingtemplate/RelativePositionManager.h \
-    include/drawingtemplate/TemplateFactory.h \
-    include/drawingtemplate/dataProvider/DataProvider.h \
-    include/drawingtemplate/dataProvider/SqliteDataProvider.h \
+    include/docRender/renderTarget/ImageRenderTarget.h \
+    include/docRender/renderTarget/PdfRenderTarget.h \
+    include/docRender/renderTarget/RenderTarget.h \
+    include/docRender/renderTarget/RenderTargetFactory.h \
+    include/docTemplate/DefectReportDocTemplate.h \
+    include/docTemplate/DocTemplate.h \
+    include/docTemplate/DocTemplateFactory.h \
+    include/docTemplate/MaterialDocTemplate.h \
+    include/docTemplate/OrderDocTemplate.h \
+    include/docTemplate/ReceiptVoucherDocTemplate.h \
     include/model/listmodel/CellData.h \
     include/model/listmodel/TableModel.h \
     include/pdfExporter/PdfExporter.h \
-    include/pdfExporter/renderTarget/DocumentRenderer.h \
-    include/pdfExporter/renderTarget/ImageRenderTarget.h \
-    include/pdfExporter/renderTarget/PdfRenderTarget.h \
-    include/pdfExporter/renderTarget/RenderTarget.h \
-    include/pdfExporter/renderTarget/RenderTargetFactory.h
+    include/docRender/DocumentRenderer.h
