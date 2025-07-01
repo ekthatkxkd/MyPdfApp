@@ -13,6 +13,21 @@ public:
     virtual void setupTemplate(const QSizeF &pxContentSize) override;
 
 private:
+    // 제목 설정
+    void setupTitle();
+    
+    // 정보 테이블 설정
+    void setupInformTable(const QSizeF &pxContentSize);
+    void populateInformTableFromDB(TableData &informTableData, QSqlQuery &query);
+    void populateInformTableWithTestData(TableData &informTableData);
+    
+    // 히스토리 테이블 설정
+    void setupHistoryTable(const QSizeF &pxContentSize);
+    void populateHistoryDataFromDB(QList<QVector<QString>> &historyData, QSqlQuery &query);
+    void populateHistoryDataWithTestData(QList<QVector<QString>> &historyData);
+    void populateHistoryTableData(TableData &historyTableData, const QList<QVector<QString>> &historyData);
+    void updateHistoryTableFooter(TableData &historyTableData, double quantitySum);
+    
     // db 로부터 전달 받은 자재구매 내역 리스트들을 일자 기준으로 오름차순 정렬.
     void sortReadHistoryFromDB(QList<QVector<QString>> &readDataFromDB);
 
